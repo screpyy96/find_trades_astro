@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, memo, useCallback, useMemo } from 'react';
+import React, { useState, useRef, useEffect, memo, useCallback, useMemo } from 'react';
 
 type NavbarProfile = {
   name: string | null;
@@ -12,8 +12,9 @@ interface NavbarProps {
   profile?: NavbarProfile | null;
   currentPath: string;
   onLogout?: () => void;
-  appUrl?: string;
-  webUrl?: string;
+  // URL configuration for cross-app navigation
+  appUrl?: string; // URL for the Remix app
+  webUrl?: string; // URL for the Astro site
 }
 
 function useOutsideAlerter(ref: React.RefObject<HTMLDivElement>, callback: () => void) {
@@ -41,7 +42,8 @@ const NavLink = memo(({
   isOutline = false, 
   onClick, 
   onDark = false, 
-  isActive = false
+  isActive = false,
+  isExternal = false
 }: { 
   href: string; 
   children: React.ReactNode; 
@@ -50,6 +52,7 @@ const NavLink = memo(({
   onClick?: () => void; 
   onDark?: boolean; 
   isActive?: boolean;
+  isExternal?: boolean;
 }) => {
   const className = isPrimary
     ? "inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold whitespace-nowrap transition-all duration-300 text-white bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 hover:shadow-lg hover:shadow-amber-500/25 transform hover:scale-105"
@@ -95,6 +98,7 @@ export function Navbar({
   
   const isTransparent = useMemo(() => hasTransparentHero && !isScrolled, [hasTransparentHero, isScrolled]);
 
+  // Combined scroll and hero detection
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
@@ -162,6 +166,7 @@ export function Navbar({
     }
   };
 
+  // Helper to check if path is active
   const isPathActive = (path: string) => {
     if (path === '/') return currentPath === '/';
     return currentPath.startsWith(path);
@@ -180,6 +185,7 @@ export function Navbar({
             </a>
           </div>
 
+          {/* Centered Navigation */}
           <div className="flex items-center gap-1">
             <NavLink href={webUrl || '/'} onDark={isTransparent} isActive={isPathActive('/')}>Acasă</NavLink>
             <NavLink href={`${webUrl}/servicii`} onDark={isTransparent} isActive={isPathActive('/servicii')}>Servicii</NavLink>
@@ -190,121 +196,124 @@ export function Navbar({
 
           <div className="flex items-center gap-3">
             {isLoggedIn && profile ? (
-              <div className="relative" ref={moreDropdownRef} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-                <button
-                  className={`flex items-center gap-3 px-4 py-2.5 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 group ${
-                    isTransparent 
-                      ? 'bg-white/10 hover:bg-white/20 border border-white/20' 
-                      : 'bg-gradient-to-r from-slate-50 to-slate-100 hover:from-slate-100 hover:to-slate-200 border border-slate-200/60'
-                  }`}
-                  disabled={isLoggingOut}
-                >
-                  <div className={`h-8 w-8 rounded-full ring-2 transition-all duration-300 flex items-center justify-center ${
-                    isTransparent 
-                      ? 'ring-white/40 group-hover:ring-white/60' 
-                      : 'ring-slate-200 group-hover:ring-slate-300'
-                  } bg-gradient-to-br from-amber-500 to-orange-600 text-white font-semibold text-sm`}>
-                    {profile?.name ? profile.name.charAt(0).toUpperCase() : 'U'}
-                  </div>
-                  <div className="text-left">
-                    <span className={`text-sm font-semibold block transition-colors duration-300 ${
+              <>
+                {/* Avatar dropdown */}
+                <div className="relative" ref={moreDropdownRef} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+                  <button
+                    className={`flex items-center gap-3 px-4 py-2.5 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 group ${
                       isTransparent 
-                        ? 'text-white group-hover:text-white/90' 
-                        : 'text-slate-700 group-hover:text-slate-900'
-                    }`}>Profil</span>
-                    <span className={`text-xs block transition-colors duration-300 ${
+                        ? 'bg-white/10 hover:bg-white/20 border border-white/20' 
+                        : 'bg-gradient-to-r from-slate-50 to-slate-100 hover:from-slate-100 hover:to-slate-200 border border-slate-200/60'
+                    }`}
+                    disabled={isLoggingOut}
+                  >
+                    <div className={`h-8 w-8 rounded-full ring-2 transition-all duration-300 flex items-center justify-center ${
                       isTransparent 
-                        ? 'text-white/70 group-hover:text-white/80' 
-                        : 'text-slate-500 group-hover:text-slate-600'
-                    }`}>
-                      {userType === 'tradesman' ? 'Meșter' : 'Client'}
-                    </span>
+                        ? 'ring-white/40 group-hover:ring-white/60' 
+                        : 'ring-slate-200 group-hover:ring-slate-300'
+                    } bg-gradient-to-br from-amber-500 to-orange-600 text-white font-semibold text-sm`}>
+                      {profile?.name ? profile.name.charAt(0).toUpperCase() : 'U'}
+                    </div>
+                    <div className="text-left">
+                      <span className={`text-sm font-semibold block transition-colors duration-300 ${
+                        isTransparent 
+                          ? 'text-white group-hover:text-white/90' 
+                          : 'text-slate-700 group-hover:text-slate-900'
+                      }`}>Profil</span>
+                      <span className={`text-xs block transition-colors duration-300 ${
+                        isTransparent 
+                          ? 'text-white/70 group-hover:text-white/80' 
+                          : 'text-slate-500 group-hover:text-slate-600'
+                      }`}>
+                        {userType === 'tradesman' ? 'Meșter' : 'Client'}
+                      </span>
+                    </div>
+                    <svg className={`w-4 h-4 transition-all duration-300 group-hover:rotate-180 ${
+                      isTransparent 
+                        ? 'text-white/60 group-hover:text-white/80' 
+                        : 'text-slate-400 group-hover:text-slate-600'
+                    }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  <div className={`absolute right-0 mt-3 w-96 bg-white border border-slate-200 rounded-2xl shadow-xl py-2 z-50 transition-all duration-300 ${
+                    showMoreDropdown 
+                      ? 'opacity-100 visible translate-y-0 scale-100' 
+                      : 'opacity-0 invisible -translate-y-2 scale-95 pointer-events-none'
+                  }`}>
+                    {userType === 'tradesman' ? (
+                      <>
+                        <div className="px-5 py-3 border-b border-slate-100">
+                          <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Dashboard</p>
+                        </div>
+                        <a href={`${appUrl}/dashboard/overview`} onClick={closeDropdown} className="flex items-center gap-3 px-5 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-150">
+                          <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center">
+                            <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                            </svg>
+                          </div>
+                          <div className="flex-1">
+                            <span className="font-semibold text-slate-900 text-base block">Prezentare generală</span>
+                            <p className="text-xs text-slate-500 mt-0.5">Statistici și activitate</p>
+                          </div>
+                        </a>
+                        <a href={`${appUrl}/dashboard/profile`} onClick={closeDropdown} className="flex items-center gap-3 px-5 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-150">
+                          <div className="w-9 h-9 rounded-lg bg-amber-50 flex items-center justify-center">
+                            <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                          </div>
+                          <div className="flex-1">
+                            <span className="font-semibold text-slate-900 text-base block">Profil Public</span>
+                            <p className="text-xs text-slate-500 mt-0.5">Informații și portofoliu</p>
+                          </div>
+                        </a>
+                        <div className="border-t border-slate-100 my-1"></div>
+                        <button 
+                          onClick={handleLogout}
+                          disabled={isLoggingOut}
+                          className="flex items-center gap-3 w-full px-5 py-3 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-150 group"
+                        >
+                          <div className="w-9 h-9 rounded-lg bg-red-50 flex items-center justify-center group-hover:bg-red-100 transition-colors duration-150">
+                            <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                            </svg>
+                          </div>
+                          <div className="text-left flex-1">
+                            <span className="font-semibold text-red-600 text-base block">Logout</span>
+                            <p className="text-xs text-red-500 mt-0.5">Deloghează-te din cont</p>
+                          </div>
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <a href={`${appUrl}/client-dashboard/overview`} onClick={closeDropdown} className="flex items-center gap-3 px-5 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-150">
+                          <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center">
+                            <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                            </svg>
+                          </div>
+                          <div className="flex-1">
+                            <span className="font-semibold text-slate-900 text-base block">Prezentare generală</span>
+                            <p className="text-xs text-slate-500 mt-0.5">Dashboard client</p>
+                          </div>
+                        </a>
+                        <a href={`${appUrl}/client-dashboard/requests`} onClick={closeDropdown} className="flex items-center gap-3 px-5 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-150">
+                          <div className="w-9 h-9 rounded-lg bg-green-50 flex items-center justify-center">
+                            <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                            </svg>
+                          </div>
+                          <div className="flex-1">
+                            <span className="font-semibold text-slate-900 text-base block">Cererile mele</span>
+                            <p className="text-xs text-slate-500 mt-0.5">Solicitări active</p>
+                          </div>
+                        </a>
+                      </>
+                    )}
                   </div>
-                  <svg className={`w-4 h-4 transition-all duration-300 group-hover:rotate-180 ${
-                    isTransparent 
-                      ? 'text-white/60 group-hover:text-white/80' 
-                      : 'text-slate-400 group-hover:text-slate-600'
-                  }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-                <div className={`absolute right-0 mt-3 w-96 bg-white border border-slate-200 rounded-2xl shadow-xl py-2 z-50 transition-all duration-300 ${
-                  showMoreDropdown 
-                    ? 'opacity-100 visible translate-y-0 scale-100' 
-                    : 'opacity-0 invisible -translate-y-2 scale-95 pointer-events-none'
-                }`}>
-                  {userType === 'tradesman' ? (
-                    <>
-                      <div className="px-5 py-3 border-b border-slate-100">
-                        <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Dashboard</p>
-                      </div>
-                      <a href={`${appUrl}/dashboard/overview`} onClick={closeDropdown} className="flex items-center gap-3 px-5 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-150">
-                        <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center">
-                          <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                          </svg>
-                        </div>
-                        <div className="flex-1">
-                          <span className="font-semibold text-slate-900 text-base block">Prezentare generală</span>
-                          <p className="text-xs text-slate-500 mt-0.5">Statistici și activitate</p>
-                        </div>
-                      </a>
-                      <a href={`${appUrl}/dashboard/profile`} onClick={closeDropdown} className="flex items-center gap-3 px-5 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-150">
-                        <div className="w-9 h-9 rounded-lg bg-amber-50 flex items-center justify-center">
-                          <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                          </svg>
-                        </div>
-                        <div className="flex-1">
-                          <span className="font-semibold text-slate-900 text-base block">Profil Public</span>
-                          <p className="text-xs text-slate-500 mt-0.5">Informații și portofoliu</p>
-                        </div>
-                      </a>
-                      <div className="border-t border-slate-100 my-1"></div>
-                      <button 
-                        onClick={handleLogout}
-                        disabled={isLoggingOut}
-                        className="flex items-center gap-3 w-full px-5 py-3 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-150 group"
-                      >
-                        <div className="w-9 h-9 rounded-lg bg-red-50 flex items-center justify-center group-hover:bg-red-100 transition-colors duration-150">
-                          <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                          </svg>
-                        </div>
-                        <div className="text-left flex-1">
-                          <span className="font-semibold text-red-600 text-base block">Logout</span>
-                          <p className="text-xs text-red-500 mt-0.5">Deloghează-te din cont</p>
-                        </div>
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <a href={`${appUrl}/client-dashboard/overview`} onClick={closeDropdown} className="flex items-center gap-3 px-5 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-150">
-                        <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center">
-                          <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                          </svg>
-                        </div>
-                        <div className="flex-1">
-                          <span className="font-semibold text-slate-900 text-base block">Prezentare generală</span>
-                          <p className="text-xs text-slate-500 mt-0.5">Dashboard client</p>
-                        </div>
-                      </a>
-                      <a href={`${appUrl}/client-dashboard/requests`} onClick={closeDropdown} className="flex items-center gap-3 px-5 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-150">
-                        <div className="w-9 h-9 rounded-lg bg-green-50 flex items-center justify-center">
-                          <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                          </svg>
-                        </div>
-                        <div className="flex-1">
-                          <span className="font-semibold text-slate-900 text-base block">Cererile mele</span>
-                          <p className="text-xs text-slate-500 mt-0.5">Solicitări active</p>
-                        </div>
-                      </a>
-                    </>
-                  )}
                 </div>
-              </div>
+              </>
             ) : (
               <div className="flex items-center gap-3">
                 <NavLink href={`${appUrl}/login`} onDark={isTransparent} isActive={isPathActive('/login')}>Autentificare</NavLink>
@@ -327,3 +336,5 @@ export function Navbar({
     </header>
   );
 }
+
+export default Navbar;

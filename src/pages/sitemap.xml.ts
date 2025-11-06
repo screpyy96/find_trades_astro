@@ -1,4 +1,5 @@
-import { services, cities } from '@meseriaslocal/data';
+import { services } from '../data/services';
+import { cities } from '../data/cities';
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
