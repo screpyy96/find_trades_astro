@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '../../lib/supabase';
 
 export const prerender = false;
 
@@ -14,10 +14,12 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
-    const supabase = createClient(
-      import.meta.env.PUBLIC_SUPABASE_URL || '',
-      import.meta.env.PUBLIC_SUPABASE_ANON_KEY || ''
-    );
+    if (!supabase) {
+      return new Response(JSON.stringify({ error: 'Service unavailable' }), {
+        status: 503,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
 
     // Insert profile view
     const { error } = await supabase

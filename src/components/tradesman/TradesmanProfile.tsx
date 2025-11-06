@@ -20,10 +20,15 @@ interface WorkerProfile {
 }
 
 const getSupabaseBrowserClient = () => {
-  return createClient(
-    import.meta.env.PUBLIC_SUPABASE_URL || '',
-    import.meta.env.PUBLIC_SUPABASE_ANON_KEY || ''
-  );
+  const url = import.meta.env.PUBLIC_SUPABASE_URL;
+  const key = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+  
+  if (!url || !key) {
+    console.warn('Supabase credentials not configured');
+    return null;
+  }
+  
+  return createClient(url, key);
 };
 
 // --- Report Profile Modal Component ---
@@ -424,6 +429,10 @@ export function TradesmanProfile({ worker }: TradesmanProfileProps) {
   useEffect(() => {
     try {
       const supabase = getSupabaseBrowserClient();
+      if (!supabase) {
+        setIsOwner(false);
+        return;
+      }
       supabase.auth.getUser().then(({ data }) => {
         const uid = data?.user?.id;
         setIsOwner(Boolean(uid && uid === worker.id));
