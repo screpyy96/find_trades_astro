@@ -1,0 +1,523 @@
+---
+import Base from '../../../../../layouts/Base.astro';
+import { cities, getCityBySlug, getNearbyCities } from '@meseriaslocal/data';
+import { getServiceCityPage } from '../../../../../lib/sanity';
+import { supabase } from '../../../../../lib/supabase';
+import { generateFallbackContent } from '../../../../../lib/seo-fallback';
+
+export async function getStaticPaths() {
+  // Fetch all trades from Supabase
+  const { data: trades, error } = await supabase
+    .from('trades')
+    .select('id, name, slug, category')
+    .order('name');
+
+  if (error || !trades) {
+    console.error('Error fetching trades:', error);
+    return [];
+  }
+
+  const paths = [];
+  
+  for (const trade of trades) {
+    // Generate category slug from category name
+    const categorySlug = (trade.category || 'altele').toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/&/g, 'si')
+      .replace(/ș/g, 's')
+      .replace(/ț/g, 't')
+      .replace(/ă/g, 'a')
+      .replace(/â/g, 'a')
+      .replace(/î/g, 'i')
+      .replace(/[^a-z0-9-]/g, '');
+    
+    for (const city of cities) {
+      paths.push({
+        params: {
+          categorie: categorySlug,
+          serviciu: trade.slug,
+          oras: city.slug,
+        },
+        props: {
+          trade,
+        },
+      });
+    }
+  }
+  
+  return paths;
+}
+
+const { categorie, serviciu, oras } = Astro.params;
+const { trade } = Astro.props;
+
+const APP_URL = import.meta.env.PUBLIC_APP_URL || 'https://app.meseriaslocal.ro';
+
+const city = getCityBySlug(oras);
+
+if (!trade || !city) {
+  return Astro.redirect('/404');
+}
+
+const service = {
+  name: trade.name,
+  slug: trade.slug,
+  category: trade.category,
+  categorySlug: categorie,
+};
+
+// Try to get custom content from Sanity
+const sanityContent = await getServiceCityPage(serviciu, oras);
+
+// Debug logging
+if (import.meta.env.DEV) {
+  console.log('🔍 Sanity Query Debug:');
+  console.log('  tradeSlug:', serviciu);
+  console.log('  citySlug:', oras);
+  console.log('  Found content:', sanityContent ? '✅ YES' : '❌ NO');
+  if (sanityContent) {
+    console.log('  Title:', sanityContent.title);
+    console.log('  Has content:', !!sanityContent.content);
+  }
+}
+
+const nearbyCities = getNearbyCities(oras);
+
+// Get similar services from Supabase
+const { data: allTrades } = await supabase
+  .from('trades')
+  .select('id, name, slug, category')
+  .eq('category', trade.category)
+  .neq('slug', trade.slug)
+  .limit(4);
+
+const similarServices = (allTrades || []).map(t => ({
+  name: t.name,
+  slug: t.slug,
+  categorySlug: categorie,
+}));
+
+// Generate comprehensive fallback content
+const fallbackContent = generateFallbackContent({
+  serviceName: service.name,
+  cityName: city.name,
+  categoryName: trade.category || 'Servicii',
+  serviceSlug: serviciu,
+  citySlug: oras,
+  categorySlug: categorie,
+  relatedServices: similarServices,
+  relatedCities: nearbyCities
+});
+
+// SEO Meta Data - use Sanity content if available, otherwise use fallback
+const title = sanityContent?.title || sanityContent?.heroTitle || fallbackContent.metaTitle;
+const description = sanityContent?.metaDescription || sanityContent?.heroDescription || fallbackContent.metaDescription;
+const keywords = sanityContent?.seoKeywords?.join(', ') || `${service.name.toLowerCase()} ${city.name.toLowerCase()}, meseriasi ${service.name.toLowerCase()} ${city.name.toLowerCase()}, servicii ${service.name.toLowerCase()} ${city.name.toLowerCase()}, pret ${service.name.toLowerCase()} ${city.name.toLowerCase()}`;
+const canonical = fallbackContent.canonical;
+
+// Default content if no Sanity override - use SEO-optimized fallback
+const defaultContent = fallbackContent.fallbackHtml;
+
+// Helper to render portable text with support for links and marks
+function renderPortableText(blocks: any[]) {
+  if (!blocks) return '';
+  
+  // Track marks that are links
+  const markDefs = blocks.reduce((acc: any, block: any) => {
+    if (block.markDefs) {
+      block.markDefs.forEach((def: any) => {
+        acc[def._key] = def;
+      });
+    }
+    return acc;
+  }, {});
+  
+  return blocks.map((block: any) => {
+    if (block._type === 'block') {
+      const children = block.children?.map((child: any) => {
+        let text = child.text || '';
+        
+        // Process marks (bold, italic, links, etc.)
+        if (child.marks && child.marks.length > 0) {
+          child.marks.forEach((mark: string) => {
+            // Check if it's a link mark
+            if (markDefs[mark]) {
+              const linkDef = markDefs[mark];
+              if (linkDef._type === 'link') {
+                const href = linkDef.href || '';
+                const target = href.startsWith('http') ? ' target="_blank" rel="noopener noreferrer"' : '';
+                text = `<a href="${href}"${target} class="text-blue-600 hover:text-blue-700 underline">${text}</a>`;
+              }
+            }
+            // Standard marks
+            else if (mark === 'strong') {
+              text = `<strong>${text}</strong>`;
+            } else if (mark === 'em') {
+              text = `<em>${text}</em>`;
+            } else if (mark === 'underline') {
+              text = `<u>${text}</u>`;
+            } else if (mark === 'code') {
+              text = `<code class="bg-slate-100 px-1 py-0.5 rounded text-sm">${text}</code>`;
+            }
+          });
+        }
+        
+        return text;
+      }).join('') || '';
+      
+      // Handle different block styles
+      if (block.style === 'h2') return `<h2 class="text-2xl font-bold text-slate-900 mt-8 mb-4">${children}</h2>`;
+      if (block.style === 'h3') return `<h3 class="text-xl font-semibold text-slate-900 mt-6 mb-3">${children}</h3>`;
+      if (block.style === 'h4') return `<h4 class="text-lg font-semibold text-slate-900 mt-4 mb-2">${children}</h4>`;
+      if (block.listItem === 'bullet') return `<li class="ml-4 mb-2">${children}</li>`;
+      if (block.listItem === 'number') return `<li class="ml-4 mb-2">${children}</li>`;
+      if (block.style === 'blockquote') return `<blockquote class="border-l-4 border-blue-500 pl-4 italic text-slate-700 my-4">${children}</blockquote>`;
+      
+      return `<p class="text-slate-700 leading-relaxed mb-4">${children}</p>`;
+    }
+    return '';
+  }).join('');
+}
+
+const content = sanityContent?.content ? renderPortableText(sanityContent.content) : defaultContent;
+
+// Hero content
+const heroTitle = sanityContent?.heroTitle || fallbackContent.h1;
+const heroSubtitle = sanityContent?.heroSubtitle || `Servicii Profesionale în ${city.name}`;
+const heroDescription = sanityContent?.heroDescription || `Găsește meseriași ${service.name.toLowerCase()} verificați în ${city.name}. Compară oferte gratuite, vezi recenzii și contactează direct. Fără comisioane, răspuns rapid!`;
+---
+
+<Base title={title} description={description} canonical={canonical}>
+  <!-- SEO Keywords -->
+  <meta slot="head" name="keywords" content={keywords} />
+  
+  <!-- Structured Data - LocalBusiness Schema -->
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(sanityContent?.schema || fallbackContent.schema)} />
+  
+  <!-- Structured Data - Breadcrumb Schema -->
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Acasă',
+        item: 'https://meseriaslocal.ro'
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Servicii',
+        item: 'https://meseriaslocal.ro/servicii'
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: service.name,
+        item: `https://meseriaslocal.ro/servicii/${categorie}/${serviciu}/`
+      },
+      {
+        '@type': 'ListItem',
+        position: 4,
+        name: city.name
+      }
+    ]
+  })} />
+
+  <!-- Modern Hero Section - Same colors as homepage -->
+  <section 
+    class="relative overflow-hidden py-16 lg:py-20"
+    style="background: linear-gradient(180deg, #1b1f1d 0%, #21251f 50%, #2a302b 100%)"
+  >
+    <!-- Grid pattern -->
+    <div class="absolute inset-0 opacity-15">
+      <div
+        class="absolute inset-0"
+        style="background-image: linear-gradient(rgba(45, 51, 45, 0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(45, 51, 45, 0.4) 1px, transparent 1px); background-size: 60px 60px"
+      ></div>
+    </div>
+
+    <!-- Floating geometric shapes -->
+    <div class="absolute inset-0 opacity-15">
+      <div class="absolute top-24 left-40 w-14 h-14 border-2 border-blue-400/30 rounded-full animate-pulse" style="animation-delay: 0.5s"></div>
+      <div class="absolute top-48 left-20 w-10 h-10 bg-emerald-400/15 rounded-full animate-bounce" style="animation-delay: 1s"></div>
+      <div class="absolute top-20 right-28 w-16 h-16 border-2 border-purple-400/30 rounded-full animate-pulse" style="animation-delay: 1.5s"></div>
+      <div class="absolute top-52 right-16 w-12 h-12 bg-blue-400/15 rounded-full animate-bounce" style="animation-delay: 2s"></div>
+    </div>
+
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-4xl mx-auto">
+        <!-- Breadcrumbs - Subtle & Clean (like Remix) -->
+        <nav class="flex justify-center mb-6">
+          <div class="bg-slate-800/40 backdrop-blur-md rounded-full px-4 py-2 border border-slate-700/50">
+            <ol class="flex items-center space-x-2 text-slate-300 text-xs font-medium">
+              <li class="flex items-center">
+                <a href="/" class="hover:text-white transition-colors">Acasă</a>
+              </li>
+              
+              <!-- Hide middle items on mobile, show on sm+ -->
+              <li class="hidden sm:flex items-center">
+                <span class="mx-2 text-white/40">›</span>
+                <a href="/servicii/" class="hover:text-white transition-colors">Servicii</a>
+              </li>
+              
+              <li class="hidden md:flex items-center">
+                <span class="mx-2 text-white/40">›</span>
+                <a href={`/servicii/${categorie}/${serviciu}/`} class="hover:text-white transition-colors truncate max-w-[150px]">{service.name}</a>
+              </li>
+              
+              <!-- Show ellipsis on mobile/tablet when items are hidden -->
+              <li class="sm:hidden flex items-center">
+                <span class="mx-2 text-white/40">›</span>
+                <span class="text-slate-400">...</span>
+              </li>
+              
+              <li class="flex items-center">
+                <span class="mx-2 text-white/40">›</span>
+                <span class="text-orange-400 font-semibold">{city.name}</span>
+              </li>
+            </ol>
+          </div>
+        </nav>
+
+        <!-- Hero Content -->
+        <div class="text-center lg:text-left">
+          <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
+            {heroTitle}
+          </h1>
+          
+          <p class="text-xl text-slate-300 mb-4">
+            {heroSubtitle}
+          </p>
+          
+          <p class="text-lg text-slate-300 mb-8 leading-relaxed">
+            {heroDescription}
+          </p>
+
+          <!-- CTA Buttons -->
+          <div class="flex flex-wrap items-center justify-center lg:justify-start gap-4">
+            <a
+              href={`${APP_URL}/cere-oferta`}
+              class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-xl hover:from-amber-600 hover:to-orange-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+            >
+              Cere Ofertă Gratuită
+              <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </a>
+            <div class="flex items-center gap-2 text-slate-400 text-sm">
+              <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-green-500/20 border border-green-400/30">
+                <span class="text-green-300 text-xs font-medium">Răspuns rapid</span>
+              </div>
+              <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-blue-500/20 border border-blue-400/30">
+                <span class="text-blue-300 text-xs font-medium">100% gratuit</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <article class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Main H1 (only if not using Sanity content) -->
+    {!sanityContent && (
+      <h1 class="text-3xl md:text-4xl font-bold text-slate-900 mb-8">{fallbackContent.h1}</h1>
+    )}
+    
+    <div class="prose prose-lg max-w-none mb-12" set:html={content} />
+    
+    <!-- Price Ranges -->
+    {sanityContent?.priceRanges && sanityContent.priceRanges.length > 0 && (
+      <section class="mb-12">
+        <h2 class="text-2xl font-bold mb-6">Prețuri orientative în {city.name}</h2>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <table class="w-full">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Serviciu</th>
+                <th class="px-6 py-3 text-right text-sm font-semibold text-gray-900">Preț</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              {sanityContent.priceRanges.map((price: { service: string; minPrice: number; maxPrice: number }) => (
+                <tr>
+                  <td class="px-6 py-4 text-sm text-gray-700">{price.service}</td>
+                  <td class="px-6 py-4 text-sm text-gray-900 font-semibold text-right">
+                    {price.minPrice} - {price.maxPrice} RON
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p class="text-sm text-gray-500 mt-4">
+          * Prețurile sunt orientative și pot varia în funcție de complexitatea proiectului
+        </p>
+      </section>
+    )}
+    
+    <!-- Local Tips -->
+    {sanityContent?.localTips && sanityContent.localTips.length > 0 && (
+      <section class="mb-12">
+        <h2 class="text-2xl font-bold mb-6">Sfaturi locale pentru {city.name}</h2>
+        <div class="space-y-4">
+          {sanityContent.localTips.map((tip: { title: string; description: string }) => (
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-2">{tip.title}</h3>
+              <p class="text-gray-700">{tip.description}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+    )}
+    
+    <!-- FAQ -->
+    {sanityContent?.faqSection && sanityContent.faqSection.length > 0 && (
+      <section class="mb-12">
+        <h2 class="text-2xl font-bold mb-6">Întrebări Frecvente</h2>
+        <div class="space-y-4">
+          {sanityContent.faqSection.map((item: { question: string; answer: string }) => (
+            <details class="bg-gray-50 rounded-lg p-4">
+              <summary class="font-semibold cursor-pointer">{item.question}</summary>
+              <p class="mt-2 text-gray-700">{item.answer}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+    )}
+    
+    <!-- Nearby Cities -->
+    {nearbyCities.length > 0 && (
+      <section class="mb-12">
+        <h2 class="text-2xl font-bold mb-6">Orașe Apropiate</h2>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {nearbyCities.map(nearbyCity => (
+            <a 
+              href={`/servicii/${categorie}/${serviciu}/${nearbyCity.slug}/`}
+              class="p-4 bg-white rounded-lg border border-gray-200 hover:border-blue-500 hover:shadow-md transition"
+            >
+              <h3 class="font-semibold">{service.name} {nearbyCity.name}</h3>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+    
+    <!-- Related Services from Sanity (if available) or Similar Services -->
+    {(sanityContent?.relatedServices && sanityContent.relatedServices.length > 0) ? (
+      <section class="mb-12">
+        <h2 class="text-2xl font-bold mb-6">Servicii Conexe în {city.name}</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {await Promise.all(sanityContent.relatedServices.map(async (relatedService: { serviceName: string; serviceSlug: string }) => {
+            // Clean the serviceSlug - extract just the slug part if it contains a full path
+            let cleanSlug = relatedService.serviceSlug;
+            
+            // Remove leading/trailing slashes
+            cleanSlug = cleanSlug.replace(/^\/+|\/+$/g, '');
+            
+            // If it contains 'servicii/', extract everything after the last slash
+            if (cleanSlug.includes('/')) {
+              const parts = cleanSlug.split('/');
+              cleanSlug = parts[parts.length - 1];
+            }
+            
+            // Get the correct category for this service from Supabase
+            const { data: relatedTrade } = await supabase
+              .from('trades')
+              .select('category')
+              .eq('slug', cleanSlug)
+              .single();
+            
+            const relatedCategorySlug = relatedTrade?.category 
+              ? relatedTrade.category.toLowerCase()
+                  .replace(/\s+/g, '-')
+                  .replace(/&/g, 'si')
+                  .replace(/ș/g, 's')
+                  .replace(/ț/g, 't')
+                  .replace(/ă/g, 'a')
+                  .replace(/â/g, 'a')
+                  .replace(/î/g, 'i')
+                  .replace(/[^a-z0-9-]/g, '')
+              : categorie;
+            
+            return (
+              <a 
+                href={`/servicii/${relatedCategorySlug}/${cleanSlug}/${oras}/`}
+                class="p-4 bg-white rounded-lg border border-gray-200 hover:border-blue-500 hover:shadow-md transition text-center"
+              >
+                <h3 class="font-semibold">{relatedService.serviceName}</h3>
+              </a>
+            );
+          }))}
+        </div>
+      </section>
+    ) : similarServices.length > 0 && (
+      <section class="mb-12">
+        <h2 class="text-2xl font-bold mb-6">Servicii Similare în {city.name}</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {similarServices.map(similarService => (
+            <a 
+              href={`/servicii/${categorie}/${similarService.slug}/${oras}/`}
+              class="p-4 bg-white rounded-lg border border-gray-200 hover:border-blue-500 hover:shadow-md transition text-center"
+            >
+              <h3 class="font-semibold">{similarService.name}</h3>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+    
+    <!-- Final CTA Section -->
+    <section class="mt-16 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8 text-center border border-blue-100">
+      <h2 class="text-2xl font-bold text-slate-900 mb-4">Gata să Începi Proiectul Tău?</h2>
+      <p class="text-slate-700 mb-6 max-w-2xl mx-auto">
+        Primește oferte gratuite de la meseriași verificați din {city.name}. Răspuns rapid în 2–4 ore, fără comisioane ascunse.
+      </p>
+      <a
+        href={`https://app.meseriaslocal.ro/cere-oferta?oras=${oras}`}
+        class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-xl hover:from-amber-600 hover:to-orange-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+      >
+        Cere Ofertă Acum
+        <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+        </svg>
+      </a>
+    </section>
+  </article>
+</Base>
+
+<style>
+  .prose {
+    color: #374151;
+  }
+  
+  .prose h2 {
+    font-size: 1.875rem;
+    font-weight: 700;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+  }
+  
+  .prose h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .prose p {
+    margin-bottom: 1rem;
+  }
+  
+  .prose ul, .prose ol {
+    margin-left: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .prose li {
+    margin-bottom: 0.5rem;
+  }
+</style>

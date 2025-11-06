@@ -1,0 +1,273 @@
+---
+import Base from '../../../../layouts/Base.astro';
+import { cities } from '@meseriaslocal/data';
+import { supabase } from '../../../../lib/supabase';
+
+export async function getStaticPaths() {
+  // Fetch all trades from Supabase
+  const { data: trades, error } = await supabase
+    .from('trades')
+    .select('id, name, slug, category')
+    .order('name');
+
+  if (error || !trades) {
+    console.error('Error fetching trades:', error);
+    return [];
+  }
+
+  const paths = [];
+  
+  for (const trade of trades) {
+    // Generate category slug from category name
+    const categorySlug = (trade.category || 'altele').toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/&/g, 'si')
+      .replace(/ș/g, 's')
+      .replace(/ț/g, 't')
+      .replace(/ă/g, 'a')
+      .replace(/â/g, 'a')
+      .replace(/î/g, 'i')
+      .replace(/[^a-z0-9-]/g, '');
+    
+    paths.push({
+      params: {
+        categorie: categorySlug,
+        serviciu: trade.slug,
+      },
+      props: {
+        trade,
+      },
+    });
+  }
+  
+  return paths;
+}
+
+const { categorie, serviciu } = Astro.params;
+const { trade } = Astro.props;
+
+if (!trade) {
+  return Astro.redirect('/404');
+}
+
+const service = {
+  name: trade.name,
+  slug: trade.slug,
+  category: trade.category,
+  categorySlug: categorie,
+};
+
+const title = `${service.name} - Găsește meseriași verificați | Meserias Local`;
+const description = `Caută ${service.name.toLowerCase()} în orașul tău. Primește oferte gratuite de la profesioniști verificați în 24 ore. Peste 150+ meseriași în 42 orașe.`;
+
+// Group cities by county for better organization
+const citiesByCounty: Record<string, typeof cities> = {};
+cities.forEach(city => {
+  const county = city.county || 'Altele';
+  if (!citiesByCounty[county]) {
+    citiesByCounty[county] = [];
+  }
+  citiesByCounty[county].push(city);
+});
+
+const counties = Object.keys(citiesByCounty).sort();
+
+// Popular cities to highlight
+const popularCities = cities.filter(c => 
+  ['bucuresti', 'cluj-napoca', 'timisoara', 'iasi', 'constanta', 'brasov', 'craiova', 'galati'].includes(c.slug)
+);
+---
+
+<Base title={title} description={description}>
+  <!-- Hero Section - Same colors as homepage -->
+  <section 
+    class="relative overflow-hidden py-16 lg:py-20"
+    style="background: linear-gradient(180deg, #1b1f1d 0%, #21251f 50%, #2a302b 100%)"
+  >
+    <!-- Grid pattern -->
+    <div class="absolute inset-0 opacity-15">
+      <div
+        class="absolute inset-0"
+        style="background-image: linear-gradient(rgba(45, 51, 45, 0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(45, 51, 45, 0.4) 1px, transparent 1px); background-size: 60px 60px"
+      ></div>
+    </div>
+
+    <!-- Floating geometric shapes -->
+    <div class="absolute inset-0 opacity-15">
+      <div class="absolute top-24 left-40 w-14 h-14 border-2 border-blue-400/30 rounded-full animate-pulse" style="animation-delay: 0.5s"></div>
+      <div class="absolute top-48 left-20 w-10 h-10 bg-emerald-400/15 rounded-full animate-bounce" style="animation-delay: 1s"></div>
+      <div class="absolute top-20 right-28 w-16 h-16 border-2 border-purple-400/30 rounded-full animate-pulse" style="animation-delay: 1.5s"></div>
+      <div class="absolute top-52 right-16 w-12 h-12 bg-blue-400/15 rounded-full animate-bounce" style="animation-delay: 2s"></div>
+    </div>
+
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-4xl mx-auto text-center">
+        <!-- Breadcrumb - Modern style -->
+        <nav class="flex justify-center mb-6">
+          <div class="bg-slate-800/40 backdrop-blur-md rounded-full px-4 py-2 border border-slate-700/50">
+            <ol class="flex items-center space-x-2 text-slate-300 text-xs font-medium">
+              <li class="flex items-center">
+                <a href="/" class="hover:text-white transition-colors">Acasă</a>
+              </li>
+              <li class="flex items-center">
+                <span class="mx-2 text-white/40">›</span>
+                <a href="/servicii/" class="hover:text-white transition-colors">Servicii</a>
+              </li>
+              <li class="flex items-center">
+                <span class="mx-2 text-white/40">›</span>
+                <span class="text-orange-400 font-semibold">{service.name}</span>
+              </li>
+            </ol>
+          </div>
+        </nav>
+
+        <!-- Main Heading -->
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
+          {service.name}
+        </h1>
+
+        <p class="text-lg text-slate-300 mb-8 leading-relaxed">
+          Găsește {service.name.toLowerCase()} verificați în orașul tău. Primește oferte gratuite în 24 ore.
+        </p>
+
+        <!-- CTA Button -->
+        <div class="flex flex-wrap items-center justify-center gap-4">
+          <a
+            href="/cere-oferta"
+            class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-xl hover:from-amber-600 hover:to-orange-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+          >
+            Cere ofertă gratuită
+            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Popular Cities Section -->
+  <section class="py-12 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-2xl font-bold text-slate-900 mb-6">Orașe populare</h2>
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        {popularCities.map(city => (
+          <a
+            href={`/servicii/${categorie}/${serviciu}/${city.slug}/`}
+            class="group bg-gradient-to-br from-blue-50 to-purple-50 hover:from-blue-100 hover:to-purple-100 border border-slate-200 hover:border-blue-300 rounded-xl p-4 transition-all duration-200 text-center"
+          >
+            <div class="text-2xl mb-2">📍</div>
+            <h3 class="font-semibold text-slate-900 group-hover:text-blue-700 text-sm">
+              {city.name}
+            </h3>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- SEO Content Section -->
+  <section class="py-16 bg-white">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="prose prose-slate max-w-none">
+        <h2>Despre serviciile de {service.name.toLowerCase()}</h2>
+        <p>
+          Găsește cei mai buni {service.name.toLowerCase()} din România pe platforma Meserias Local.
+          Toți profesioniștii sunt verificați personal, cu identitate confirmată și experiență validată.
+        </p>
+        
+        <h3>De ce să alegi Meserias Local?</h3>
+        <ul>
+          <li><strong>Meseriași verificați</strong> - Toți profesioniștii sunt verificați personal</li>
+          <li><strong>Oferte gratuite</strong> - Primești oferte în 24 ore fără niciun cost</li>
+          <li><strong>Recenzii reale</strong> - Vezi feedback-ul altor clienți</li>
+          <li><strong>Garanție de calitate</strong> - Lucrări executate profesional</li>
+          <li><strong>Suport dedicat</strong> - Echipa noastră te ajută pe tot parcursul proiectului</li>
+        </ul>
+
+        <h3>Cum funcționează?</h3>
+        <ol>
+          <li>Alege orașul tău din lista de mai sus</li>
+          <li>Completează formularul cu detaliile proiectului</li>
+          <li>Primești oferte personalizate în 24 ore</li>
+          <li>Compari prețurile și recenziile</li>
+          <li>Alegi meseriașul potrivit și începi proiectul</li>
+        </ol>
+
+        <h3>Servicii oferite</h3>
+        <p>
+          Profesioniștii noștri de {service.name.toLowerCase()} oferă o gamă completă de servicii,
+          adaptate nevoilor tale specifice. Fie că ai nevoie de o intervenție rapidă sau de un proiect
+          complex, vei găsi specialistul potrivit pe platforma noastră.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- More Cities Link -->
+  <section class="py-12 bg-slate-50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-2xl font-bold text-slate-900 mb-4">
+        Căutați în alt oraș?
+      </h2>
+      <p class="text-slate-600 mb-6">
+        Serviciile noastre de {service.name.toLowerCase()} sunt disponibile în peste {cities.length} orașe din România
+      </p>
+      <p class="text-sm text-slate-500">
+        Selectați orașul dorit din lista de mai sus sau contactați-ne pentru mai multe informații
+      </p>
+    </div>
+  </section>
+
+  <!-- Service Description -->
+  <section class="py-12 bg-white">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="prose prose-slate max-w-none">
+        <h2>Despre serviciile de {service.name.toLowerCase()}</h2>
+        <p>
+          Găsește cei mai buni {service.name.toLowerCase()} din România pe platforma Meserias Local.
+          Toți profesioniștii sunt verificați personal, cu identitate confirmată și experiență validată.
+        </p>
+        
+        <h3>De ce să alegi Meserias Local?</h3>
+        <ul>
+          <li><strong>Meseriași verificați</strong> - Toți profesioniștii sunt verificați personal</li>
+          <li><strong>Oferte gratuite</strong> - Primești oferte în 24 ore fără niciun cost</li>
+          <li><strong>Recenzii reale</strong> - Vezi feedback-ul altor clienți</li>
+          <li><strong>Garanție de calitate</strong> - Lucrări executate profesional</li>
+          <li><strong>Suport dedicat</strong> - Echipa noastră te ajută pe tot parcursul proiectului</li>
+        </ul>
+
+        <h3>Cum funcționează?</h3>
+        <ol>
+          <li>Alege orașul tău din lista de mai sus</li>
+          <li>Completează formularul cu detaliile proiectului</li>
+          <li>Primești oferte personalizate în 24 ore</li>
+          <li>Compari prețurile și recenziile</li>
+          <li>Alegi meseriașul potrivit și începi proiectul</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- Final CTA -->
+  <section class="py-16 bg-gradient-to-br from-blue-50 to-purple-50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-2xl font-bold text-slate-900 mb-4">
+        Gata să începi proiectul?
+      </h2>
+      <p class="text-slate-600 mb-8">
+        Primește oferte gratuite de la {service.name.toLowerCase()} verificați în orașul tău
+      </p>
+      <a
+        href="/cere-oferta"
+        class="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+      >
+        Cere ofertă gratuită acum
+        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+        </svg>
+      </a>
+    </div>
+  </section>
+</Base>

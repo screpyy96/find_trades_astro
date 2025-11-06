@@ -1,0 +1,189 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getBlogPostBySlug, getAllBlogPosts, getImageUrl } from '../../lib/sanity';
+import type { GetStaticPaths } from 'astro';
+
+export const prerender = true;
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const posts = await getAllBlogPosts();
+  
+  return posts.map((post) => ({
+    params: { slug: post.slug.current },
+    props: { post },
+  }));
+};
+
+interface Props {
+  post: Awaited<ReturnType<typeof getAllBlogPosts>>[0];
+}
+
+const { post } = Astro.props as Props;
+
+const imageUrl = post.featuredImage ? getImageUrl(post.featuredImage) : null;
+
+// Helper to render portable text
+function renderPortableText(blocks: any[]) {
+  if (!blocks) return '';
+  
+  return blocks.map((block: any) => {
+    if (block._type === 'block') {
+      const children = block.children?.map((child: any) => {
+        let text = child.text || '';
+        if (child.marks?.includes('strong')) text = `<strong>${text}</strong>`;
+        if (child.marks?.includes('em')) text = `<em>${text}</em>`;
+        if (child.marks?.includes('code')) text = `<code class="bg-slate-100 px-1 py-0.5 rounded text-sm">${text}</code>`;
+        return text;
+      }).join('') || '';
+      
+      if (block.style === 'h2') return `<h2 class="text-2xl font-bold text-slate-900 mt-8 mb-4">${children}</h2>`;
+      if (block.style === 'h3') return `<h3 class="text-xl font-semibold text-slate-900 mt-6 mb-3">${children}</h3>`;
+      if (block.style === 'h4') return `<h4 class="text-lg font-semibold text-slate-900 mt-4 mb-2">${children}</h4>`;
+      if (block.listItem === 'bullet') return `<li class="ml-6 mb-2">${children}</li>`;
+      if (block.listItem === 'number') return `<li class="ml-6 mb-2">${children}</li>`;
+      if (block.style === 'blockquote') return `<blockquote class="border-l-4 border-blue-500 pl-4 italic my-4">${children}</blockquote>`;
+      return `<p class="text-slate-700 leading-relaxed mb-4">${children}</p>`;
+    }
+    return '';
+  }).join('');
+}
+---
+
+<Base 
+  title={post.metaTitle || post.title}
+  description={post.metaDescription || post.excerpt}
+>
+
+  <!-- Article Header -->
+  <article class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Breadcrumb -->
+    <nav class="flex items-center space-x-2 text-sm text-slate-600 mb-8">
+      <a href="/" class="hover:text-blue-600">Acasă</a>
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+      </svg>
+      <a href="/blog/" class="hover:text-blue-600">Blog</a>
+      {post.category && (
+        <>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+          <a href={`/blog/categorie/${post.category.slug.current}/`} class="hover:text-blue-600">
+            {post.category.name}
+          </a>
+        </>
+      )}
+    </nav>
+
+    <!-- Category Badge -->
+    {post.category && (
+      <span class="inline-block px-3 py-1 bg-blue-100 text-blue-700 text-sm font-semibold rounded-full mb-4">
+        {post.category.name}
+      </span>
+    )}
+
+    <!-- Title -->
+    <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 mb-6 leading-tight">
+      {post.title}
+    </h1>
+
+    <!-- Meta Info -->
+    <div class="flex items-center gap-4 text-sm text-slate-600 mb-8 pb-8 border-b border-slate-200">
+      {post.author && (
+        <div class="flex items-center gap-2">
+          {post.author.avatar && (
+            <img
+              src={getImageUrl(post.author.avatar) || ''}
+              alt={post.author.name}
+              class="w-10 h-10 rounded-full"
+            />
+          )}
+          <span class="font-medium">{post.author.name}</span>
+        </div>
+      )}
+      <span>•</span>
+      <time datetime={post.publishedAt}>
+        {new Date(post.publishedAt).toLocaleDateString('ro-RO', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        })}
+      </time>
+      {post.readingTime && (
+        <>
+          <span>•</span>
+          <span>{post.readingTime} min citire</span>
+        </>
+      )}
+    </div>
+
+    <!-- Featured Image -->
+    {imageUrl && (
+      <div class="mb-8 rounded-xl overflow-hidden">
+        <img
+          src={imageUrl}
+          alt={post.featuredImage?.alt || post.title}
+          class="w-full h-auto"
+        />
+      </div>
+    )}
+
+    <!-- Excerpt -->
+    {post.excerpt && (
+      <div class="text-xl text-slate-700 leading-relaxed mb-8 font-medium">
+        {post.excerpt}
+      </div>
+    )}
+
+    <!-- Content -->
+    <div class="prose prose-slate prose-lg max-w-none" set:html={renderPortableText(post.content)} />
+
+    <!-- Tags -->
+    {post.tags && post.tags.length > 0 && (
+      <div class="mt-12 pt-8 border-t border-slate-200">
+        <h3 class="text-sm font-semibold text-slate-900 mb-3">Etichete:</h3>
+        <div class="flex flex-wrap gap-2">
+          {post.tags.map((tag) => (
+            <span class="px-3 py-1 bg-slate-100 text-slate-700 text-sm rounded-full">
+              {tag}
+            </span>
+          ))}
+        </div>
+      </div>
+    )}
+
+    <!-- Share & Back -->
+    <div class="mt-12 pt-8 border-t border-slate-200 flex items-center justify-between">
+      <a
+        href="/blog/"
+        class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-semibold"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        Înapoi la Blog
+      </a>
+    </div>
+  </article>
+
+  <!-- CTA Section -->
+  <section class="py-16 bg-gradient-to-br from-blue-50 to-purple-50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-2xl font-bold text-slate-900 mb-4">
+        Ai nevoie de un meseriaș?
+      </h2>
+      <p class="text-slate-600 mb-8">
+        Primește oferte gratuite de la meseriași verificați
+      </p>
+      <a
+        href="/cere-oferta"
+        class="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+      >
+        Cere ofertă gratuită
+        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+        </svg>
+      </a>
+    </div>
+  </section>
+</Base>

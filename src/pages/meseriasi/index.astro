@@ -1,0 +1,128 @@
+---
+import Base from '../../layouts/Base.astro';
+import { HeroBackground } from '../../components/hero/HeroBackground';
+import { TradesmenClientList } from '../../components/tradesman/TradesmenClientList';
+
+const APP_URL = import.meta.env.PUBLIC_APP_URL || 'https://app.meseriaslocal.ro';
+
+// Get search params from URL
+const searchTerm = Astro.url.searchParams.get('q') || '';
+const sortMethod = Astro.url.searchParams.get('sort') || 'rating';
+---
+
+<Base 
+  title="Găsește Meseriași Verificați | Meserias Local"
+  description="Mii de meseriași verificați în România. Electricieni, zugravi, instalatori, constructori. Oferte gratuite, recenzii reale."
+>
+  <!-- Schema.org structured data -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": "Meseriași Verificați din România",
+    "description": "Lista completă de meseriași verificați și profesioniști din România",
+    "url": "https://www.meseriaslocal.ro/meseriasi",
+    "numberOfItems": "mii",
+    "itemListElement": [{
+      "@type": "ListItem",
+      "position": 1,
+      "item": {
+        "@type": "Person",
+        "name": "Meseriași Verificați",
+        "jobTitle": "Profesioniști în Construcții și Reparații",
+        "description": "Electricieni, zugravi, instalatori, constructori și alți specialiști"
+      }
+    }],
+    "mainEntity": {
+      "@type": "Organization",
+      "name": "Meserias Local",
+      "url": "https://www.meseriaslocal.ro",
+      "description": "Platformă pentru găsirea meseriașilor verificați din România"
+    }
+  })} />
+
+  <div class="relative">
+    <!-- Hero Section -->
+    <HeroBackground className="py-12 lg:py-16" client:load>
+      <div class="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center max-w-4xl mx-auto">
+          <!-- Heading -->
+          <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4">
+            Găsește meseriașul potrivit
+          </h1>
+          <p class="text-lg text-slate-100 mb-8 max-w-2xl mx-auto">
+            Mii de profesioniști verificați. Compară recenzii și contactează direct.
+          </p>
+
+          <!-- Search Form -->
+          <form method="get" action="/meseriasi/" class="max-w-3xl mx-auto mb-6">
+            <div class="flex flex-col sm:flex-row gap-3 p-2 bg-white rounded-xl shadow-lg">
+              <label for="hero-search" class="sr-only">Caută meseriași</label>
+              <input
+                id="hero-search"
+                type="text"
+                name="q"
+                inputmode="search"
+                autocomplete="off"
+                placeholder="Caută: electrician, zugrav, instalator, oraș..."
+                class="flex-1 rounded-lg border-0 bg-transparent px-4 py-3 text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                value={searchTerm}
+              />
+              <button
+                type="submit"
+                class="inline-flex items-center justify-center rounded-lg bg-amber-500 px-6 py-3 text-white font-semibold hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-colors"
+                aria-label="Caută meseriași"
+              >
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                Caută
+              </button>
+            </div>
+          </form>
+
+          <!-- Quick search suggestions -->
+          <div class="flex flex-wrap items-center justify-center gap-3 text-sm">
+            <span class="text-slate-300">Căutări populare:</span>
+            <a href="/meseriasi/?q=electrician" class="text-slate-200 hover:text-white underline">
+              electrician
+            </a>
+            <span class="text-slate-300">•</span>
+            <a href="/meseriasi/?q=zugrav" class="text-slate-200 hover:text-white underline">
+              zugrav
+            </a>
+            <span class="text-slate-300">•</span>
+            <a href="/meseriasi/?q=instalator" class="text-slate-200 hover:text-white underline">
+              instalator
+            </a>
+          </div>
+        </div>
+      </div>
+    </HeroBackground>
+
+    <!-- Tradesmen List - React Component -->
+    <section id="lista" class="scroll-mt-20 bg-slate-50">
+      <TradesmenClientList 
+        client:load 
+        initialSearch={searchTerm}
+        initialSort={sortMethod}
+      />
+    </section>
+
+    <!-- Loading placeholder for no-JS -->
+    <noscript>
+      <div class="max-w-7xl mx-auto px-4 pb-16 sm:px-6 lg:px-8">
+        <div class="text-center py-16">
+          <div class="bg-slate-800/60 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-8 sm:p-12 max-w-md mx-auto">
+            <svg class="w-12 h-12 sm:w-16 sm:h-16 text-slate-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <h3 class="text-lg sm:text-xl font-semibold text-white mb-2">Se încarcă...</h3>
+            <p class="text-slate-400 text-sm sm:text-base">
+              Pentru a vedea meseriașii, te rugăm să activezi JavaScript.
+            </p>
+          </div>
+        </div>
+      </div>
+    </noscript>
+  </div>
+</Base>

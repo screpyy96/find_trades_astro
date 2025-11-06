@@ -1,0 +1,84 @@
+---
+import Base from '../../layouts/Base.astro';
+import { supabase } from '../../lib/supabase';
+import { JobsClientList } from '../../components/jobs/JobsClientList';
+
+// Fetch jobs from Supabase
+const { data: jobs, error } = await supabase
+  .from('jobs')
+  .select('id, title, description, status, budget, address, tradeType, urgency, images, created_at')
+  .eq('status', 'open')
+  .order('created_at', { ascending: false })
+  .limit(100);
+
+const jobsList = jobs || [];
+const jobCount = jobsList.length;
+---
+
+<Base 
+  title={`${jobCount}+ Lucrări Disponibile - Găsește Proiecte | Meserias Local`}
+  description={`Descoperă ${jobCount}+ lucrări și proiecte de construcții, renovări, instalații în toată România. Electricieni, zugravi, instalatori - aplică gratuit și câștigă contracte noi.`}
+>
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": "Lucrări Disponibile pentru Meseriași",
+    "description": "Lista completă de lucrări și proiecte disponibile pentru meseriași în România",
+    "url": "https://www.meseriaslocal.ro/solicitari",
+    "numberOfItems": jobCount
+  })} />
+
+  <div class="relative min-h-screen pt-20">
+    <!-- Hero Section -->
+    <div class="bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 py-16 sm:py-20 mb-8 md:mb-12">
+      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h1 class="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-3 leading-tight">
+          <span class="block text-slate-200 text-2xl md:text-3xl font-bold mb-1">Găsește Lucrări în Zona Ta</span>
+          <span class="bg-gradient-to-r from-orange-400 via-amber-400 to-yellow-400 bg-clip-text text-transparent">Proiecte Noi Zilnic</span>
+        </h1>
+        <p class="text-slate-300 text-base sm:text-lg max-w-3xl mx-auto mb-6">
+          Peste {jobCount} lucrări active. Aplică gratuit, fără comision. Electricieni, zugravi, instalatori, constructori.
+        </p>
+
+        <!-- Stats -->
+        <div class="flex flex-wrap items-center justify-center gap-3 mb-6">
+          <div class="bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-left text-slate-100">
+            <div class="text-2xl font-black text-orange-300">{jobCount}</div>
+            <div class="text-xs text-slate-300 font-semibold">Lucrări active</div>
+          </div>
+          <div class="bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-left text-slate-100">
+            <div class="text-2xl font-black text-emerald-300">0%</div>
+            <div class="text-xs text-slate-300 font-semibold">comision</div>
+          </div>
+          <div class="bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-left text-slate-100">
+            <div class="text-2xl font-black text-blue-300">24h</div>
+            <div class="text-xs text-slate-300 font-semibold">Răspuns tipic</div>
+          </div>
+        </div>
+
+        <!-- CTA -->
+        <a 
+          href={`${import.meta.env.PUBLIC_APP_URL || 'https://app.meseriaslocal.ro'}/cere-oferta`}
+          class="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-semibold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl hover:from-orange-600 hover:to-amber-600 transition-all transform hover:scale-105"
+        >
+          <span>Postează o lucrare</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Job Listings with Search and Filters -->
+    {error ? (
+      <div class="max-w-7xl mx-auto px-4 pb-16 sm:px-6 lg:px-8">
+        <div class="text-center py-12 px-6 bg-white border border-slate-200 rounded-2xl shadow-sm">
+          <svg class="mx-auto h-12 w-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <h3 class="mt-4 text-lg font-semibold text-slate-900">A apărut o eroare</h3>
+          <p class="mt-2 text-sm text-slate-600">Nu am putut încărca lucrările. Te rugăm să încerci din nou.</p>
+        </div>
+      </div>
+    ) : (
+      <JobsClientList client:load jobs={jobsList} />
+    )}
+  </div>
+</Base>

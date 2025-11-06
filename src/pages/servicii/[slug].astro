@@ -1,0 +1,267 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getServicePageBySlug, getAllServicePages } from '../../lib/sanity';
+import type { GetStaticPaths } from 'astro';
+
+export const prerender = true;
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const servicePages = await getAllServicePages();
+  
+  const paths = servicePages
+    .filter((page) => {
+      if (!page.slug || !page.slug.current) return false;
+      
+      let slug = page.slug.current;
+      
+      // Remove 'servicii/' prefix if it exists
+      if (slug.startsWith('servicii/')) {
+        slug = slug.replace('servicii/', '');
+      }
+      if (slug.startsWith('/servicii/')) {
+        slug = slug.replace('/servicii/', '');
+      }
+      // Remove leading/trailing slashes
+      slug = slug.replace(/^\/+|\/+$/g, '');
+      
+      // Skip if slug is empty
+      if (!slug || slug.trim() === '') {
+        console.warn('Skipping page with empty slug:', page.title);
+        return false;
+      }
+      
+      // IMPORTANT: Skip if slug contains any slashes - these are handled by structured routes
+      // /servicii/[categorie]/[serviciu]/ or /servicii/[categorie]/[serviciu]/[oras]/
+      if (slug.includes('/')) {
+        console.log('Skipping multi-part slug (handled by structured routes):', slug);
+        return false;
+      }
+      
+      return true;
+    })
+    .map((page) => {
+      let slug = page.slug.current;
+      
+      // Clean the slug
+      if (slug.startsWith('servicii/')) {
+        slug = slug.replace('servicii/', '');
+      }
+      if (slug.startsWith('/servicii/')) {
+        slug = slug.replace('/servicii/', '');
+      }
+      slug = slug.replace(/^\/+|\/+$/g, '');
+      
+      return {
+        params: { slug },
+        props: { page },
+      };
+    });
+  
+  console.log(`Generated ${paths.length} simple service page paths (single-slug only)`);
+  
+  return paths;
+};
+
+interface Props {
+  page: Awaited<ReturnType<typeof getAllServicePages>>[0];
+}
+
+const { page } = Astro.props as Props;
+
+// Helper function to render portable text
+function renderPortableText(blocks: any[]) {
+  if (!blocks) return '';
+  
+  return blocks.map((block: any) => {
+    if (block._type === 'block') {
+      const children = block.children?.map((child: any) => {
+        let text = child.text || '';
+        if (child.marks?.includes('strong')) text = `<strong>${text}</strong>`;
+        if (child.marks?.includes('em')) text = `<em>${text}</em>`;
+        return text;
+      }).join('') || '';
+      
+      if (block.style === 'h2') return `<h2 class="text-2xl font-bold text-slate-900 mt-8 mb-4">${children}</h2>`;
+      if (block.style === 'h3') return `<h3 class="text-xl font-semibold text-slate-900 mt-6 mb-3">${children}</h3>`;
+      if (block.listItem === 'bullet') return `<li class="ml-4">${children}</li>`;
+      if (block.listItem === 'number') return `<li class="ml-4">${children}</li>`;
+      return `<p class="text-slate-700 leading-relaxed mb-4">${children}</p>`;
+    }
+    return '';
+  }).join('');
+}
+---
+
+<Base 
+  title={page.heroTitle || page.title}
+  description={page.metaDescription || page.heroDescription || ''}
+>
+
+  <!-- Hero Section -->
+  <section class="relative bg-gradient-to-br from-slate-900 via-blue-900 to-purple-900 py-16 lg:py-20">
+    <div class="absolute inset-0 bg-[url('/grid.svg')] opacity-10"></div>
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-4xl mx-auto text-center">
+        <!-- Breadcrumb -->
+        <nav class="flex items-center justify-center space-x-2 text-sm text-slate-300 mb-6">
+          <a href="/" class="hover:text-amber-400 transition-colors">Acasă</a>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+          <a href="/servicii/" class="hover:text-amber-400 transition-colors">Servicii</a>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+          <span class="text-amber-400 font-medium">{page.citySlug}</span>
+        </nav>
+
+        <!-- Main Heading -->
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
+          {page.heroTitle || page.title}
+        </h1>
+
+        {page.heroSubtitle && (
+          <p class="text-xl text-slate-300 mb-6">
+            {page.heroSubtitle}
+          </p>
+        )}
+
+        {page.heroDescription && (
+          <p class="text-lg text-slate-300 mb-8 leading-relaxed">
+            {page.heroDescription}
+          </p>
+        )}
+
+        <!-- CTA Button -->
+        <div class="flex flex-wrap items-center justify-center gap-4">
+          <a
+            href="/cere-oferta"
+            class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-xl hover:from-amber-600 hover:to-orange-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+          >
+            Cere ofertă gratuită
+            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <section class="py-16 bg-white">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      {page.content && (
+        <div class="prose prose-slate max-w-none" set:html={renderPortableText(page.content)} />
+      )}
+    </div>
+  </section>
+
+  <!-- Price Ranges -->
+  {page.priceRanges && page.priceRanges.length > 0 && (
+    <section class="py-16 bg-slate-50">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-2xl font-bold text-slate-900 mb-8">Prețuri orientative</h2>
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <table class="w-full">
+            <thead class="bg-slate-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-sm font-semibold text-slate-900">Serviciu</th>
+                <th class="px-6 py-3 text-right text-sm font-semibold text-slate-900">Preț</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200">
+              {page.priceRanges.map((price) => (
+                <tr>
+                  <td class="px-6 py-4 text-sm text-slate-700">{price.service}</td>
+                  <td class="px-6 py-4 text-sm text-slate-900 font-semibold text-right">
+                    {price.minPrice} - {price.maxPrice} RON
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p class="text-sm text-slate-500 mt-4">
+          * Prețurile sunt orientative și pot varia în funcție de complexitatea proiectului
+        </p>
+      </div>
+    </section>
+  )}
+
+  <!-- Local Tips -->
+  {page.localTips && page.localTips.length > 0 && (
+    <section class="py-16 bg-white">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-2xl font-bold text-slate-900 mb-8">Sfaturi locale</h2>
+        <div class="space-y-4">
+          {page.localTips.map((tip) => (
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+              <h3 class="text-lg font-semibold text-slate-900 mb-2">{tip.title}</h3>
+              <p class="text-slate-700">{tip.description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- FAQ -->
+  {page.faqSection && page.faqSection.length > 0 && (
+    <section class="py-16 bg-slate-50">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-2xl font-bold text-slate-900 mb-8">Întrebări frecvente</h2>
+        <div class="space-y-4">
+          {page.faqSection.map((faq) => (
+            <div class="bg-white border border-slate-200 rounded-lg p-6">
+              <h3 class="text-lg font-semibold text-slate-900 mb-3">{faq.question}</h3>
+              <p class="text-slate-600">{faq.answer}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Related Services -->
+  {page.relatedServices && page.relatedServices.length > 0 && (
+    <section class="py-16 bg-white">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-2xl font-bold text-slate-900 mb-8">Servicii conexe</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {page.relatedServices.map((service) => (
+            <a
+              href={`/servicii/${service.serviceSlug}/`}
+              class="group bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-300 rounded-lg p-4 transition-all duration-200"
+            >
+              <h3 class="font-semibold text-slate-900 group-hover:text-blue-700">
+                {service.serviceName}
+              </h3>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Final CTA -->
+  <section class="py-16 bg-gradient-to-br from-blue-50 to-purple-50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-2xl font-bold text-slate-900 mb-4">
+        Gata să începi proiectul?
+      </h2>
+      <p class="text-slate-600 mb-8">
+        Primește oferte gratuite de la meseriași verificați în {page.citySlug}
+      </p>
+      <a
+        href="/cere-oferta"
+        class="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+      >
+        Cere ofertă gratuită acum
+        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+        </svg>
+      </a>
+    </div>
+  </section>
+</Base>

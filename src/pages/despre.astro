@@ -1,0 +1,45 @@
+---
+import Base from '../layouts/Base.astro';
+
+const APP_URL = import.meta.env.PUBLIC_APP_URL || 'https://app.meseriaslocal.ro';
+---
+
+<Base 
+  title="Despre Noi - Meserias Local"
+  description="Aflați mai multe despre Meserias Local, platforma care conectează clienții cu meseriași profesioniști verificați din România."
+>
+  <div class="max-w-4xl mx-auto px-4 py-16">
+    <h1 class="text-4xl font-bold text-gray-900 mb-6">Despre Meserias Local</h1>
+    
+    <div class="prose">
+      <p class="text-xl text-gray-600 mb-8">
+        Meserias Local este platforma ta de încredere pentru găsirea meseriașilor profesioniști din România.
+      </p>
+      
+      <h2>Misiunea Noastră</h2>
+      <p>
+        Ne propunem să simplificăm procesul de găsire și angajare a meseriașilor profesioniști, 
+        oferind o platformă transparentă unde calitatea și încrederea sunt pe primul loc.
+      </p>
+      
+      <h2>Ce Oferim</h2>
+      <ul>
+        <li>Meseriași verificați cu recenzii reale</li>
+        <li>Proces simplu de cerere ofertă</li>
+        <li>Comparare rapidă a ofertelor</li>
+        <li>Suport dedicat pentru clienți și meseriași</li>
+      </ul>
+      
+      <h2>Pentru Meseriași</h2>
+      <p>
+        Dacă ești meseriaș, <a href={`${APP_URL}/register`}>înregistrează-te gratuit</a> 
+        și începe să primești cereri de ofertă de la clienți din zona ta.
+      </p>
+      
+      <h2>Contact</h2>
+      <p>
+        Ai întrebări? <a href="/contact/">Contactează-ne</a> și îți vom răspunde în cel mai scurt timp.
+      </p>
+    </div>
+  </div>
+</Base>

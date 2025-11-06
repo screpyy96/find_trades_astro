@@ -1,0 +1,7 @@
+<svg width="564" height="168" viewBox="0 0 564 168" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="564" height="168" rx="12" fill="black"/>
+  <text x="282" y="60" font-family="Arial, sans-serif" font-size="14" fill="white" text-anchor="middle">ÎN CURÂND PE</text>
+  <text x="282" y="100" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="white" text-anchor="middle">App Store</text>
+  <circle cx="100" cy="84" r="30" fill="none" stroke="white" stroke-width="3"/>
+  <path d="M100 64 L100 104 M80 84 L120 84" stroke="white" stroke-width="3" stroke-linecap="round"/>
+</svg>

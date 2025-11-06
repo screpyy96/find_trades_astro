@@ -1,0 +1,51 @@
+{
+  "name": "Meserias Local - Meseriași Verificați",
+  "short_name": "Meserias Local",
+  "description": "Platforma pentru meseriași locali și servicii profesionale",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "orientation": "portrait-primary",
+  "categories": ["business", "productivity"],
+  "lang": "ro",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "/icons/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/icons/favicon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Caută Meseriași",
+      "short_name": "Caută",
+      "description": "Caută meseriași în zona ta",
+      "url": "/meseriasi"
+    },
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "Accesează dashboard-ul tău",
+      "url": "/dashboard"
+    }
+  ]
+}

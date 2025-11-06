@@ -1,0 +1,23 @@
+---
+import { Navbar as NavbarReact } from '@meseriaslocal/ui';
+
+// Get current path
+const currentPath = Astro.url.pathname;
+
+// Environment URLs
+const APP_URL = import.meta.env.PUBLIC_APP_URL || 'http://localhost:3000';
+// Use empty string for WEB_URL so links are relative (same domain)
+const WEB_URL = '';
+
+// For now, we're not logged in on the static site
+// In the future, you could check for auth cookies here
+const isLoggedIn = false;
+---
+
+<NavbarReact 
+  client:load
+  isLoggedIn={isLoggedIn}
+  currentPath={currentPath}
+  appUrl={APP_URL}
+  webUrl={WEB_URL}
+/>

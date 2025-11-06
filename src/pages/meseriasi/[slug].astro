@@ -1,0 +1,184 @@
+---
+export const prerender = false;
+
+import Base from '../../layouts/Base.astro';
+import { createClient } from '@supabase/supabase-js';
+import { getWorkerProfileUrl } from '../../utils/seo-urls';
+import { TradesmanProfile } from '../../components/tradesman/TradesmanProfile';
+
+const { slug } = Astro.params;
+
+if (!slug) {
+  return Astro.redirect('/meseriasi', 404);
+}
+
+const supabase = createClient(
+  import.meta.env.PUBLIC_SUPABASE_URL || '',
+  import.meta.env.PUBLIC_SUPABASE_ANON_KEY || ''
+);
+
+// Check if it's a full UUID and redirect to SEO-friendly URL
+const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);
+
+if (isUuid) {
+  // Fetch worker data for redirect
+  const { data: worker, error: workerError } = await supabase
+    .from('profiles')
+    .select('id, name, address')
+    .eq('id', slug)
+    .eq('role', 'worker')
+    .single();
+
+  if (workerError || !worker) {
+    return Astro.redirect('/meseriasi', 404);
+  }
+
+  // Fetch trades
+  const { data: workerTrades } = await supabase
+    .from('worker_trades')
+    .select('trade_ids')
+    .eq('profile_id', worker.id)
+    .single();
+
+  const tradeIds = workerTrades?.trade_ids || [];
+  let trades: any[] = [];
+  
+  if (tradeIds.length > 0) {
+    const { data: tradeData } = await supabase
+      .from('trades')
+      .select('id, name, slug')
+      .in('id', tradeIds);
+    trades = tradeData || [];
+  }
+
+  const seoUrl = getWorkerProfileUrl(worker, trades);
+  return Astro.redirect(seoUrl, 301);
+}
+
+// Extract short ID from slug (last 8 characters after last hyphen)
+const slugParts = slug.split('-');
+const shortId = slugParts[slugParts.length - 1];
+
+// Validate short ID (should be 8 hex characters)
+const shortIdRegex = /^[0-9a-f]{8}$/i;
+if (!shortIdRegex.test(shortId)) {
+  return Astro.redirect('/meseriasi', 404);
+}
+
+// Find worker by matching last 8 characters of UUID
+const { data: allWorkers, error: searchError } = await supabase
+  .from('profiles')
+  .select('id')
+  .eq('role', 'worker');
+
+if (searchError || !allWorkers) {
+  return Astro.redirect('/meseriasi', 500);
+}
+
+// Find worker whose UUID ends with shortId
+const matchingWorker = allWorkers.find(w => w.id.toLowerCase().endsWith(shortId.toLowerCase()));
+
+if (!matchingWorker) {
+  return Astro.redirect('/meseriasi', 404);
+}
+
+const workerId = matchingWorker.id;
+
+// Fetch full worker data
+const { data: worker, error } = await supabase
+  .from('profiles')
+  .select('*')
+  .eq('role', 'worker')
+  .eq('id', workerId)
+  .single();
+
+if (error || !worker) {
+  return Astro.redirect('/meseriasi', 404);
+}
+
+// Fetch worker trades
+const { data: workerTrades } = await supabase
+  .from('worker_trades')
+  .select('trade_ids')
+  .eq('profile_id', worker.id)
+  .single();
+
+const tradeIds = workerTrades?.trade_ids || [];
+let trades: any[] = [];
+
+if (tradeIds.length > 0) {
+  const { data: tradeData } = await supabase
+    .from('trades')
+    .select('*')
+    .in('id', tradeIds);
+  trades = tradeData || [];
+}
+
+// Fetch portfolio items
+const { data: portfolioItems } = await supabase
+  .from('portfolio_items')
+  .select('*')
+  .eq('profile_id', worker.id)
+  .order('created_at', { ascending: false });
+
+// Fetch reviews
+const { data: reviews } = await supabase
+  .from('reviews')
+  .select(`
+    *,
+    profiles!reviews_client_id_fkey(
+      id,
+      name,
+      avatar_url
+    )
+  `)
+  .eq('worker_id', worker.id)
+  .order('created_at', { ascending: false });
+
+// Fetch certifications
+const { data: certifications } = await supabase
+  .from('certifications')
+  .select('*')
+  .eq('profile_id', worker.id)
+  .order('issue_date', { ascending: false });
+
+// Generate SEO data
+const tradeNames = trades.map((trade: any) =>
+  trade.name.split(' ').map((word: string) =>
+    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+  ).join(' ')
+).join(', ');
+
+const primaryTrade = trades[0]?.name ?
+  trades[0].name.split(' ').map((word: string) =>
+    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+  ).join(' ') : 'Servicii Profesionale';
+
+const location = worker.address ?
+  ` din ${worker.address.split(' ').map((word: string) =>
+    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+  ).join(' ')}` : '';
+
+const workerName = worker.name ?
+  worker.name.split(' ').map((word: string) =>
+    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+  ).join(' ') : 'Meseriaș';
+
+const title = `${workerName} - ${primaryTrade}${location} | Meserias Local`;
+const rating = worker.rating || 0;
+const description = `${workerName}${location}: ${tradeNames}. ` +
+  `${rating > 0 ? `★${rating.toFixed(1)} ` : ''}` +
+  `Contactați pentru ofertă gratuită!`;
+
+const avatarUrl = worker.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(worker.name || 'M')}&background=3B82F6&color=fff&size=400`;
+---
+
+<Base title={title} description={description}>
+  <TradesmanProfile client:load worker={{
+    ...worker,
+    trades,
+    portfolio_items: portfolioItems,
+    reviews,
+    certifications
+  }} />
+</Base>

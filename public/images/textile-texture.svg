@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <!-- Base gradient: dark greenish-grey -->
+    <linearGradient id="baseGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1b1f1d;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#21251f;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2a302b;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Twill pattern: diagonal lines at 45° -->
+    <pattern id="twillPattern" x="0" y="0" width="16" height="16" patternUnits="userSpaceOnUse">
+      <!-- Diagonal lines creating twill weave effect -->
+      <line x1="0" y1="0" x2="16" y2="16" stroke="#2d332d" stroke-width="1.5" opacity="0.15" />
+      <line x1="-4" y1="0" x2="12" y2="16" stroke="#2d332d" stroke-width="1" opacity="0.1" />
+      <line x1="4" y1="0" x2="20" y2="16" stroke="#2d332d" stroke-width="1" opacity="0.1" />
+      
+      <!-- Counter diagonal for weave effect -->
+      <line x1="0" y1="16" x2="16" y2="0" stroke="#252a25" stroke-width="0.8" opacity="0.08" />
+      <line x1="-4" y1="16" x2="12" y2="0" stroke="#252a25" stroke-width="0.5" opacity="0.05" />
+      <line x1="4" y1="16" x2="20" y2="0" stroke="#252a25" stroke-width="0.5" opacity="0.05" />
+    </pattern>
+    
+    <!-- Secondary twill pattern (offset for depth) -->
+    <pattern id="twillPattern2" x="8" y="8" width="16" height="16" patternUnits="userSpaceOnUse">
+      <line x1="0" y1="0" x2="16" y2="16" stroke="#323832" stroke-width="1.2" opacity="0.12" />
+      <line x1="-4" y1="0" x2="12" y2="16" stroke="#323832" stroke-width="0.8" opacity="0.08" />
+      <line x1="4" y1="0" x2="20" y2="16" stroke="#323832" stroke-width="0.8" opacity="0.08" />
+    </pattern>
+    
+    <!-- Fine grain texture using feTurbulence -->
+    <filter id="grainFilter" x="0%" y="0%" width="100%" height="100%">
+      <feTurbulence 
+        type="fractalNoise" 
+        baseFrequency="0.9" 
+        numOctaves="4" 
+        seed="42" 
+        result="turbulence" />
+      <feColorMatrix 
+        in="turbulence" 
+        type="saturate" 
+        values="0" 
+        result="grayscale" />
+      <feColorMatrix 
+        in="grayscale" 
+        type="matrix" 
+        values="1 0 0 0 0
+                0 1 0 0 0
+                0 0 1 0 0
+                0 0 0 0.08 0" 
+        result="opacity" />
+      <feBlend in="SourceGraphic" in2="opacity" mode="multiply" />
+    </filter>
+    
+    <!-- Subtle vignette for depth -->
+    <radialGradient id="vignette">
+      <stop offset="0%" style="stop-color:#000;stop-opacity:0" />
+      <stop offset="70%" style="stop-color:#000;stop-opacity:0" />
+      <stop offset="100%" style="stop-color:#000;stop-opacity:0.15" />
+    </radialGradient>
+  </defs>
+  
+  <!-- Base layer with gradient -->
+  <rect width="512" height="512" fill="url(#baseGradient)" />
+  
+  <!-- First twill layer -->
+  <rect width="512" height="512" fill="url(#twillPattern)" />
+  
+  <!-- Second twill layer (offset for depth) -->
+  <rect width="512" height="512" fill="url(#twillPattern2)" />
+  
+  <!-- Grain texture overlay -->
+  <rect width="512" height="512" fill="#1e221e" filter="url(#grainFilter)" opacity="0.6" />
+  
+  <!-- Subtle vignette for depth -->
+  <rect width="512" height="512" fill="url(#vignette)" />
+</svg>

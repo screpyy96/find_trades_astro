@@ -1,0 +1,9 @@
+<svg width="564" height="168" viewBox="0 0 564 168" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="564" height="168" rx="12" fill="black"/>
+  <text x="282" y="60" font-family="Arial, sans-serif" font-size="14" fill="white" text-anchor="middle">DISPONIBIL PE</text>
+  <text x="282" y="100" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="white" text-anchor="middle">Google Play</text>
+  <path d="M100 50 L140 84 L100 118 L100 50Z" fill="#34A853"/>
+  <path d="M100 50 L140 84 L120 94 L100 84 L100 50Z" fill="#FBBC04"/>
+  <path d="M100 118 L140 84 L120 74 L100 84 L100 118Z" fill="#EA4335"/>
+  <path d="M100 84 L120 74 L120 94 L100 84Z" fill="#4285F4"/>
+</svg>

@@ -1,0 +1,413 @@
+---
+import Base from '../../layouts/Base.astro';
+import { supabase } from '../../lib/supabase';
+import { getAllServicePages } from '../../lib/sanity';
+import { ServicesSearch } from '../../components/services/ServicesSearch';
+
+// Fetch trades from Supabase
+const { data: trades, error } = await supabase
+  .from('trades')
+  .select('id, name, slug, category, description')
+  .order('name');
+
+if (error) {
+  console.error('Error fetching trades:', error);
+}
+
+// Fetch service pages from Sanity
+const servicePages = await getAllServicePages();
+
+// Group trades by category
+const groupedTrades: Record<string, NonNullable<typeof trades>> = {};
+(trades || []).forEach((trade) => {
+  const category = trade.category || 'Altele';
+  if (!groupedTrades[category]) {
+    groupedTrades[category] = [];
+  }
+  groupedTrades[category].push(trade);
+});
+
+const categories = Object.keys(groupedTrades).sort().filter(cat => groupedTrades[cat] && groupedTrades[cat].length > 0);
+const totalTrades = trades?.length || 0;
+const totalCategories = categories.length;
+
+// Stats
+const stats = {
+  totalTrades,
+  totalCategories,
+  totalWorkers: 150,
+  totalCities: 42
+};
+---
+
+<Base 
+  title={`Servicii Profesionale - ${totalTrades} Meserii în ${totalCategories} Categorii | Meserias Local`}
+  description={`Director complet cu ${totalTrades} servicii profesionale în ${totalCategories} categorii: construcții, instalații, finisaje, electrice, grădinărit. ${stats.totalWorkers}+ meseriași verificați din ${stats.totalCities} orașe.`}
+>
+
+  <!-- Hero Section -->
+  <section 
+    class="relative overflow-hidden py-16 lg:py-20"
+    style="background: linear-gradient(180deg, #1b1f1d 0%, #21251f 50%, #2a302b 100%)"
+  >
+    <!-- Grid pattern -->
+    <div class="absolute inset-0 opacity-15">
+      <div
+        class="absolute inset-0"
+        style="background-image: linear-gradient(rgba(45, 51, 45, 0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(45, 51, 45, 0.4) 1px, transparent 1px); background-size: 60px 60px"
+      ></div>
+    </div>
+
+    <!-- Floating geometric shapes -->
+    <div class="absolute inset-0 opacity-15">
+      <div class="absolute top-24 left-40 w-14 h-14 border-2 border-blue-400/30 rounded-full animate-pulse" style="animation-delay: 0.5s"></div>
+      <div class="absolute top-48 left-20 w-10 h-10 bg-emerald-400/15 rounded-full animate-bounce" style="animation-delay: 1s"></div>
+      <div class="absolute top-20 right-28 w-16 h-16 border-2 border-purple-400/30 rounded-full animate-pulse" style="animation-delay: 1.5s"></div>
+      <div class="absolute top-52 right-16 w-12 h-12 bg-blue-400/15 rounded-full animate-bounce" style="animation-delay: 2s"></div>
+    </div>
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-6xl mx-auto text-center lg:text-left">
+        <div class="grid lg:grid-cols-12 gap-8 lg:gap-16 items-center">
+          <!-- Left Column: Content -->
+          <div class="lg:col-span-8">
+            <!-- Breadcrumb - Modern style -->
+            <nav class="flex justify-center lg:justify-start mb-6">
+              <div class="bg-slate-800/40 backdrop-blur-md rounded-full px-4 py-2 border border-slate-700/50">
+                <ol class="flex items-center space-x-2 text-slate-300 text-xs font-medium">
+                  <li class="flex items-center">
+                    <a href="/" class="hover:text-white transition-colors">Acasă</a>
+                  </li>
+                  <li class="flex items-center">
+                    <span class="mx-2 text-white/40">›</span>
+                    <span class="text-orange-400 font-semibold">Servicii</span>
+                  </li>
+                </ol>
+              </div>
+            </nav>
+
+            <!-- Main Heading -->
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
+              Peste {totalTrades} de servicii
+            </h1>
+
+            <!-- Description -->
+            <p class="text-lg text-slate-300 mb-8 leading-relaxed max-w-3xl">
+              Găsește meseriași verificați pentru orice proiect. De la construcții la finisaje,
+              toți profesioniștii într-un singur loc.
+            </p>
+
+            <!-- CTA Button -->
+            <div class="flex flex-wrap items-center justify-center lg:justify-start gap-4">
+              <a
+                href="/cere-oferta"
+                class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-xl hover:from-amber-600 hover:to-orange-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+              >
+                Cere ofertă gratuită
+                <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </a>
+              <span class="text-slate-400 text-sm">sau caută mai jos</span>
+            </div>
+          </div>
+
+          <!-- Right Column: Stats -->
+          <div class="hidden lg:flex lg:col-span-4 items-center justify-center">
+            <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 w-72">
+              <div class="text-center mb-5">
+                <h3 class="text-lg font-bold text-white mb-1">Statistici platformă</h3>
+                <p class="text-slate-400 text-xs">Date în timp real</p>
+              </div>
+
+              <div class="space-y-3">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 bg-emerald-400 rounded-full"></div>
+                    <span class="text-slate-300 text-sm">Servicii</span>
+                  </div>
+                  <span class="text-white font-semibold">{totalTrades}</span>
+                </div>
+
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 bg-blue-400 rounded-full"></div>
+                    <span class="text-slate-300 text-sm">Meseriași</span>
+                  </div>
+                  <span class="text-white font-semibold">{stats.totalWorkers}+</span>
+                </div>
+
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 bg-amber-400 rounded-full"></div>
+                    <span class="text-slate-300 text-sm">Orașe</span>
+                  </div>
+                  <span class="text-white font-semibold">{stats.totalCities}</span>
+                </div>
+
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 bg-purple-400 rounded-full"></div>
+                    <span class="text-slate-300 text-sm">Categorii</span>
+                  </div>
+                  <span class="text-white font-semibold">{totalCategories}</span>
+                </div>
+              </div>
+
+              <div class="mt-5 pt-3 border-t border-white/10 text-center">
+                <span class="text-xs text-slate-400">✓ Toate serviciile verificate</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Search and Categories Section -->
+  <section class="py-16 bg-slate-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="mb-8">
+        <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mb-4">
+          Caută servicii
+        </h2>
+        <p class="text-slate-600 max-w-2xl">
+          Găsește meseriașul potrivit din {totalCategories} categorii și {totalTrades} servicii
+        </p>
+      </div>
+
+      <!-- Interactive Search Component -->
+      <ServicesSearch 
+        client:load
+        trades={trades || []}
+        groupedTrades={groupedTrades}
+        categories={categories}
+      />
+    </div>
+  </section>
+
+  <!-- Sanity Content Pages Section -->
+  {servicePages && servicePages.length > 0 && (
+    <section class="py-16 bg-white border-t border-slate-200">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="mb-12">
+          <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mb-4">
+            Ghiduri și Informații Detaliate
+          </h2>
+          <p class="text-slate-600 max-w-2xl">
+            Articole complete despre servicii și meseriași în diferite orașe
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {servicePages.slice(0, 6).map((page) => (
+            <a
+              href={`/servicii/${page.slug.current}/`}
+              class="group bg-gradient-to-br from-slate-50 to-blue-50 border border-slate-200 rounded-xl p-6 hover:shadow-lg transition-all duration-300"
+            >
+              <h3 class="text-lg font-bold text-slate-900 group-hover:text-blue-700 mb-2">
+                {page.heroTitle || page.title}
+              </h3>
+              {page.heroDescription && (
+                <p class="text-sm text-slate-600 mb-4 line-clamp-3">
+                  {page.heroDescription}
+                </p>
+              )}
+              <div class="flex items-center gap-2 text-xs text-slate-500">
+                <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded">
+                  {page.citySlug}
+                </span>
+                <span>•</span>
+                <span>{new Date(page.publishedAt || '').toLocaleDateString('ro-RO')}</span>
+              </div>
+            </a>
+          ))}
+        </div>
+
+        {servicePages.length > 6 && (
+          <div class="text-center mt-8">
+            <a
+              href="/servicii/ghiduri/"
+              class="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Vezi toate ghidurile
+              <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </a>
+          </div>
+        )}
+      </div>
+    </section>
+  )}
+
+  <!-- CTA Section -->
+  <section class="py-16 bg-white border-t border-slate-200">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-2xl font-bold text-slate-900 mb-4">
+        Nu găsești ce cauți?
+      </h2>
+      <p class="text-slate-600 mb-8">
+        Postează o cerere gratuită și primește oferte personalizate în 24 de ore.
+      </p>
+      <a
+        href="/cere-oferta"
+        class="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+      >
+        Cere ofertă gratuită
+        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+        </svg>
+      </a>
+    </div>
+  </section>
+
+  <!-- SEO Content Section -->
+  <section class="py-16 bg-slate-50">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid lg:grid-cols-2 gap-12">
+        <!-- Main Content -->
+        <div>
+          <h2 class="text-2xl font-bold text-slate-900 mb-6">
+            Platforma completă de servicii profesionale din România
+          </h2>
+          <div class="prose prose-slate max-w-none">
+            <p class="text-slate-700 leading-relaxed mb-4">
+              <strong>Meserias Local</strong> este cea mai mare platformă de conectare între clienți și meseriași din România,
+              cu peste <strong>{stats.totalWorkers} profesioniști verificați</strong> în <strong>{stats.totalCities} orașe</strong>.
+              Oferim acces la {totalTrades} servicii specializate, de la construcții și renovări până la instalații și finisaje.
+            </p>
+            <p class="text-slate-700 leading-relaxed mb-4">
+              Toți meseriașii din platforma noastră sunt <strong>verificați personal</strong>, cu identitate confirmată,
+              experiență validată și recenzii reale de la clienți anteriori. Garantăm calitatea serviciilor și oferim
+              suport complet pe toată durata proiectului.
+            </p>
+            <p class="text-slate-700 leading-relaxed">
+              Procesul este simplu: postezi cererea, primești oferte gratuite în 24h, alegi meseriașul potrivit și
+              plătești doar la finalizarea lucrării. Cu garanție de calitate și suport dedicat.
+            </p>
+          </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-8">
+          <!-- Benefits -->
+          <div>
+            <h3 class="text-lg font-semibold text-slate-900 mb-4">
+              De ce Meserias Local?
+            </h3>
+            <ul class="space-y-2 text-sm text-slate-600">
+              <li class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+                Meseriași verificați și evaluați
+              </li>
+              <li class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+                Oferte gratuite în 24 ore
+              </li>
+              <li class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+                Garanție de calitate
+              </li>
+              <li class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+                Plăți securizate
+              </li>
+              <li class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+                Suport dedicat 24/7
+              </li>
+            </ul>
+          </div>
+
+          <!-- Popular Cities -->
+          <div>
+            <h3 class="text-lg font-semibold text-slate-900 mb-4">
+              Orașe acoperite
+            </h3>
+            <div class="grid grid-cols-2 gap-2 text-sm text-slate-600">
+              <span>București</span>
+              <span>Cluj-Napoca</span>
+              <span>Timișoara</span>
+              <span>Iași</span>
+              <span>Constanța</span>
+              <span>Craiova</span>
+              <span>Brașov</span>
+              <span>Galați</span>
+              <span>Ploiești</span>
+              <span>Oradea</span>
+              <span>Brăila</span>
+              <span>Arad</span>
+            </div>
+            <p class="text-xs text-slate-500 mt-2">
+              și alte {stats.totalCities - 12} orașe din România
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section class="py-16 bg-white">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-2xl font-bold text-slate-900 mb-8 text-center">
+        Întrebări frecvente
+      </h2>
+      <div class="space-y-6">
+        <div class="border border-slate-200 rounded-lg p-6">
+          <h3 class="text-lg font-semibold text-slate-900 mb-3">
+            Ce servicii găsesc pe Meserias Local?
+          </h3>
+          <p class="text-slate-600">
+            Avem {totalTrades} servicii în {totalCategories} categorii principale: construcții, instalații,
+            finisaje, electrice, grădinărit, curățenie, transport, reparații și multe altele.
+            De la zugraveli și instalații sanitare până la renovări complete și amenajări exterioare.
+          </p>
+        </div>
+
+        <div class="border border-slate-200 rounded-lg p-6">
+          <h3 class="text-lg font-semibold text-slate-900 mb-3">
+            Cum funcționează platforma?
+          </h3>
+          <p class="text-slate-600">
+            Simplu: postezi cererea ta gratuită, primești oferte de la meseriași din zona ta în 24h,
+            compari prețurile și recenziile, alegi specialistul potrivit și plătești doar la finalizarea lucrării.
+            Totul cu garanție de calitate.
+          </p>
+        </div>
+
+        <div class="border border-slate-200 rounded-lg p-6">
+          <h3 class="text-lg font-semibold text-slate-900 mb-3">
+            Sunt meseriașii verificați?
+          </h3>
+          <p class="text-slate-600">
+            Da, toți cei {stats.totalWorkers}+ meseriași sunt verificați personal. Confirmăm identitatea,
+            experiența profesională și validăm referințele. Plus, ai acces la recenzii reale de la
+            clienți anteriori pentru fiecare specialist.
+          </p>
+        </div>
+
+        <div class="border border-slate-200 rounded-lg p-6">
+          <h3 class="text-lg font-semibold text-slate-900 mb-3">
+            În ce orașe oferiți servicii?
+          </h3>
+          <p class="text-slate-600">
+            Acoperim {stats.totalCities} orașe din România, inclusiv toate marile centre urbane:
+            București, Cluj-Napoca, Timișoara, Iași, Constanța, Brașov, Craiova, Galați,
+            Ploiești, Oradea și multe altele.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>
