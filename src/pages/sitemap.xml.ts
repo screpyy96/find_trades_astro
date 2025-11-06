@@ -1,9 +1,13 @@
 import { services, cities } from '../data';
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL || '';
-const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
+const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key';
+
+// Only create client if we have real credentials
+const supabase = (supabaseUrl !== 'https://placeholder.supabase.co' && supabaseAnonKey !== 'placeholder-key')
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : null;
 
 type SitemapPage = {
   url: string;
@@ -34,15 +38,17 @@ export async function GET() {
   
   // Dynamic job pages
   const jobPages: SitemapPage[] = [];
-  try {
-    const { data: jobs } = await supabase
-      .from('jobs')
-      .select('id, title, address, created_at')
-      .eq('status', 'open')
-      .order('created_at', { ascending: false })
-      .limit(100);
-    
-    if (jobs) {
+  
+  if (supabase) {
+    try {
+      const { data: jobs } = await supabase
+        .from('jobs')
+        .select('id, title, address, created_at')
+        .eq('status', 'open')
+        .order('created_at', { ascending: false })
+        .limit(100);
+      
+      if (jobs) {
       for (const job of jobs) {
         // Generate slug
         const parts: string[] = [];
@@ -69,8 +75,9 @@ export async function GET() {
         });
       }
     }
-  } catch (error) {
-    console.error('Error fetching jobs for sitemap:', error);
+    } catch (error) {
+      console.error('Error fetching jobs for sitemap:', error);
+    }
   }
   
   const allPages = [...staticPages, ...servicePages, ...jobPages];
