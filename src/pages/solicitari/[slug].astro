@@ -6,6 +6,12 @@ import type { GetStaticPaths } from 'astro';
 export const prerender = true;
 
 export const getStaticPaths: GetStaticPaths = async () => {
+  // Check if Supabase is available
+  if (!supabase) {
+    console.warn('Supabase not configured, skipping job pages generation');
+    return [];
+  }
+
   const { data: jobs } = await supabase
     .from('jobs')
     .select('*')
