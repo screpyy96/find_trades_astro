@@ -45,10 +45,17 @@ export function TradesmenClientList({ initialSearch = '', initialSort = 'rating'
     
     try {
       const { createClient } = await import('@supabase/supabase-js');
-      const supabase = createClient(
-        import.meta.env.PUBLIC_SUPABASE_URL || '',
-        import.meta.env.PUBLIC_SUPABASE_ANON_KEY || ''
-      );
+      const url = import.meta.env.PUBLIC_SUPABASE_URL;
+      const key = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+      
+      if (!url || !key) {
+        console.warn('Supabase not configured');
+        setWorkers([]);
+        setLoading(false);
+        return;
+      }
+      
+      const supabase = createClient(url, key);
 
       let query = supabase
         .from('profiles')
