@@ -1,12 +1,24 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL || '';
-const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
+const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+
+// Debug logging
+if (import.meta.env.DEV) {
+  console.log('🔍 Supabase Config Check:');
+  console.log('  URL exists:', !!supabaseUrl);
+  console.log('  Key exists:', !!supabaseAnonKey);
+  console.log('  URL value:', supabaseUrl ? `${supabaseUrl.substring(0, 30)}...` : 'MISSING');
+}
 
 // Only create client if we have valid credentials
 export const supabase = (supabaseUrl && supabaseAnonKey) 
   ? createClient(supabaseUrl, supabaseAnonKey)
   : null;
+
+if (!supabase && import.meta.env.DEV) {
+  console.warn('⚠️ Supabase client not initialized - check your .env file');
+}
 
 export interface Worker {
   id: string;

@@ -109,6 +109,30 @@ const similarServices = (allTrades || []).map(t => ({
   categorySlug: categorie,
 }));
 
+// Pre-fetch all related service categories if we have Sanity content
+let relatedServiceCategories: Record<string, string> = {};
+if (sanityContent?.relatedServices && sanityContent.relatedServices.length > 0 && supabase) {
+  const slugs = sanityContent.relatedServices.map((rs: any) => {
+    let cleanSlug = rs.serviceSlug.replace(/^\/+|\/+$/g, '');
+    if (cleanSlug.includes('/')) {
+      const parts = cleanSlug.split('/');
+      cleanSlug = parts[parts.length - 1];
+    }
+    return cleanSlug;
+  });
+  
+  const { data: relatedTrades } = await supabase
+    .from('trades')
+    .select('slug, category')
+    .in('slug', slugs);
+  
+  if (relatedTrades) {
+    relatedTrades.forEach(t => {
+      relatedServiceCategories[t.slug] = t.category;
+    });
+  }
+}
+
 // Generate comprehensive fallback content
 const fallbackContent = generateFallbackContent({
   serviceName: service.name,
@@ -423,7 +447,7 @@ const heroDescription = sanityContent?.heroDescription || `Găsește meseriași 
       <section class="mb-12">
         <h2 class="text-2xl font-bold mb-6">Servicii Conexe în {city.name}</h2>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {await Promise.all(sanityContent.relatedServices.map(async (relatedService: { serviceName: string; serviceSlug: string }) => {
+          {sanityContent.relatedServices.map((relatedService: { serviceName: string; serviceSlug: string }) => {
             // Clean the serviceSlug - extract just the slug part if it contains a full path
             let cleanSlug = relatedService.serviceSlug;
             
@@ -436,19 +460,10 @@ const heroDescription = sanityContent?.heroDescription || `Găsește meseriași 
               cleanSlug = parts[parts.length - 1];
             }
             
-            // Get the correct category for this service from Supabase
-            let relatedTrade = null;
-            if (supabase) {
-              const result = await supabase
-                .from('trades')
-                .select('category')
-                .eq('slug', cleanSlug)
-                .single();
-              relatedTrade = result.data;
-            }
-            
-            const relatedCategorySlug = relatedTrade?.category 
-              ? relatedTrade.category.toLowerCase()
+            // Get the category from pre-fetched data
+            const category = relatedServiceCategories[cleanSlug];
+            const relatedCategorySlug = category 
+              ? category.toLowerCase()
                   .replace(/\s+/g, '-')
                   .replace(/&/g, 'si')
                   .replace(/ș/g, 's')
@@ -467,7 +482,7 @@ const heroDescription = sanityContent?.heroDescription || `Găsește meseriași 
                 <h3 class="font-semibold">{relatedService.serviceName}</h3>
               </a>
             );
-          }))}
+          })}
         </div>
       </section>
     ) : similarServices.length > 0 && (
