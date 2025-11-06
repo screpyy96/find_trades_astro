@@ -4,12 +4,20 @@ import { supabase } from '../../lib/supabase';
 import { JobsClientList } from '../../components/jobs/JobsClientList';
 
 // Fetch jobs from Supabase
-const { data: jobs, error } = await supabase
-  .from('jobs')
-  .select('id, title, description, status, budget, address, tradeType, urgency, images, created_at')
-  .eq('status', 'open')
-  .order('created_at', { ascending: false })
-  .limit(100);
+let jobs = null;
+let error = null;
+
+if (supabase) {
+  const result = await supabase
+    .from('jobs')
+    .select('id, title, description, status, budget, address, tradeType, urgency, images, created_at')
+    .eq('status', 'open')
+    .order('created_at', { ascending: false })
+    .limit(100);
+  
+  jobs = result.data;
+  error = result.error;
+}
 
 const jobsList = jobs || [];
 const jobCount = jobsList.length;
@@ -19,7 +27,7 @@ const jobCount = jobsList.length;
   title={`${jobCount}+ Lucrări Disponibile - Găsește Proiecte | Meserias Local`}
   description={`Descoperă ${jobCount}+ lucrări și proiecte de construcții, renovări, instalații în toată România. Electricieni, zugravi, instalatori - aplică gratuit și câștigă contracte noi.`}
 >
-  <script type="application/ld+json" set:html={JSON.stringify({
+  <script is:inline type="application/ld+json" set:html={JSON.stringify({
     "@context": "https://schema.org",
     "@type": "ItemList",
     "name": "Lucrări Disponibile pentru Meseriași",

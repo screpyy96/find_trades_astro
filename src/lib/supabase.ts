@@ -19,6 +19,11 @@ export interface Worker {
 }
 
 export async function getPublicWorkers(limit = 50) {
+  if (!supabase) {
+    console.warn('Supabase client not initialized');
+    return [];
+  }
+
   const { data, error} = await supabase
     .from('profiles')
     .select('id, name, avatar_url, address, bio, rating, is_verified')

@@ -92,12 +92,16 @@ if (import.meta.env.DEV) {
 const nearbyCities = getNearbyCities(oras);
 
 // Get similar services from Supabase
-const { data: allTrades } = await supabase
-  .from('trades')
-  .select('id, name, slug, category')
-  .eq('category', trade.category)
-  .neq('slug', trade.slug)
-  .limit(4);
+let allTrades = null;
+if (supabase) {
+  const result = await supabase
+    .from('trades')
+    .select('id, name, slug, category')
+    .eq('category', trade.category)
+    .neq('slug', trade.slug)
+    .limit(4);
+  allTrades = result.data;
+}
 
 const similarServices = (allTrades || []).map(t => ({
   name: t.name,
@@ -200,10 +204,10 @@ const heroDescription = sanityContent?.heroDescription || `Găsește meseriași 
   <meta slot="head" name="keywords" content={keywords} />
   
   <!-- Structured Data - LocalBusiness Schema -->
-  <script slot="head" type="application/ld+json" set:html={JSON.stringify(sanityContent?.schema || fallbackContent.schema)} />
+  <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(sanityContent?.schema || fallbackContent.schema)} />
   
   <!-- Structured Data - Breadcrumb Schema -->
-  <script slot="head" type="application/ld+json" set:html={JSON.stringify({
+  <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify({
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
@@ -433,11 +437,15 @@ const heroDescription = sanityContent?.heroDescription || `Găsește meseriași 
             }
             
             // Get the correct category for this service from Supabase
-            const { data: relatedTrade } = await supabase
-              .from('trades')
-              .select('category')
-              .eq('slug', cleanSlug)
-              .single();
+            let relatedTrade = null;
+            if (supabase) {
+              const result = await supabase
+                .from('trades')
+                .select('category')
+                .eq('slug', cleanSlug)
+                .single();
+              relatedTrade = result.data;
+            }
             
             const relatedCategorySlug = relatedTrade?.category 
               ? relatedTrade.category.toLowerCase()

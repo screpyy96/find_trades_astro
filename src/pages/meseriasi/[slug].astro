@@ -16,6 +16,10 @@ if (!slug) {
 const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);
 
 if (isUuid) {
+  if (!supabase) {
+    return Astro.redirect('/meseriasi', 500);
+  }
+
   // Fetch worker data for redirect
   const { data: worker, error: workerError } = await supabase
     .from('profiles')
@@ -48,6 +52,10 @@ if (isUuid) {
 
   const seoUrl = getWorkerProfileUrl(worker, trades);
   return Astro.redirect(seoUrl, 301);
+}
+
+if (!supabase) {
+  return Astro.redirect('/meseriasi', 500);
 }
 
 // Extract short ID from slug (last 8 characters after last hyphen)

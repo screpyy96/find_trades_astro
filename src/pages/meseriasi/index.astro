@@ -15,7 +15,7 @@ const sortMethod = Astro.url.searchParams.get('sort') || 'rating';
   description="Mii de meseriași verificați în România. Electricieni, zugravi, instalatori, constructori. Oferte gratuite, recenzii reale."
 >
   <!-- Schema.org structured data -->
-  <script type="application/ld+json" set:html={JSON.stringify({
+  <script is:inline type="application/ld+json" set:html={JSON.stringify({
     "@context": "https://schema.org",
     "@type": "ItemList",
     "name": "Meseriași Verificați din România",
