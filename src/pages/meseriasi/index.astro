@@ -3,7 +3,8 @@ import Base from '../../layouts/Base.astro';
 import { HeroBackground } from '../../components/hero/HeroBackground';
 import { TradesmenClientList } from '../../components/tradesman/TradesmenClientList';
 
-const APP_URL = import.meta.env.PUBLIC_APP_URL || 'https://app.meseriaslocal.ro';
+// Use empty string for relative URLs (stay on same domain)
+const APP_URL = '';
 
 // Get search params from URL
 const searchTerm = Astro.url.searchParams.get('q') || '';

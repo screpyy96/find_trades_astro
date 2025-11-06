@@ -59,7 +59,8 @@ export async function getStaticPaths() {
 const { categorie, serviciu, oras } = Astro.params;
 const { trade } = Astro.props;
 
-const APP_URL = import.meta.env.PUBLIC_APP_URL || 'https://app.meseriaslocal.ro';
+// Use empty string for relative URLs (stay on same domain)
+const APP_URL = '';
 
 const city = getCityBySlug(oras);
 

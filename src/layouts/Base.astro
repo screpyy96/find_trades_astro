@@ -15,8 +15,9 @@ const { title, description, canonical, ogImage } = Astro.props;
 const canonicalURL = canonical || new URL(Astro.url.pathname, Astro.site).href;
 const ogImageURL = ogImage || `${Astro.site}og-image.png`;
 
-// App URL pentru link-uri către app-ul dinamic
-const APP_URL = import.meta.env.PUBLIC_APP_URL || 'https://app.meseriaslocal.ro';
+// Use empty strings for relative URLs (stay on same domain)
+const APP_URL = '';
+const WEB_URL = '';
 ---
 
 <!DOCTYPE html>
@@ -74,7 +75,7 @@ const APP_URL = import.meta.env.PUBLIC_APP_URL || 'https://app.meseriaslocal.ro'
     <MobileHeader />
     
     <!-- Mobile Bottom Navigation -->
-    <MobileNavbar client:load currentPath={Astro.url.pathname} appUrl={APP_URL} webUrl={import.meta.env.PUBLIC_WEB_URL || 'http://localhost:4321'} />
+    <MobileNavbar client:load currentPath={Astro.url.pathname} appUrl={APP_URL} webUrl={WEB_URL} />
     
     <!-- Add padding: top for navbar (desktop + mobile), bottom for mobile bottom nav -->
     <main class="pt-16 lg:pt-20 pb-24 lg:pb-0">

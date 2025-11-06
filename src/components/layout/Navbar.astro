@@ -5,8 +5,8 @@ import { Navbar as NavbarReact } from '../ui/Navbar';
 const currentPath = Astro.url.pathname;
 
 // Environment URLs
-const APP_URL = import.meta.env.PUBLIC_APP_URL || 'http://localhost:3000';
-// Use empty string for WEB_URL so links are relative (same domain)
+// Use empty strings so all links stay on the same domain (relative URLs)
+const APP_URL = '';
 const WEB_URL = '';
 
 // For now, we're not logged in on the static site

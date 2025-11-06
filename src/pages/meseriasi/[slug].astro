@@ -68,45 +68,78 @@ if (!shortIdRegex.test(shortId)) {
   return Astro.redirect('/meseriasi', 404);
 }
 
-// Find worker by matching last 8 characters of UUID
-const { data: allWorkers, error: searchError } = await supabase
+// Find worker by matching last 8 characters of UUID using LIKE query (much faster)
+const { data: workers, error: searchError } = await supabase
   .from('profiles')
   .select('id')
-  .eq('role', 'worker');
+  .eq('role', 'worker')
+  .like('id', `%${shortId}`);
 
-if (searchError || !allWorkers) {
-  return Astro.redirect('/meseriasi', 500);
-}
-
-// Find worker whose UUID ends with shortId
-const matchingWorker = allWorkers.find(w => w.id.toLowerCase().endsWith(shortId.toLowerCase()));
-
-if (!matchingWorker) {
+if (searchError || !workers || workers.length === 0) {
   return Astro.redirect('/meseriasi', 404);
 }
 
-const workerId = matchingWorker.id;
+const workerId = workers[0].id;
 
-// Fetch full worker data
-const { data: worker, error } = await supabase
-  .from('profiles')
-  .select('*')
-  .eq('role', 'worker')
-  .eq('id', workerId)
-  .single();
+// Fetch all data in parallel for better performance
+const [
+  workerResult,
+  workerTradesResult,
+  portfolioResult,
+  reviewsResult,
+  certificationsResult
+] = await Promise.all([
+  // Worker data
+  supabase
+    .from('profiles')
+    .select('*')
+    .eq('role', 'worker')
+    .eq('id', workerId)
+    .single(),
+  
+  // Worker trades
+  supabase
+    .from('worker_trades')
+    .select('trade_ids')
+    .eq('profile_id', workerId)
+    .single(),
+  
+  // Portfolio items
+  supabase
+    .from('portfolio_items')
+    .select('*')
+    .eq('profile_id', workerId)
+    .order('created_at', { ascending: false }),
+  
+  // Reviews with client info
+  supabase
+    .from('reviews')
+    .select(`
+      *,
+      profiles!reviews_client_id_fkey(
+        id,
+        name,
+        avatar_url
+      )
+    `)
+    .eq('worker_id', workerId)
+    .order('created_at', { ascending: false }),
+  
+  // Certifications
+  supabase
+    .from('certifications')
+    .select('*')
+    .eq('profile_id', workerId)
+    .order('issue_date', { ascending: false })
+]);
 
+const { data: worker, error } = workerResult;
 if (error || !worker) {
   return Astro.redirect('/meseriasi', 404);
 }
 
-// Fetch worker trades
-const { data: workerTrades } = await supabase
-  .from('worker_trades')
-  .select('trade_ids')
-  .eq('profile_id', worker.id)
-  .single();
-
-const tradeIds = workerTrades?.trade_ids || [];
+// Get trades data
+const tradeIds = workerTradesResult.data?.trade_ids || [];
 let trades: any[] = [];
 
 if (tradeIds.length > 0) {
@@ -117,33 +150,9 @@ if (tradeIds.length > 0) {
   trades = tradeData || [];
 }
 
-// Fetch portfolio items
-const { data: portfolioItems } = await supabase
-  .from('portfolio_items')
-  .select('*')
-  .eq('profile_id', worker.id)
-  .order('created_at', { ascending: false });
-
-// Fetch reviews
-const { data: reviews } = await supabase
-  .from('reviews')
-  .select(`
-    *,
-    profiles!reviews_client_id_fkey(
-      id,
-      name,
-      avatar_url
-    )
-  `)
-  .eq('worker_id', worker.id)
-  .order('created_at', { ascending: false });
-
-// Fetch certifications
-const { data: certifications } = await supabase
-  .from('certifications')
-  .select('*')
-  .eq('profile_id', worker.id)
-  .order('issue_date', { ascending: false });
+const portfolioItems = portfolioResult.data;
+const reviews = reviewsResult.data;
+const certifications = certificationsResult.data;
 
 // Generate SEO data
 const tradeNames = trades.map((trade: any) =>
@@ -177,7 +186,7 @@ const avatarUrl = worker.avatar_url || `https://ui-avatars.com/api/?name=${encod
 ---
 
 <Base title={title} description={description}>
-  <TradesmanProfile client:load worker={{
+  <TradesmanProfile client:idle worker={{
     ...worker,
     trades,
     portfolio_items: portfolioItems,

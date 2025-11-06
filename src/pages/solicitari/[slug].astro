@@ -3,9 +3,15 @@ import Base from '../../layouts/Base.astro';
 import { supabase } from '../../lib/supabase';
 import type { GetStaticPaths } from 'astro';
 
-export const prerender = true;
+// Use SSR in development, SSG in production
+export const prerender = !import.meta.env.DEV;
 
 export const getStaticPaths: GetStaticPaths = async () => {
+  // In development, return empty array to use SSR for all requests
+  if (import.meta.env.DEV) {
+    return [];
+  }
+
   // Check if Supabase is available
   if (!supabase) {
     console.warn('Supabase not configured, skipping job pages generation');
@@ -76,18 +82,30 @@ async function findJobByShortId(shortId: string) {
     return job;
   }
   
-  // Query all jobs and find by short ID
+  // Query recent jobs and search in memory (more reliable than LIKE)
   const { data: jobs } = await supabase
     .from('jobs')
     .select('*')
-    .limit(200);
+    .order('created_at', { ascending: false })
+    .limit(500);
   
-  if (!jobs) return null;
+  if (!jobs || jobs.length === 0) {
+    if (import.meta.env.DEV) {
+      console.log('No jobs found in database');
+    }
+    return null;
+  }
   
+  // Find exact match where the cleaned ID starts with shortId
   const job = jobs.find((j: any) => {
     const cleanId = j.id.replace(/-/g, '');
     return cleanId.startsWith(shortId);
   });
+  
+  if (import.meta.env.DEV && !job) {
+    console.log(`Searched ${jobs.length} jobs, none matched shortId: ${shortId}`);
+    console.log('Sample IDs:', jobs.slice(0, 3).map(j => j.id.replace(/-/g, '').substring(0, 6)));
+  }
   
   return job;
 }
@@ -98,13 +116,25 @@ let job = preloadedJob;
 // Fallback for development or if job not found
 if (!job && slug && supabase) {
   const shortId = extractJobIdFromSlug(String(slug));
+  
+  if (import.meta.env.DEV) {
+    console.log('🔍 Job lookup:', { slug, shortId });
+  }
+  
   if (!shortId) {
+    console.warn('Invalid slug format:', slug);
     return Astro.redirect('/solicitari');
   }
+  
   job = await findJobByShortId(shortId);
+  
+  if (import.meta.env.DEV) {
+    console.log('Job found:', job ? `✓ ${job.title}` : '✗ Not found');
+  }
 }
 
 if (!job) {
+  console.warn('Job not found for slug:', slug);
   return Astro.redirect('/solicitari');
 }
 
@@ -138,7 +168,8 @@ const projectSizeMap: Record<string, string> = {
 const jobTypeDisplay = job.jobType ? jobTypeMap[job.jobType] || 'Nespecificat' : 'Nespecificat';
 const projectSizeDisplay = job.projectSize ? projectSizeMap[job.projectSize] || 'Nespecificat' : 'Nespecificat';
 
-const APP_URL = import.meta.env.PUBLIC_APP_URL || 'https://app.meseriaslocal.ro';
+// Use empty string for relative URLs (stay on same domain)
+const APP_URL = '';
 ---
 
 <Base 
