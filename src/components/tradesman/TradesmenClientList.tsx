@@ -51,7 +51,7 @@ export function TradesmenClientList({ initialSearch = '', initialSort = 'rating'
       if (!url || !key) {
         console.warn('Supabase not configured');
         setWorkers([]);
-        setLoading(false);
+        setIsLoading(false);
         return;
       }
       
