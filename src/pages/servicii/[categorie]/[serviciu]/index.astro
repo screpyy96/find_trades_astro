@@ -3,7 +3,15 @@ import Base from '../../../../layouts/Base.astro';
 import { cities } from '../../../../data';
 import { supabase } from '../../../../lib/supabase';
 
+export const prerender = true;
+
 export async function getStaticPaths() {
+  // Check if Supabase is available
+  if (!supabase) {
+    console.warn('Supabase not configured, skipping service pages generation');
+    return [];
+  }
+
   // Fetch all trades from Supabase
   const { data: trades, error } = await supabase
     .from('trades')

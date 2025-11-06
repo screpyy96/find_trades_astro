@@ -2,7 +2,7 @@
 export const prerender = false;
 
 import Base from '../../layouts/Base.astro';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '../../lib/supabase';
 import { getWorkerProfileUrl } from '../../utils/seo-urls';
 import { TradesmanProfile } from '../../components/tradesman/TradesmanProfile';
 
@@ -11,11 +11,6 @@ const { slug } = Astro.params;
 if (!slug) {
   return Astro.redirect('/meseriasi', 404);
 }
-
-const supabase = createClient(
-  import.meta.env.PUBLIC_SUPABASE_URL || '',
-  import.meta.env.PUBLIC_SUPABASE_ANON_KEY || ''
-);
 
 // Check if it's a full UUID and redirect to SEO-friendly URL
 const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);

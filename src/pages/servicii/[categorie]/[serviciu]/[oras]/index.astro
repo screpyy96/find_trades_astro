@@ -5,7 +5,15 @@ import { getServiceCityPage } from '../../../../../lib/sanity';
 import { supabase } from '../../../../../lib/supabase';
 import { generateFallbackContent } from '../../../../../lib/seo-fallback';
 
+export const prerender = true;
+
 export async function getStaticPaths() {
+  // Check if Supabase is available
+  if (!supabase) {
+    console.warn('Supabase not configured, skipping service city pages generation');
+    return [];
+  }
+
   // Fetch all trades from Supabase
   const { data: trades, error } = await supabase
     .from('trades')
