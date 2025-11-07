@@ -9,6 +9,8 @@ interface MobileNavbarProps {
 
 export function MobileNavbar({ currentPath, appUrl = '', webUrl = '' }: MobileNavbarProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userType, setUserType] = useState<'client' | 'tradesman'>('client');
 
   const isPathActive = (path: string) => {
     if (path === '/') return currentPath === '/';
@@ -17,8 +19,28 @@ export function MobileNavbar({ currentPath, appUrl = '', webUrl = '' }: MobileNa
 
   const closeDrawer = () => setDrawerOpen(false);
 
-  // Close drawer when path changes
+  // Check for session on mount
   useState(() => {
+    if (typeof window === 'undefined') return;
+    
+    const isAstroSite = !window.location.hostname.includes('app.');
+    
+    if (isAstroSite && appUrl) {
+      fetch(`${appUrl}/api/session-check`, {
+        credentials: 'include',
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.isLoggedIn) {
+            setIsLoggedIn(true);
+            setUserType(data.userType || 'client');
+          }
+        })
+        .catch(() => {
+          // Silently fail
+        });
+    }
+    
     setDrawerOpen(false);
   });
 
@@ -26,7 +48,14 @@ export function MobileNavbar({ currentPath, appUrl = '', webUrl = '' }: MobileNa
     { icon: <Home className="w-6 h-6" />, label: 'Acasă', href: webUrl || '/', id: 'home' },
     { icon: <Search className="w-6 h-6" />, label: 'Meșeriași', href: `${webUrl}/meseriasi`, id: 'search' },
     { icon: <PlusCircle className="w-6 h-6" />, label: 'Cere ofertă', href: `${appUrl}/cere-oferta`, id: 'new-job' },
-    { icon: <LogIn className="w-6 h-6" />, label: 'Cont', href: `${appUrl}/login`, id: 'login' },
+    { 
+      icon: <LogIn className="w-6 h-6" />, 
+      label: isLoggedIn ? 'Dashboard' : 'Cont', 
+      href: isLoggedIn 
+        ? (userType === 'tradesman' ? `${appUrl}/dashboard/overview` : `${appUrl}/client-dashboard/overview`)
+        : `${appUrl}/login`, 
+      id: 'login' 
+    },
     { 
       icon: drawerOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />, 
       label: drawerOpen ? 'Închide' : 'Meniu', 
@@ -115,20 +144,41 @@ export function MobileNavbar({ currentPath, appUrl = '', webUrl = '' }: MobileNa
         <div className="px-6 pb-6 overflow-y-auto" style={{ maxHeight: 'calc(85vh - 60px)' }}>
           {/* Auth Buttons */}
           <div className="grid grid-cols-2 gap-3 mb-4">
-            <a 
-              href={`${appUrl}/login`}
-              onClick={closeDrawer} 
-              className="text-center font-bold bg-white text-slate-900 hover:bg-slate-50 rounded-xl p-3.5 transition-all border border-slate-200 shadow-sm"
-            >
-              Autentificare
-            </a>
-            <a 
-              href={`${appUrl}/cere-oferta`}
-              onClick={closeDrawer} 
-              className="text-center font-bold bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 rounded-xl p-3.5 transition-all shadow-md"
-            >
-              Cere Ofertă
-            </a>
+            {isLoggedIn ? (
+              <>
+                <a 
+                  href={userType === 'tradesman' ? `${appUrl}/dashboard/overview` : `${appUrl}/client-dashboard/overview`}
+                  onClick={closeDrawer} 
+                  className="text-center font-bold bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 rounded-xl p-3.5 transition-all shadow-md"
+                >
+                  Dashboard
+                </a>
+                <a 
+                  href={`${appUrl}/cere-oferta`}
+                  onClick={closeDrawer} 
+                  className="text-center font-bold bg-gradient-to-r from-amber-500 to-amber-600 text-white hover:from-amber-600 hover:to-amber-700 rounded-xl p-3.5 transition-all shadow-md"
+                >
+                  Cere Ofertă
+                </a>
+              </>
+            ) : (
+              <>
+                <a 
+                  href={`${appUrl}/login`}
+                  onClick={closeDrawer} 
+                  className="text-center font-bold bg-white text-slate-900 hover:bg-slate-50 rounded-xl p-3.5 transition-all border border-slate-200 shadow-sm"
+                >
+                  Autentificare
+                </a>
+                <a 
+                  href={`${appUrl}/cere-oferta`}
+                  onClick={closeDrawer} 
+                  className="text-center font-bold bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 rounded-xl p-3.5 transition-all shadow-md"
+                >
+                  Cere Ofertă
+                </a>
+              </>
+            )}
           </div>
           
           <div className="h-px bg-gradient-to-r from-transparent via-slate-300 to-transparent my-3" />
