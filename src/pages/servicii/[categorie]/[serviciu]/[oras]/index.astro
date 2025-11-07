@@ -297,7 +297,7 @@ function createLocalBusinessSchema(params: { serviceName: string; cityName: stri
     serviceType: params.serviceName,
     url: params.canonical,
     areaServed: {
-      '@type': 'Place',
+      '@type': 'AdministrativeArea',
       name: params.cityName
     },
     address: {
@@ -388,7 +388,7 @@ const heroStats = [
   metrics.avgBudget ? { label: 'Buget mediu acceptat', value: `${Math.round(metrics.avgBudget)} RON` } : null
 ].filter(Boolean) as Array<{ label: string; value: string }>;
 
-const localBusinessSchema = sanityContent?.schema || createLocalBusinessSchema({
+const localBusinessSchema = createLocalBusinessSchema({
   serviceName: service.name,
   cityName: city.name,
   canonical,

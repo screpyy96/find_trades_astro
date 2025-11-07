@@ -86,13 +86,13 @@ function generateSchema(params: FallbackContentParams): any {
     name: `${serviceName} ${cityName} | MeseriasLocal`,
     serviceType: serviceName,
     areaServed: {
-      '@type': 'Place',
-      name: cityName,
-      address: {
-        '@type': 'PostalAddress',
-        addressLocality: cityName,
-        addressCountry: 'RO'
-      }
+      '@type': 'AdministrativeArea',
+      name: cityName
+    },
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: cityName,
+      addressCountry: 'RO'
     },
     url: `https://www.meseriaslocal.ro/servicii/${categorySlug}/${serviceSlug}/${citySlug}/`,
     priceRange: '€€',
