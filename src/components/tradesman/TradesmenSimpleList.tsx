@@ -13,9 +13,16 @@ interface Worker {
 interface TradesmenSimpleListProps {
   initialSearch?: string;
   initialSort?: string;
+  supabaseUrl?: string;
+  supabaseAnonKey?: string;
 }
 
-export function TradesmenSimpleList({ initialSearch = '', initialSort = 'rating' }: TradesmenSimpleListProps) {
+export function TradesmenSimpleList({
+  initialSearch = '',
+  initialSort = 'rating',
+  supabaseUrl: supabaseUrlProp,
+  supabaseAnonKey: supabaseAnonKeyProp
+}: TradesmenSimpleListProps) {
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState(initialSearch);
@@ -26,8 +33,8 @@ export function TradesmenSimpleList({ initialSearch = '', initialSort = 'rating'
       setLoading(true);
       try {
         const { createClient } = await import('@supabase/supabase-js');
-        const url = import.meta.env.PUBLIC_SUPABASE_URL;
-        const key = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+        const url = supabaseUrlProp || import.meta.env.PUBLIC_SUPABASE_URL;
+        const key = supabaseAnonKeyProp || import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
         
         if (!url || !key) {
           console.warn('Supabase not configured');
@@ -73,7 +80,7 @@ export function TradesmenSimpleList({ initialSearch = '', initialSort = 'rating'
     };
 
     fetchWorkers();
-  }, [search, initialSort]);
+  }, [search, initialSort, supabaseUrlProp, supabaseAnonKeyProp]);
 
   if (loading) {
     return (

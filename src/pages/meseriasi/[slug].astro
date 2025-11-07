@@ -5,8 +5,10 @@ import Base from '../../layouts/Base.astro';
 import { supabase } from '../../lib/supabase';
 import { getWorkerProfileUrl } from '../../utils/seo-urls';
 import { TradesmanProfile } from '../../components/tradesman/TradesmanProfile';
+import { getPublicSupabaseConfig } from '../../lib/publicEnv';
 
 const { slug } = Astro.params;
+const { url: supabaseUrl, anonKey: supabaseAnonKey } = getPublicSupabaseConfig();
 
 if (!slug) {
   return Astro.redirect('/meseriasi', 404);
@@ -207,11 +209,16 @@ const avatarUrl = worker.avatar_url || `https://ui-avatars.com/api/?name=${encod
 ---
 
 <Base title={title} description={description}>
-  <TradesmanProfile client:idle worker={{
-    ...worker,
-    trades,
-    portfolio_items: portfolioItems,
-    reviews,
-    certifications
-  }} />
+  <TradesmanProfile 
+    client:idle 
+    worker={{
+      ...worker,
+      trades,
+      portfolio_items: portfolioItems,
+      reviews,
+      certifications
+    }}
+    supabaseUrl={supabaseUrl}
+    supabaseAnonKey={supabaseAnonKey}
+  />
 </Base>

@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
+import { getPublicSupabaseConfig } from './publicEnv';
 
-const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+const { url: supabaseUrl, anonKey: supabaseAnonKey } = getPublicSupabaseConfig();
 
 // Debug logging
 if (import.meta.env.DEV) {

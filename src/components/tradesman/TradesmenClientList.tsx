@@ -20,9 +20,16 @@ interface Worker {
 interface TradesmenClientListProps {
   initialSearch?: string;
   initialSort?: string;
+  supabaseUrl?: string;
+  supabaseAnonKey?: string;
 }
 
-export function TradesmenClientList({ initialSearch = '', initialSort = 'rating' }: TradesmenClientListProps) {
+export function TradesmenClientList({
+  initialSearch = '',
+  initialSort = 'rating',
+  supabaseUrl: supabaseUrlProp,
+  supabaseAnonKey: supabaseAnonKeyProp
+}: TradesmenClientListProps) {
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -49,25 +56,48 @@ export function TradesmenClientList({ initialSearch = '', initialSort = 'rating'
   // Initialize Supabase client once
   useEffect(() => {
     const initSupabase = async () => {
-      const { createClient } = await import('@supabase/supabase-js');
-      const url = import.meta.env.PUBLIC_SUPABASE_URL;
-      const key = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
-      
-      if (url && key) {
-        setSupabase(createClient(url, key));
+      try {
+        const { createClient } = await import('@supabase/supabase-js');
+        const url = supabaseUrlProp || import.meta.env.PUBLIC_SUPABASE_URL;
+        const key = supabaseAnonKeyProp || import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+        
+        console.log('🔧 Initializing Supabase...', { 
+          hasUrl: !!url,
+          hasKey: !!key,
+          source: supabaseUrlProp ? 'props' : 'env',
+          urlPrefix: url?.substring(0, 20)
+        });
+        
+        if (url && key) {
+          setSupabase(createClient(url, key));
+          console.log('✅ Supabase initialized successfully');
+        } else {
+          console.error('❌ Missing Supabase credentials', { url: !!url, key: !!key });
+          setError('Configurare incompletă. Variabilele de mediu Supabase lipsesc.');
+          setIsLoading(false);
+        }
+      } catch (err) {
+        console.error('❌ Failed to initialize Supabase:', err);
+        setError('Nu s-a putut inițializa conexiunea la baza de date.');
+        setIsLoading(false);
       }
     };
     
     initSupabase();
-  }, []);
+  }, [supabaseUrlProp, supabaseAnonKeyProp]);
 
   // Fetch workers
   const fetchWorkers = async (pageNum: number, reset: boolean = false) => {
     if (!hasMore && !reset) return;
-    if (!supabase) return; // Wait for Supabase to initialize
+    if (!supabase) {
+      console.log('⏳ Waiting for Supabase to initialize...');
+      return; // Wait for Supabase to initialize
+    }
     
     setIsLoading(true);
     setError(null);
+    
+    console.log('📡 Fetching workers...', { page: pageNum, reset });
     
     try {
 
@@ -192,10 +222,13 @@ export function TradesmenClientList({ initialSearch = '', initialSort = 'rating'
         setHasMore(false);
       }
     } catch (err) {
-      console.error('Error fetching workers:', err);
-      setError('Nu am putut încărca meseriașii. Te rugăm să încerci din nou.');
+      console.error('❌ Error fetching workers:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Eroare necunoscută';
+      console.error('Error details:', errorMessage);
+      setError(`Nu am putut încărca meseriașii: ${errorMessage}`);
     } finally {
       setIsLoading(false);
+      console.log('✅ Fetch complete');
     }
   };
 

@@ -19,9 +19,14 @@ interface WorkerProfile {
   [key: string]: any;
 }
 
-const getSupabaseBrowserClient = () => {
-  const url = import.meta.env.PUBLIC_SUPABASE_URL;
-  const key = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+interface SupabaseBrowserConfig {
+  url?: string;
+  anonKey?: string;
+}
+
+const getSupabaseBrowserClient = (config?: SupabaseBrowserConfig) => {
+  const url = config?.url || import.meta.env.PUBLIC_SUPABASE_URL;
+  const key = config?.anonKey || import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
   
   if (!url || !key) {
     console.warn('Supabase credentials not configured');
@@ -299,9 +304,11 @@ function PortfolioModal({ item, onClose }: { item: any; onClose: () => void }) {
 
 interface TradesmanProfileProps {
   worker: WorkerProfile;
+  supabaseUrl?: string;
+  supabaseAnonKey?: string;
 }
 
-export function TradesmanProfile({ worker }: TradesmanProfileProps) {
+export function TradesmanProfile({ worker, supabaseUrl, supabaseAnonKey }: TradesmanProfileProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'portfolio' | 'reviews' | 'certifications'>('overview');
   const [isContactRevealed, setIsContactRevealed] = useState(false);
   const [selectedPortfolioItem, setSelectedPortfolioItem] = useState<any | null>(null);
@@ -428,7 +435,7 @@ export function TradesmanProfile({ worker }: TradesmanProfileProps) {
   // Determine if current user owns this profile (for better empty states)
   useEffect(() => {
     try {
-      const supabase = getSupabaseBrowserClient();
+      const supabase = getSupabaseBrowserClient({ url: supabaseUrl, anonKey: supabaseAnonKey });
       if (!supabase) {
         setIsOwner(false);
         return;
@@ -440,7 +447,7 @@ export function TradesmanProfile({ worker }: TradesmanProfileProps) {
     } catch {
       setIsOwner(false);
     }
-  }, [worker.id]);
+  }, [worker.id, supabaseUrl, supabaseAnonKey]);
 
   const handleContactReveal = async () => {
     try {

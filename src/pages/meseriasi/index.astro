@@ -2,6 +2,7 @@
 import Base from '../../layouts/Base.astro';
 import { HeroBackground } from '../../components/hero/HeroBackground';
 import { TradesmenClientList } from '../../components/tradesman/TradesmenClientList';
+import { getPublicSupabaseConfig } from '../../lib/publicEnv';
 
 // Use empty string for relative URLs (stay on same domain)
 const APP_URL = '';
@@ -9,6 +10,8 @@ const APP_URL = '';
 // Get search params from URL
 const searchTerm = Astro.url.searchParams.get('q') || '';
 const sortMethod = Astro.url.searchParams.get('sort') || 'rating';
+
+const { url: supabaseUrl, anonKey: supabaseAnonKey } = getPublicSupabaseConfig();
 ---
 
 <Base 
@@ -106,6 +109,8 @@ const sortMethod = Astro.url.searchParams.get('sort') || 'rating';
         client:load 
         initialSearch={searchTerm}
         initialSort={sortMethod}
+        supabaseUrl={supabaseUrl}
+        supabaseAnonKey={supabaseAnonKey}
       />
     </section>
 
