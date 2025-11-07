@@ -22,8 +22,14 @@ const cities = Object.keys(pagesByCity).sort();
   description="Ghiduri complete despre servicii și meseriași în diferite orașe din România. Informații detaliate, prețuri și sfaturi locale."
 >
   <!-- Hero Section -->
-  <section class="relative bg-gradient-to-br from-slate-900 via-blue-900 to-purple-900 py-16 lg:py-20">
-    <div class="absolute inset-0 bg-[url('/grid.svg')] opacity-10"></div>
+  <section 
+    data-navbar-transparent="true"
+    class="relative overflow-hidden py-16 lg:py-20 lg:pt-32"
+    style="background: linear-gradient(180deg, #1b1f1d 0%, #21251f 50%, #2a302b 100%)"
+  >
+    <div class="absolute inset-0 opacity-15">
+      <div class="absolute inset-0" style="background-image: linear-gradient(rgba(45, 51, 45, 0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(45, 51, 45, 0.4) 1px, transparent 1px); background-size: 60px 60px;"></div>
+    </div>
     <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="max-w-4xl mx-auto text-center">
         <!-- Breadcrumb -->
@@ -43,7 +49,7 @@ const cities = Object.keys(pagesByCity).sort();
           Ghiduri Complete Servicii
         </h1>
 
-        <p class="text-lg text-slate-300 mb-8 leading-relaxed">
+        <p class="text-lg text-slate-100 leading-relaxed">
           Informații detaliate despre servicii și meseriași în {cities.length} orașe din România
         </p>
       </div>

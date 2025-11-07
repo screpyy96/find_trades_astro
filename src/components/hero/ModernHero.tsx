@@ -50,7 +50,7 @@ export function ModernHero({ trades = [], stats }: ModernHeroProps) {
   }, []);
 
   return (
-    <HeroBackground className="min-h-[85vh] md:min-h-[90vh] flex items-center justify-center">
+    <HeroBackground className="min-h-screen flex items-center justify-center lg:pt-24">
       <div className="relative z-10 w-full max-w-screen-2xl mx-auto px-4 sm:px-8 lg:px-12 py-16 sm:py-20 lg:py-24">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center">
           {/* Left Column: Content */}

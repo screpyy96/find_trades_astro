@@ -1,28 +1,24 @@
 ---
 import Base from '../layouts/Base.astro';
-import { services } from '../data';
+import { trades } from '../data';
 import { ModernHero } from '../components/hero/ModernHero';
+import HomeTestimonials from '../components/home/HomeTestimonials.astro';
+import HomePopularTrades from '../components/home/HomePopularTrades.astro';
+import HomeHowItWorks from '../components/home/HomeHowItWorks.astro';
+import HomeTrustSafety from '../components/home/HomeTrustSafety.astro';
+import HomeFAQ from '../components/home/HomeFAQ.astro';
+import HomeFinalCTA from '../components/home/HomeFinalCTA.astro';
 
 // Use empty string for relative URLs (stay on same domain)
 const APP_URL = '';
-
-const popularServices = services.slice(0, 12);
 
 // Stats - în producție ar veni din API
 const stats = {
   totalWorkers: 150,
   totalCities: 45,
-  totalTrades: 12,
+  totalTrades: trades.length,
   totalReviews: 320
 };
-
-// Trades pentru hero - convertim din services
-const trades = services.map((s, index) => ({
-  id: index + 1,
-  name: s.name,
-  slug: s.slug,
-  category: s.category
-}));
 ---
 
 <Base 
@@ -32,226 +28,21 @@ const trades = services.map((s, index) => ({
   <!-- Hero Section cu React Component -->
   <ModernHero client:load trades={trades} stats={stats} />
 
+  <!-- Testimonials Section -->
+  <HomeTestimonials />
 
-  <!-- Benefits Section -->
-  <section class="py-16 bg-white">
-    <div class="max-w-7xl mx-auto px-4">
-      <h2 class="text-3xl font-bold text-center text-gray-900 mb-12">De Ce Meserias Local?</h2>
-      <div class="grid md:grid-cols-3 gap-8">
-        <div class="text-center p-6">
-          <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-          <h3 class="text-xl font-semibold mb-2">Meseriași Verificați</h3>
-          <p class="text-gray-600">Toți meseriașii sunt verificați și au recenzii reale de la clienți.</p>
-        </div>
-        
-        <div class="text-center p-6">
-          <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-          <h3 class="text-xl font-semibold mb-2">Oferte Gratuite</h3>
-          <p class="text-gray-600">Primești oferte personalizate fără costuri ascunse.</p>
-        </div>
-        
-        <div class="text-center p-6">
-          <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-          </div>
-          <h3 class="text-xl font-semibold mb-2">Răspuns Rapid</h3>
-          <p class="text-gray-600">Primești răspunsuri de la meseriași în câteva ore.</p>
-        </div>
-      </div>
-    </div>
-  </section>
+  <!-- Popular Trades Section -->
+  <HomePopularTrades trades={trades} />
 
-  <!-- Popular Services -->
-  <section class="py-16 bg-gray-50">
-    <div class="max-w-7xl mx-auto px-4">
-      <h2 class="text-3xl font-bold text-center text-gray-900 mb-12">Servicii Populare</h2>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {popularServices.map(service => (
-          <a 
-            href={`/servicii/${service.categorySlug}/${service.slug}/`}
-            class="card text-center"
-          >
-            <h3 class="font-semibold text-gray-900">{service.name}</h3>
-            <p class="text-sm text-gray-600 mt-1">{service.category}</p>
-          </a>
-        ))}
-      </div>
-      <div class="text-center mt-8">
-        <a href="/meseriasi/" class="text-blue-600 hover:text-blue-700 font-semibold">
-          Vezi toți meseriașii →
-        </a>
-      </div>
-    </div>
-  </section>
+  <!-- How It Works Section -->
+  <HomeHowItWorks />
 
-  <!-- Active Jobs Section -->
-  <section class="py-16 bg-white">
-    <div class="max-w-7xl mx-auto px-4">
-      <div class="text-center mb-12">
-        <h2 class="text-3xl font-bold text-gray-900 mb-4">Lucrări Active</h2>
-        <p class="text-xl text-gray-600">Meseriași, găsiți proiecte noi în zona voastră</p>
-      </div>
-      
-      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        <!-- Sample job cards - în producție ar veni din API -->
-        <div class="bg-gradient-to-br from-slate-50 to-blue-50 border border-slate-200 rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
-          <div class="flex items-start justify-between mb-3">
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-500 text-white">
-              DESCHIS
-            </span>
-            <span class="text-xs text-slate-500">Azi</span>
-          </div>
-          <h3 class="text-lg font-bold text-slate-900 mb-2">Renovare Apartament</h3>
-          <p class="text-sm text-slate-600 mb-4 line-clamp-2">
-            Caut meseriaș pentru renovare completă apartament 2 camere în București.
-          </p>
-          <div class="flex items-center justify-between">
-            <span class="text-sm text-slate-500">București</span>
-            <span class="text-sm font-bold text-amber-600">3000 RON</span>
-          </div>
-        </div>
+  <!-- Trust & Safety Section -->
+  <HomeTrustSafety />
 
-        <div class="bg-gradient-to-br from-slate-50 to-blue-50 border border-slate-200 rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
-          <div class="flex items-start justify-between mb-3">
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-500 text-white">
-              DESCHIS
-            </span>
-            <span class="text-xs text-slate-500">Ieri</span>
-          </div>
-          <h3 class="text-lg font-bold text-slate-900 mb-2">Instalare Sistem Încălzire</h3>
-          <p class="text-sm text-slate-600 mb-4 line-clamp-2">
-            Necesit instalator pentru montaj sistem de încălzire în pardoseală.
-          </p>
-          <div class="flex items-center justify-between">
-            <span class="text-sm text-slate-500">Cluj-Napoca</span>
-            <span class="text-sm font-bold text-amber-600">5000 RON</span>
-          </div>
-        </div>
+  <!-- FAQ Section -->
+  <HomeFAQ />
 
-        <div class="bg-gradient-to-br from-slate-50 to-blue-50 border border-slate-200 rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
-          <div class="flex items-start justify-between mb-3">
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-500 text-white">
-              DESCHIS
-            </span>
-            <span class="text-xs text-slate-500">Acum 2 zile</span>
-          </div>
-          <h3 class="text-lg font-bold text-slate-900 mb-2">Zugrăvit Casă</h3>
-          <p class="text-sm text-slate-600 mb-4 line-clamp-2">
-            Caut zugrav pentru zugrăvit interior și exterior casă 120mp.
-          </p>
-          <div class="flex items-center justify-between">
-            <span class="text-sm text-slate-500">Timișoara</span>
-            <span class="text-sm font-bold text-amber-600">2500 RON</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="text-center">
-        <a 
-          href="/solicitari/"
-          class="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
-        >
-          Vezi Toate Lucrările
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-          </svg>
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <!-- How It Works -->
-  <section class="py-16 bg-gradient-to-br from-blue-600 to-purple-700 text-white">
-    <div class="max-w-7xl mx-auto px-4">
-      <h2 class="text-3xl font-bold text-center mb-12">Cum Funcționează?</h2>
-      <div class="grid md:grid-cols-3 gap-8">
-        <div class="text-center">
-          <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
-            1
-          </div>
-          <h3 class="text-xl font-semibold mb-2">Descrie Proiectul</h3>
-          <p class="text-blue-100">Completezi un formular simplu cu detaliile proiectului tău.</p>
-        </div>
-        
-        <div class="text-center">
-          <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
-            2
-          </div>
-          <h3 class="text-xl font-semibold mb-2">Primești Oferte</h3>
-          <p class="text-blue-100">Meseriașii interesați îți trimit oferte personalizate.</p>
-        </div>
-        
-        <div class="text-center">
-          <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
-            3
-          </div>
-          <h3 class="text-xl font-semibold mb-2">Alegi și Colaborezi</h3>
-          <p class="text-blue-100">Compari ofertele și alegi meseriașul potrivit pentru tine.</p>
-        </div>
-      </div>
-      
-      <div class="text-center mt-12">
-        <a 
-          href={`${APP_URL}/cere-oferta`}
-          class="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition inline-block"
-        >
-          Începe Acum
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <!-- FAQ -->
-  <section class="py-16 bg-white">
-    <div class="max-w-4xl mx-auto px-4">
-      <h2 class="text-3xl font-bold text-center text-gray-900 mb-12">Întrebări Frecvente</h2>
-      <div class="space-y-4">
-        <details class="bg-gray-50 rounded-lg p-4">
-          <summary class="font-semibold cursor-pointer">Este gratuit să cer oferte?</summary>
-          <p class="mt-2 text-gray-700">Da, cererea de oferte este complet gratuită. Plătești doar pentru serviciile meseriașului pe care îl alegi.</p>
-        </details>
-        
-        <details class="bg-gray-50 rounded-lg p-4">
-          <summary class="font-semibold cursor-pointer">Cum sunt verificați meseriașii?</summary>
-          <p class="mt-2 text-gray-700">Verificăm identitatea, experiența și recenziile fiecărui meseriaș înainte de a-l accepta pe platformă.</p>
-        </details>
-        
-        <details class="bg-gray-50 rounded-lg p-4">
-          <summary class="font-semibold cursor-pointer">Cât timp durează să primesc oferte?</summary>
-          <p class="mt-2 text-gray-700">De obicei, primești primele oferte în câteva ore. Majoritatea clienților primesc 3-5 oferte în prima zi.</p>
-        </details>
-        
-        <details class="bg-gray-50 rounded-lg p-4">
-          <summary class="font-semibold cursor-pointer">Pot anula o cerere de ofertă?</summary>
-          <p class="mt-2 text-gray-700">Da, poți anula oricând din dashboard-ul tău. Nu există nicio obligație de a accepta vreo ofertă.</p>
-        </details>
-      </div>
-    </div>
-  </section>
-
-  <!-- Final CTA -->
-  <section class="py-16 bg-gradient-to-br from-blue-50 to-purple-50">
-    <div class="max-w-4xl mx-auto px-4 text-center">
-      <h2 class="text-3xl font-bold text-gray-900 mb-4">Gata să Începi Proiectul Tău?</h2>
-      <p class="text-xl text-gray-600 mb-8">
-        Peste {stats.totalWorkers} meseriași profesioniști așteaptă să te ajute.
-      </p>
-      <a 
-        href={`${APP_URL}/cere-oferta`}
-        class="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition inline-block text-lg"
-      >
-        Cere Ofertă Gratuită Acum
-      </a>
-    </div>
-  </section>
+  <!-- Final CTA Section -->
+  <HomeFinalCTA />
 </Base>

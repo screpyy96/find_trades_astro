@@ -3,6 +3,7 @@ import '../styles/global.css';
 import Navbar from '../components/layout/Navbar.astro';
 import MobileHeader from '../components/layout/MobileHeader.astro';
 import { MobileNavbar } from '../components/layout/MobileNavbar';
+import Footer from '../components/layout/Footer.astro';
 
 interface Props {
   title: string;
@@ -77,34 +78,11 @@ const WEB_URL = '';
     <!-- Mobile Bottom Navigation -->
     <MobileNavbar client:load currentPath={Astro.url.pathname} appUrl={APP_URL} webUrl={WEB_URL} />
     
-    <!-- Add padding: top for navbar (desktop + mobile), bottom for mobile bottom nav -->
-    <main class="pt-16 lg:pt-20 pb-24 lg:pb-0">
+    <!-- Add padding: top for mobile navbar only, bottom for mobile bottom nav -->
+    <main class="pt-16 lg:pt-0 pb-24 lg:pb-0">
       <slot />
     </main>
     
-    <footer class="bg-gray-50 border-t border-gray-200 mt-16">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div>
-            <h3 class="font-bold text-lg mb-4">Meserias Local</h3>
-            <p class="text-gray-600 text-sm">Platforma ta de încredere pentru găsirea meseriașilor profesioniști.</p>
-          </div>
-          <div>
-            <h4 class="font-semibold mb-4">Link-uri Utile</h4>
-            <ul class="space-y-2 text-sm">
-              <li><a href="/meseriasi/" class="text-gray-600 hover:text-blue-600">Meseriași</a></li>
-              <li><a href="https://app.meseriaslocal.ro/cere-oferta" class="text-gray-600 hover:text-blue-600">Cere Ofertă</a></li>
-            </ul>
-          </div>
-          <div>
-            <h4 class="font-semibold mb-4">Contact</h4>
-            <p class="text-gray-600 text-sm">contact@meseriaslocal.ro</p>
-          </div>
-        </div>
-        <div class="mt-8 pt-8 border-t border-gray-200 text-center text-sm text-gray-600">
-          <p>&copy; {new Date().getFullYear()} Meserias Local. Toate drepturile rezervate.</p>
-        </div>
-      </div>
-    </footer>
+    <Footer />
   </body>
 </html>

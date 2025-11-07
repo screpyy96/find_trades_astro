@@ -20,29 +20,20 @@ interface ServicesSearchProps {
 
 export function ServicesSearch({ trades, groupedTrades, categories }: ServicesSearchProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
-  // Filter trades based on search and category
+  // Filter trades based on search query only
   const filteredResults = useMemo(() => {
-    let filtered = trades;
-
-    // Filter by category
-    if (selectedCategory !== 'all') {
-      filtered = filtered.filter(trade => trade.category === selectedCategory);
+    if (!searchQuery.trim()) {
+      return trades; // Show all when no search
     }
 
-    // Filter by search query
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(trade =>
-        trade.name.toLowerCase().includes(query) ||
-        trade.description?.toLowerCase().includes(query) ||
-        trade.category.toLowerCase().includes(query)
-      );
-    }
-
-    return filtered;
-  }, [trades, searchQuery, selectedCategory]);
+    const query = searchQuery.toLowerCase();
+    return trades.filter(trade =>
+      trade.name.toLowerCase().includes(query) ||
+      trade.description?.toLowerCase().includes(query) ||
+      trade.category.toLowerCase().includes(query)
+    );
+  }, [trades, searchQuery]);
 
   // Group filtered results by category
   const filteredGrouped = useMemo(() => {
@@ -61,90 +52,57 @@ export function ServicesSearch({ trades, groupedTrades, categories }: ServicesSe
 
   const createCategorySlug = (category: string) => {
     return category.toLowerCase()
+      .replace(/\s+&\s+/g, '-')  // Replace " & " with "-"
+      .replace(/&/g, '')  // Remove any remaining &
       .replace(/\s+/g, '-')
-      .replace(/&/g, 'si')
       .replace(/ș/g, 's')
       .replace(/ț/g, 't')
       .replace(/ă/g, 'a')
       .replace(/â/g, 'a')
       .replace(/î/g, 'i')
-      .replace(/[^a-z0-9-]/g, '');
+      .replace(/[^a-z0-9-]/g, '')
+      .replace(/-+/g, '-');  // Replace multiple dashes with single dash
   };
 
   return (
     <div className="space-y-8">
-      {/* Search and Filter Bar */}
-      <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
-        <div className="flex flex-col lg:flex-row gap-4">
-          {/* Search Input */}
-          <div className="flex-1">
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <svg className="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </div>
-              <input
-                type="text"
-                placeholder="Caută servicii (ex: zugrav, electrician, instalator...)"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600"
-                >
-                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              )}
-            </div>
+      {/* Search Bar - Simplified */}
+      <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-4 sm:p-6">
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <svg className="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
           </div>
-
-          {/* Category Filter */}
-          <div className="lg:w-64">
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white"
-            >
-              <option value="all">Toate categoriile ({trades.length})</option>
-              {categories.map(category => (
-                <option key={category} value={category}>
-                  {category} ({groupedTrades[category]?.length || 0})
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {/* Results Count */}
-        <div className="mt-4 flex items-center justify-between text-sm">
-          <span className="text-slate-600">
-            {filteredResults.length === trades.length ? (
-              <>Afișez toate <strong>{trades.length}</strong> serviciile</>
-            ) : (
-              <>Găsite <strong>{filteredResults.length}</strong> servicii din <strong>{trades.length}</strong></>
-            )}
-          </span>
-          {(searchQuery || selectedCategory !== 'all') && (
+          <input
+            type="text"
+            placeholder="Caută servicii (ex: zugrav, electrician, instalator...)"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-12 pr-12 py-4 text-base border-2 border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all font-medium"
+          />
+          {searchQuery && (
             <button
-              onClick={() => {
-                setSearchQuery('');
-                setSelectedCategory('all');
-              }}
-              className="text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
+              onClick={() => setSearchQuery('')}
+              className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
-              Resetează filtrele
             </button>
           )}
         </div>
+        
+        {/* Simple results count */}
+        {searchQuery && (
+          <div className="mt-3 text-sm text-slate-600">
+            {filteredResults.length === 0 ? (
+              <span>Niciun rezultat găsit</span>
+            ) : (
+              <span>Găsite <strong className="text-slate-900">{filteredResults.length}</strong> servicii</span>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Results */}
@@ -161,10 +119,7 @@ export function ServicesSearch({ trades, groupedTrades, categories }: ServicesSe
               Încearcă să modifici criteriile de căutare sau să alegi o altă categorie.
             </p>
             <button
-              onClick={() => {
-                setSearchQuery('');
-                setSelectedCategory('all');
-              }}
+              onClick={() => setSearchQuery('')}
               className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
             >
               Vezi toate serviciile

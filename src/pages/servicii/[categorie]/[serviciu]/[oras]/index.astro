@@ -30,14 +30,16 @@ export async function getStaticPaths() {
   for (const trade of trades) {
     // Generate category slug from category name
     const categorySlug = (trade.category || 'altele').toLowerCase()
+      .replace(/\s+&\s+/g, '-')  // Replace " & " with "-"
+      .replace(/&/g, '')  // Remove any remaining &
       .replace(/\s+/g, '-')
-      .replace(/&/g, 'si')
       .replace(/ș/g, 's')
       .replace(/ț/g, 't')
       .replace(/ă/g, 'a')
       .replace(/â/g, 'a')
       .replace(/î/g, 'i')
-      .replace(/[^a-z0-9-]/g, '');
+      .replace(/[^a-z0-9-]/g, '')
+      .replace(/-+/g, '-');  // Replace multiple dashes with single dash
     
     for (const city of cities) {
       paths.push({
@@ -240,19 +242,19 @@ const heroDescription = sanityContent?.heroDescription || `Găsește meseriași 
         '@type': 'ListItem',
         position: 1,
         name: 'Acasă',
-        item: 'https://meseriaslocal.ro'
+        item: 'https://www.meseriaslocal.ro'
       },
       {
         '@type': 'ListItem',
         position: 2,
         name: 'Servicii',
-        item: 'https://meseriaslocal.ro/servicii'
+        item: 'https://www.meseriaslocal.ro/servicii'
       },
       {
         '@type': 'ListItem',
         position: 3,
         name: service.name,
-        item: `https://meseriaslocal.ro/servicii/${categorie}/${serviciu}/`
+        item: `https://www.meseriaslocal.ro/servicii/${categorie}/${serviciu}/`
       },
       {
         '@type': 'ListItem',
@@ -465,14 +467,16 @@ const heroDescription = sanityContent?.heroDescription || `Găsește meseriași 
             const category = relatedServiceCategories[cleanSlug];
             const relatedCategorySlug = category 
               ? category.toLowerCase()
+                  .replace(/\s+&\s+/g, '-')  // Replace " & " with "-"
+                  .replace(/&/g, '')  // Remove any remaining &
                   .replace(/\s+/g, '-')
-                  .replace(/&/g, 'si')
                   .replace(/ș/g, 's')
                   .replace(/ț/g, 't')
                   .replace(/ă/g, 'a')
                   .replace(/â/g, 'a')
                   .replace(/î/g, 'i')
                   .replace(/[^a-z0-9-]/g, '')
+                  .replace(/-+/g, '-')  // Replace multiple dashes with single dash
               : categorie;
             
             return (

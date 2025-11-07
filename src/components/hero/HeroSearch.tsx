@@ -129,15 +129,30 @@ export function HeroSearch({ trades, isLoading, onSelectTrade, initialQuery = ''
           {isLoading ? (
             <div className="p-4 text-center text-slate-600 font-medium">Se încarcă...</div>
           ) : filteredTrades.length > 0 ? (
-            <ul
-              id="hero-search-suggestions"
-              className="max-h-[440px] overflow-y-auto custom-scrollbar"
-              role="listbox"
-            >
+            <>
+              {/* Mobile scroll hint */}
+              {filteredTrades.length > 5 && (
+                <div className="lg:hidden sticky top-0 z-10 bg-gradient-to-b from-amber-50 to-orange-50 px-4 py-2 text-center border-b-2 border-orange-200">
+                  <div className="flex items-center justify-center gap-2 text-xs font-semibold text-orange-700">
+                    <svg className="w-4 h-4 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                    <span>{filteredTrades.length} rezultate - Scroll pentru mai multe</span>
+                    <svg className="w-4 h-4 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
+              )}
+              <ul
+                id="hero-search-suggestions"
+                className="max-h-[500px] overflow-y-auto custom-scrollbar"
+                role="listbox"
+              >
               {filteredTrades.map((trade) => (
                 <li
                   key={trade.id ?? trade.name}
-                  className="px-4 py-3 cursor-pointer hover:bg-slate-100 transition-colors text-slate-800 font-medium border-b border-slate-100 last:border-b-0"
+                  className="px-5 py-4 cursor-pointer hover:bg-amber-50 transition-colors text-slate-900 font-semibold text-base border-b-2 border-orange-200 last:border-b-0"
                   onMouseDown={(event) => {
                     event.preventDefault();
                     handleTradeSelect(trade as Trade);
@@ -150,6 +165,7 @@ export function HeroSearch({ trades, isLoading, onSelectTrade, initialQuery = ''
                 </li>
               ))}
             </ul>
+            </>
           ) : (
             <div className="p-4 text-center text-slate-600 font-medium space-y-2">
               <div>Niciun rezultat pentru "{searchQuery}"</div>

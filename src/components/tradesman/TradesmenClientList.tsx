@@ -32,41 +32,74 @@ export function TradesmenClientList({ initialSearch = '', initialSort = 'rating'
   const [sortMethod, setSortMethod] = useState(initialSort);
   const [showFilters, setShowFilters] = useState(false);
   
+  // New filters
+  const [selectedCity, setSelectedCity] = useState('');
+  const [selectedTrade, setSelectedTrade] = useState('');
+  const [minRating, setMinRating] = useState<number | undefined>(undefined);
+  const [onlyVerified, setOnlyVerified] = useState(true);
+  const [onlyOnline, setOnlyOnline] = useState(false);
+  
+  // Create Supabase client once
+  const [supabase, setSupabase] = useState<any>(null);
+  
   const { ref, inView } = useInView({ threshold: 0.5 });
   
   const ITEMS_PER_PAGE = 20;
 
+  // Initialize Supabase client once
+  useEffect(() => {
+    const initSupabase = async () => {
+      const { createClient } = await import('@supabase/supabase-js');
+      const url = import.meta.env.PUBLIC_SUPABASE_URL;
+      const key = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+      
+      if (url && key) {
+        setSupabase(createClient(url, key));
+      }
+    };
+    
+    initSupabase();
+  }, []);
+
   // Fetch workers
   const fetchWorkers = async (pageNum: number, reset: boolean = false) => {
     if (!hasMore && !reset) return;
+    if (!supabase) return; // Wait for Supabase to initialize
     
     setIsLoading(true);
     setError(null);
     
     try {
-      const { createClient } = await import('@supabase/supabase-js');
-      const url = import.meta.env.PUBLIC_SUPABASE_URL;
-      const key = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
-      
-      if (!url || !key) {
-        console.warn('Supabase not configured');
-        setWorkers([]);
-        setIsLoading(false);
-        return;
-      }
-      
-      const supabase = createClient(url, key);
 
       let query = supabase
         .from('profiles')
         .select('id, name, avatar_url, address, bio, rating, is_verified, is_online, phone')
         .eq('role', 'worker')
-        .eq('is_verified', true)
         .not('name', 'is', null);
+
+      // Apply verified filter
+      if (onlyVerified) {
+        query = query.eq('is_verified', true);
+      }
+
+      // Apply online filter
+      if (onlyOnline) {
+        query = query.eq('is_online', true);
+      }
+
+      // Apply rating filter
+      if (minRating) {
+        query = query.gte('rating', minRating);
+      }
 
       // Apply search filter
       if (searchTerm) {
         query = query.or(`name.ilike.%${searchTerm}%,bio.ilike.%${searchTerm}%,address.ilike.%${searchTerm}%`);
+      }
+
+      // Apply city filter
+      if (selectedCity) {
+        query = query.ilike('address', `%${selectedCity}%`);
       }
 
       // Apply sorting
@@ -74,6 +107,8 @@ export function TradesmenClientList({ initialSearch = '', initialSort = 'rating'
         query = query.order('rating', { ascending: false });
       } else if (sortMethod === 'name') {
         query = query.order('name', { ascending: true });
+      } else if (sortMethod === 'newest') {
+        query = query.order('created_at', { ascending: false });
       }
 
       // Pagination
@@ -122,8 +157,8 @@ export function TradesmenClientList({ initialSearch = '', initialSort = 'rating'
         );
 
         // Map trades to workers
-        const workersWithTrades = data.map((worker: any) => {
-          const tradeIds = workerTradesMap.get(worker.id) || [];
+        let workersWithTrades = (data as any[]).map((worker: any) => {
+          const tradeIds = (workerTradesMap.get(worker.id) || []) as number[];
           const workerTrades = tradeIds
             .map((id: number) => tradeMap.get(id))
             .filter(Boolean);
@@ -133,6 +168,16 @@ export function TradesmenClientList({ initialSearch = '', initialSort = 'rating'
             trades: workerTrades
           };
         });
+
+        // Client-side filter by trade name if specified
+        if (selectedTrade) {
+          const tradeLower = selectedTrade.toLowerCase();
+          workersWithTrades = workersWithTrades.filter((worker: any) => {
+            return worker.trades?.some((trade: any) => 
+              trade.name?.toLowerCase().includes(tradeLower)
+            );
+          });
+        }
 
         if (reset) {
           setWorkers(workersWithTrades as Worker[]);
@@ -154,12 +199,14 @@ export function TradesmenClientList({ initialSearch = '', initialSort = 'rating'
     }
   };
 
-  // Initial load
+  // Initial load - reset when filters change
   useEffect(() => {
+    if (!supabase) return; // Wait for Supabase to initialize
+    
     setPage(0);
     setHasMore(true);
     fetchWorkers(0, true);
-  }, [searchTerm, sortMethod]);
+  }, [supabase, searchTerm, sortMethod, selectedCity, selectedTrade, minRating, onlyVerified, onlyOnline]);
 
   // Load more when in view
   useEffect(() => {
@@ -210,11 +257,96 @@ export function TradesmenClientList({ initialSearch = '', initialSort = 'rating'
       <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
         {/* Filters sidebar */}
         <aside className={`lg:w-72 xl:w-80 flex-shrink-0 ${showFilters ? 'block' : 'hidden lg:block'}`}>
-          <div className="sticky top-24 bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-            <h3 className="text-lg font-bold text-slate-900 mb-4">Filtrează rezultatele</h3>
+          <div className="sticky top-24 bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-6">
+            <h3 className="text-lg font-bold text-slate-900">Filtrează rezultatele</h3>
             
+            {/* City filter */}
+            <div>
+              <label htmlFor="city" className="block text-sm font-semibold text-slate-700 mb-2">
+                Oraș
+              </label>
+              <input
+                id="city"
+                type="text"
+                value={selectedCity}
+                onChange={(e) => setSelectedCity(e.target.value)}
+                placeholder="Ex: București, Cluj..."
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              />
+            </div>
+
+            {/* Trade filter */}
+            <div>
+              <label htmlFor="trade" className="block text-sm font-semibold text-slate-700 mb-2">
+                Meserie
+              </label>
+              <input
+                id="trade"
+                type="text"
+                value={selectedTrade}
+                onChange={(e) => setSelectedTrade(e.target.value)}
+                placeholder="Ex: electrician, zugrav..."
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              />
+            </div>
+
+            {/* Quick filters */}
+            <div className="space-y-3 pt-4 border-t border-slate-200">
+              <label className="flex items-center gap-3 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  checked={onlyVerified}
+                  onChange={(e) => setOnlyVerified(e.target.checked)}
+                  className="w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                />
+                <span className="text-sm font-medium text-slate-700 group-hover:text-slate-900">
+                  Doar verificați
+                </span>
+              </label>
+
+              <label className="flex items-center gap-3 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  checked={onlyOnline}
+                  onChange={(e) => setOnlyOnline(e.target.checked)}
+                  className="w-5 h-5 rounded border-slate-300 text-green-600 focus:ring-green-500"
+                />
+                <span className="text-sm font-medium text-slate-700 group-hover:text-slate-900">
+                  Doar online acum
+                </span>
+              </label>
+            </div>
+
+            {/* Rating filter */}
+            <div className="pt-4 border-t border-slate-200">
+              <label className="block text-sm font-semibold text-slate-700 mb-3">
+                Rating minim
+              </label>
+              <div className="space-y-2">
+                {[
+                  { value: undefined, label: 'Orice rating' },
+                  { value: 3, label: '3.0+' },
+                  { value: 4, label: '4.0+' },
+                  { value: 4.5, label: '4.5+' },
+                ].map((option) => (
+                  <label key={option.value || 'any'} className="flex items-center gap-3 cursor-pointer group">
+                    <input
+                      type="radio"
+                      name="rating"
+                      checked={minRating === option.value}
+                      onChange={() => setMinRating(option.value)}
+                      className="w-4 h-4 border-slate-300 text-amber-600 focus:ring-amber-500"
+                    />
+                    <span className="text-sm font-medium text-slate-700 group-hover:text-slate-900">
+                      {option.label}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
             {/* Sort */}
-            <div className="mb-6">
+            <div className="pt-4 border-t border-slate-200">
               <label htmlFor="sort" className="block text-sm font-semibold text-slate-700 mb-2">
                 Sortează după
               </label>
@@ -222,12 +354,30 @@ export function TradesmenClientList({ initialSearch = '', initialSort = 'rating'
                 id="sort"
                 value={sortMethod}
                 onChange={(e) => setSortMethod(e.target.value)}
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
               >
                 <option value="rating">Rating (cel mai mare)</option>
+                <option value="newest">Cei mai noi</option>
                 <option value="name">Nume (A-Z)</option>
               </select>
             </div>
+
+            {/* Reset filters */}
+            {(selectedCity || selectedTrade || minRating || !onlyVerified || onlyOnline) && (
+              <button
+                onClick={() => {
+                  setSelectedCity('');
+                  setSelectedTrade('');
+                  setMinRating(undefined);
+                  setOnlyVerified(true);
+                  setOnlyOnline(false);
+                  setSortMethod('rating');
+                }}
+                className="w-full px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors border border-slate-200"
+              >
+                Resetează filtrele
+              </button>
+            )}
 
             {/* Results count */}
             {workers.length > 0 && (

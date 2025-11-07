@@ -28,14 +28,16 @@ export async function getStaticPaths() {
   for (const trade of trades) {
     // Generate category slug from category name
     const categorySlug = (trade.category || 'altele').toLowerCase()
+      .replace(/\s+&\s+/g, '-')  // Replace " & " with "-"
+      .replace(/&/g, '')  // Remove any remaining &
       .replace(/\s+/g, '-')
-      .replace(/&/g, 'si')
       .replace(/ș/g, 's')
       .replace(/ț/g, 't')
       .replace(/ă/g, 'a')
       .replace(/â/g, 'a')
       .replace(/î/g, 'i')
-      .replace(/[^a-z0-9-]/g, '');
+      .replace(/[^a-z0-9-]/g, '')
+      .replace(/-+/g, '-');  // Replace multiple dashes with single dash
     
     paths.push({
       params: {

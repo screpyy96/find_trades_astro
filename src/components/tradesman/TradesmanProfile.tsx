@@ -514,7 +514,7 @@ export function TradesmanProfile({ worker }: TradesmanProfileProps) {
         }}
       />
 
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 lg:pt-20">
         {/* Premium Hero Section with Enhanced Background */}
         <div className="relative overflow-hidden">
           {/* Enhanced Background Effects */}

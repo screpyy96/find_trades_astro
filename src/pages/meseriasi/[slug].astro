@@ -62,24 +62,45 @@ if (!supabase) {
 const slugParts = slug.split('-');
 const shortId = slugParts[slugParts.length - 1];
 
+console.log('Processing slug:', slug);
+console.log('Extracted shortId:', shortId);
+
 // Validate short ID (should be 8 hex characters)
 const shortIdRegex = /^[0-9a-f]{8}$/i;
 if (!shortIdRegex.test(shortId)) {
+  console.log('Invalid shortId format, redirecting');
   return Astro.redirect('/meseriasi', 404);
 }
 
-// Find worker by matching last 8 characters of UUID using LIKE query (much faster)
+// Find worker by matching last 8 characters of UUID
+// We need to cast UUID to text for LIKE to work
 const { data: workers, error: searchError } = await supabase
-  .from('profiles')
-  .select('id')
-  .eq('role', 'worker')
-  .like('id', `%${shortId}`);
+  .rpc('find_worker_by_short_id', { short_id: shortId });
+
+// If RPC doesn't exist, fall back to fetching all workers and filtering in JS
+let workerId: string | null = null;
 
 if (searchError || !workers || workers.length === 0) {
-  return Astro.redirect('/meseriasi', 404);
+  // Fallback: fetch all workers and filter client-side
+  const { data: allWorkers } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('role', 'worker');
+  
+  if (allWorkers) {
+    const matchingWorker = allWorkers.find((w: any) => w.id.endsWith(shortId));
+    if (matchingWorker) {
+      workerId = matchingWorker.id;
+    }
+  }
+  
+  if (!workerId) {
+    console.log('Worker not found, redirecting to /meseriasi');
+    return Astro.redirect('/meseriasi', 404);
+  }
+} else {
+  workerId = workers[0].id;
 }
-
-const workerId = workers[0].id;
 
 // Fetch all data in parallel for better performance
 const [

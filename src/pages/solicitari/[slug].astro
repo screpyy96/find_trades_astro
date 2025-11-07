@@ -27,13 +27,19 @@ export const getStaticPaths: GetStaticPaths = async () => {
   if (!jobs) return [];
 
   return jobs.map((job) => {
-    // Generate slug from title and short ID
-    const titleSlug = job.title
+    // Generate slug matching Remix logic: max 3 words from title + short ID (6 chars)
+    const titleWords = job.title.trim().split(/\s+/).slice(0, 3);
+    const titleSlug = titleWords.join(' ')
       .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '');
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+      .replace(/[^a-z0-9\s-]/g, '') // Remove special chars
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/-+/g, '-') // Replace multiple hyphens with single
+      .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+    
     const shortId = job.id.replace(/-/g, '').substring(0, 6);
-    const slug = `${titleSlug}-${shortId}`;
+    const slug = titleSlug ? `${titleSlug}-${shortId}` : `lucrare-${shortId}`;
 
     return {
       params: { slug },

@@ -66,7 +66,7 @@ Build generated **thousands of pages** including:
 ## What to Monitor After Deploy
 
 ### Google Search Console
-1. Submit sitemap: `https://meseriaslocal.ro/sitemap.xml`
+1. Submit sitemap: `https://www.meseriaslocal.ro/sitemap.xml`
 2. Monitor indexing status
 3. Check for crawl errors
 4. Watch for "Page with redirect" warnings

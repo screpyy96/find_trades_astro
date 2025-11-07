@@ -1,29 +1,32 @@
 ---
 import Base from '../../layouts/Base.astro';
-import { supabase } from '../../lib/supabase';
+import { trades } from '../../data/trades';
 import { getAllServicePages } from '../../lib/sanity';
 import { ServicesSearch } from '../../components/services/ServicesSearch';
 
-// Fetch trades from Supabase
-let trades = null;
-let error = null;
-
-if (supabase) {
-  const result = await supabase
-    .from('trades')
-    .select('id, name, slug, category, description')
-    .order('name');
-  
-  trades = result.data;
-  error = result.error;
-  
-  if (error) {
-    console.error('Error fetching trades:', error);
-  }
-}
-
 // Fetch service pages from Sanity
 const servicePages = await getAllServicePages();
+
+// Create a map of tradeSlug -> category for quick lookup
+const tradeSlugToCategory = new Map<string, string>();
+trades.forEach(trade => {
+  tradeSlugToCategory.set(trade.slug, trade.category);
+});
+
+// Helper function to generate category slug
+const generateCategorySlug = (category: string) => {
+  return category.toLowerCase()
+    .replace(/\s+&\s+/g, '-')  // Replace " & " with "-"
+    .replace(/&/g, '')  // Remove any remaining &
+    .replace(/\s+/g, '-')
+    .replace(/ș/g, 's')
+    .replace(/ț/g, 't')
+    .replace(/ă/g, 'a')
+    .replace(/â/g, 'a')
+    .replace(/î/g, 'i')
+    .replace(/[^a-z0-9-]/g, '')
+    .replace(/-+/g, '-');  // Replace multiple dashes with single dash
+};
 
 // Group trades by category
 const groupedTrades: Record<string, NonNullable<typeof trades>> = {};
@@ -55,7 +58,7 @@ const stats = {
 
   <!-- Hero Section -->
   <section 
-    class="relative overflow-hidden py-16 lg:py-20"
+    class="relative overflow-hidden py-16 lg:py-20 lg:pt-32 lg:min-h-[60vh] flex items-center"
     style="background: linear-gradient(180deg, #1b1f1d 0%, #21251f 50%, #2a302b 100%)"
   >
     <!-- Grid pattern -->
@@ -207,28 +210,64 @@ const stats = {
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {servicePages.slice(0, 6).map((page) => (
-            <a
-              href={`/servicii/${page.slug.current}/`}
-              class="group bg-gradient-to-br from-slate-50 to-blue-50 border border-slate-200 rounded-xl p-6 hover:shadow-lg transition-all duration-300"
-            >
-              <h3 class="text-lg font-bold text-slate-900 group-hover:text-blue-700 mb-2">
-                {page.heroTitle || page.title}
-              </h3>
-              {page.heroDescription && (
-                <p class="text-sm text-slate-600 mb-4 line-clamp-3">
-                  {page.heroDescription}
-                </p>
-              )}
-              <div class="flex items-center gap-2 text-xs text-slate-500">
-                <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded">
-                  {page.citySlug}
-                </span>
-                <span>•</span>
-                <span>{new Date(page.publishedAt || '').toLocaleDateString('ro-RO')}</span>
-              </div>
-            </a>
-          ))}
+          {servicePages.slice(0, 6).map((page) => {
+            // Build proper URL using tradeSlug, citySlug, and categorySlug
+            let pageUrl = '';
+            
+            if (page.tradeSlug && page.citySlug) {
+              // Get category from our static trades data
+              let categorySlug = page.categorySlug;
+              
+              // If no categorySlug in Sanity, generate it from category or lookup from trades
+              if (!categorySlug) {
+                const category = tradeSlugToCategory.get(page.tradeSlug);
+                if (category) {
+                  categorySlug = generateCategorySlug(category);
+                } else if (page.categoryName) {
+                  categorySlug = generateCategorySlug(page.categoryName);
+                }
+              }
+              
+              if (categorySlug) {
+                // Use the structured URL: /servicii/[category]/[trade]/[city]/
+                pageUrl = `/servicii/${categorySlug}/${page.tradeSlug}/${page.citySlug}/`;
+              } else {
+                // Fallback if we still don't have category
+                pageUrl = `/servicii/${page.tradeSlug}/${page.citySlug}/`;
+              }
+            } else {
+              // Last resort: use slug as-is (shouldn't happen for service pages)
+              let cleanSlug = page.slug.current;
+              if (cleanSlug.startsWith('servicii/')) {
+                cleanSlug = cleanSlug.replace(/^servicii\//, '');
+              }
+              cleanSlug = cleanSlug.replace(/^\//, '');
+              pageUrl = `/servicii/${cleanSlug}/`;
+            }
+            
+            return (
+              <a
+                href={pageUrl}
+                class="group bg-gradient-to-br from-slate-50 to-blue-50 border border-slate-200 rounded-xl p-6 hover:shadow-lg transition-all duration-300"
+              >
+                <h3 class="text-lg font-bold text-slate-900 group-hover:text-blue-700 mb-2">
+                  {page.heroTitle || page.title}
+                </h3>
+                {page.heroDescription && (
+                  <p class="text-sm text-slate-600 mb-4 line-clamp-3">
+                    {page.heroDescription}
+                  </p>
+                )}
+                <div class="flex items-center gap-2 text-xs text-slate-500">
+                  <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded">
+                    {page.citySlug}
+                  </span>
+                  <span>•</span>
+                  <span>{new Date(page.publishedAt || '').toLocaleDateString('ro-RO')}</span>
+                </div>
+              </a>
+            );
+          })}
         </div>
 
         {servicePages.length > 6 && (

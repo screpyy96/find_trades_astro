@@ -1,0 +1,46 @@
+---
+const testimonials = [
+  {
+    quote: 'Am găsit un instalator serios în 3 ore și am rezolvat problema în aceeași zi. Super rapid și clar.',
+    name: 'Elena V.',
+    city: 'Timișoara',
+  },
+  {
+    quote: 'Oferte comparabile, discuții la obiect, fără pierdere de timp. Exact ce aveam nevoie.',
+    name: 'Radu M.',
+    city: 'Cluj-Napoca',
+  },
+  {
+    quote: 'Electrician verificat, preț corect, lucrare făcută impecabil. Revin cu încredere.',
+    name: 'Andreea P.',
+    city: 'București',
+  },
+];
+---
+
+<section class="w-full bg-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-16 lg:py-20">
+    <div class="text-center mb-10 sm:mb-12">
+      <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">
+        Ce spun clienții noștri
+      </h2>
+      <p class="mt-3 text-base sm:text-lg text-slate-600 max-w-3xl mx-auto">
+        Experiențe reale, rezultate rapide.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+      {testimonials.map((t) => (
+        <figure class="relative rounded-2xl bg-white ring-1 ring-black/5 shadow-[0_8px_24px_rgba(0,0,0,0.06)] p-6">
+          <div class="absolute top-0 left-0 right-0 h-1 rounded-t-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-rose-500" />
+          <blockquote class="mt-2 text-slate-700 leading-relaxed">
+            "{t.quote}"
+          </blockquote>
+          <figcaption class="mt-4 text-sm font-semibold text-slate-900">
+            {t.name} <span class="text-slate-500">· {t.city}</span>
+          </figcaption>
+        </figure>
+      ))}
+    </div>
+  </div>
+</section>

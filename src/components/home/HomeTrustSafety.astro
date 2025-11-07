@@ -1,0 +1,49 @@
+---
+const items = [
+  {
+    icon: '🛡️',
+    title: 'Verificare identitate',
+    description: 'Toți meseriașii trec prin verificări de identitate și validarea datelor de profil.',
+  },
+  {
+    icon: '⭐',
+    title: 'Recenzii reale',
+    description: 'Sistem de rating transparent, bazat pe experiențele clienților reali.',
+  },
+  {
+    icon: '💬',
+    title: 'Suport dedicat',
+    description: 'Suntem aici să te ajutăm cu sfaturi și clarificări pe tot parcursul.',
+  },
+  {
+    icon: '🔒',
+    title: 'Siguranța datelor',
+    description: 'Respectăm confidențialitatea și securitatea datelor tale personale.',
+  },
+];
+---
+
+<section class="w-full bg-slate-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-16 lg:py-20">
+    <div class="mb-10 sm:mb-12 text-center">
+      <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">
+        Siguranța ta este prioritatea noastră
+      </h2>
+      <p class="mt-3 text-base sm:text-lg text-slate-600 max-w-3xl mx-auto">
+        Construim încredere la fiecare pas: transparență, verificare și suport real.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+      {items.map((item) => (
+        <div class="rounded-2xl bg-white ring-1 ring-black/5 shadow-[0_8px_24px_rgba(0,0,0,0.06)] p-6">
+          <div class="inline-flex items-center justify-center h-12 w-12 rounded-full bg-gradient-to-br from-amber-500 to-rose-500 text-white shadow-lg ring-4 ring-amber-500/20 text-2xl">
+            {item.icon}
+          </div>
+          <h3 class="mt-4 text-lg font-bold text-slate-900">{item.title}</h3>
+          <p class="mt-1.5 text-sm text-slate-600">{item.description}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

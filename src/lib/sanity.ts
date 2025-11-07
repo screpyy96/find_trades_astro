@@ -181,7 +181,8 @@ export async function getServiceCityPage(tradeSlug: string, citySlug: string): P
           return true;
         }
         return false;
-      }) || results[0]; // Fallback to first result if no city match
+      });
+      // Don't fallback to first result - return null if no exact match
     }
   }
   

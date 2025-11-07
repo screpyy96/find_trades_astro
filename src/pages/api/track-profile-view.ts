@@ -21,10 +21,11 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
-    // Insert profile view
+    // Insert profile view with generated UUID
     const { error } = await supabase
       .from('profile_views')
       .insert({
+        id: crypto.randomUUID(),
         profile_id: profileId,
         viewed_at: new Date().toISOString()
       });

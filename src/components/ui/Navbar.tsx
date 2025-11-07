@@ -62,13 +62,13 @@ const NavLink = memo(({
           ? 'border-white/60 text-white hover:bg-white/10 hover:border-white/80' 
           : 'border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400'
       } transform hover:scale-105`
-    : `inline-flex items-center px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all duration-300 ${
+    : `inline-flex items-center px-5 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all duration-300 ${
         isActive 
           ? (onDark 
               ? 'text-white font-bold bg-white/10' 
               : 'text-amber-600 font-bold bg-amber-50') 
           : (onDark 
-              ? 'text-white hover:text-white hover:bg-white/10' 
+              ? 'text-white/90 hover:text-white hover:bg-white/10' 
               : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50')
       }`;
 
@@ -177,16 +177,16 @@ export function Navbar({
       isTransparent ? 'bg-transparent border-transparent' : 'bg-white/95 backdrop-blur-md border-b border-slate-200'
     } ${isScrolled && !isTransparent ? 'shadow-lg shadow-slate-200/50' : ''}`}>
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
-          <div className="flex items-center gap-8">
-            <a href={webUrl || '/'} className="flex-shrink-0 flex items-center gap-3 group">
+        <div className="flex items-center justify-between h-24">
+          <div className="flex items-center">
+            <a href={webUrl || '/'} className="flex-shrink-0 flex items-center gap-3 group mr-12">
               <img src="/logo.svg" alt="" className="h-10 w-10 transition-transform duration-300 group-hover:scale-110" width="40" height="40" decoding="async" style={{ imageRendering: 'auto' }} />
               <span className={`text-xl font-bold tracking-tight transition-colors duration-300 ${isTransparent ? 'text-white' : 'text-slate-900'}`}>Meserias Local</span>
             </a>
           </div>
 
           {/* Centered Navigation */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
             <NavLink href={webUrl || '/'} onDark={isTransparent} isActive={isPathActive('/')}>Acasă</NavLink>
             <NavLink href={`${webUrl}/servicii`} onDark={isTransparent} isActive={isPathActive('/servicii')}>Servicii</NavLink>
             <NavLink href={`${webUrl}/meseriasi`} onDark={isTransparent} isActive={isPathActive('/meseriasi')}>Caută meșeriași</NavLink>

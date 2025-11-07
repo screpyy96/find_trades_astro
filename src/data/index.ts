@@ -1,4 +1,4 @@
-export * from './services';
+export * from './trades';
 export * from './cities';
 
 // Utility functions

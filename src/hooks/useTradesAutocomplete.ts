@@ -21,11 +21,11 @@ export function useTradesAutocomplete({
   // Filter trades based on search query with smart matching
   const filteredTrades = useMemo(() => {
     if (searchQuery.length === 0) {
-      return trades.slice(0, 10);
+      return trades; // Show all trades when no search query
     }
 
     const term = searchQuery.toLowerCase();
-    return trades.filter(trade => trade.name.toLowerCase().includes(term)).slice(0, 20);
+    return trades.filter(trade => trade.name.toLowerCase().includes(term)); // Show all matching results
   }, [searchQuery, trades]);
 
   // Close dropdown when clicking outside
