@@ -11,7 +11,7 @@ interface Trade {
   name: string;
   slug: string;
   category?: string;
-  description?: string;
+  description?: string | null;
 }
 
 export function generateHomepageSchema(stats: HomepageStats, trades: Trade[]) {
