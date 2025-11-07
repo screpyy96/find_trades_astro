@@ -8,6 +8,7 @@ import HomeHowItWorks from '../components/home/HomeHowItWorks.astro';
 import HomeTrustSafety from '../components/home/HomeTrustSafety.astro';
 import HomeFAQ from '../components/home/HomeFAQ.astro';
 import HomeFinalCTA from '../components/home/HomeFinalCTA.astro';
+import { generateHomepageSchema } from '../lib/schema';
 
 // Use empty string for relative URLs (stay on same domain)
 const APP_URL = '';
@@ -19,12 +20,16 @@ const stats = {
   totalTrades: trades.length,
   totalReviews: 320
 };
+
+// Generate structured data
+const schemaData = generateHomepageSchema(stats, trades);
 ---
 
 <Base 
   title="Meserias Local - Găsește Meseriași Profesioniști în România"
   description="Platforma ta de încredere pentru găsirea meseriașilor profesioniști. Compară oferte, vezi recenzii reale și contactează meseriași verificați."
 >
+  <script type="application/ld+json" set:html={JSON.stringify(schemaData)} slot="head" />
   <!-- Hero Section cu React Component -->
   <ModernHero client:load trades={trades} stats={stats} />
 

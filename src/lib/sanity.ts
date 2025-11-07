@@ -320,6 +320,18 @@ export async function getAllBlogCategories(): Promise<BlogCategory[]> {
   return sanityClient.fetch(query, { now: new Date().toISOString() });
 }
 
+export async function getBlogCategoryBySlug(slug: string): Promise<BlogCategory | null> {
+  const query = `*[_type == "blogCategory" && slug.current == $slug][0] {
+    _id,
+    name,
+    slug,
+    description,
+    "postCount": count(*[_type == "blogPost" && references(^._id) && publishedAt <= $now])
+  }`;
+
+  return sanityClient.fetch(query, { slug, now: new Date().toISOString() });
+}
+
 export async function getBlogPostsByCategory(categorySlug: string): Promise<BlogPost[]> {
   const query = `*[_type == "blogPost" && category->slug.current == $categorySlug && publishedAt <= $now] | order(publishedAt desc) {
     _id,

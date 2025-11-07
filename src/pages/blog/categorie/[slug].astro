@@ -1,24 +1,21 @@
 ---
 import Base from '../../../layouts/Base.astro';
-import { getBlogPostsByCategory, getAllBlogCategories, getImageUrl } from '../../../lib/sanity';
-import type { GetStaticPaths } from 'astro';
+import { getBlogPostsByCategory, getBlogCategoryBySlug, getImageUrl } from '../../../lib/sanity';
 
-export const prerender = true;
+export const prerender = false;
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  const categories = await getAllBlogCategories();
-  
-  return categories.map((category) => ({
-    params: { slug: category.slug.current },
-    props: { category },
-  }));
-};
+const { slug } = Astro.params;
 
-interface Props {
-  category: Awaited<ReturnType<typeof getAllBlogCategories>>[0];
+if (!slug) {
+  return Astro.redirect('/blog', 404);
 }
 
-const { category } = Astro.props as Props;
+const category = await getBlogCategoryBySlug(slug);
+
+if (!category) {
+  return Astro.redirect('/blog', 404);
+}
+
 const posts = await getBlogPostsByCategory(category.slug.current);
 ---
 

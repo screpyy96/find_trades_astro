@@ -5,61 +5,26 @@ import { getServiceCityPage } from '../../../../../lib/sanity';
 import { supabase } from '../../../../../lib/supabase';
 import { generateFallbackContent } from '../../../../../lib/seo-fallback';
 
-export const prerender = true;
-
-export async function getStaticPaths() {
-  // Check if Supabase is available
-  if (!supabase) {
-    console.warn('Supabase not configured, skipping service city pages generation');
-    return [];
-  }
-
-  // Fetch all trades from Supabase
-  const { data: trades, error } = await supabase
-    .from('trades')
-    .select('id, name, slug, category')
-    .order('name');
-
-  if (error || !trades) {
-    console.error('Error fetching trades:', error);
-    return [];
-  }
-
-  const paths = [];
-  
-  for (const trade of trades) {
-    // Generate category slug from category name
-    const categorySlug = (trade.category || 'altele').toLowerCase()
-      .replace(/\s+&\s+/g, '-')  // Replace " & " with "-"
-      .replace(/&/g, '')  // Remove any remaining &
-      .replace(/\s+/g, '-')
-      .replace(/ș/g, 's')
-      .replace(/ț/g, 't')
-      .replace(/ă/g, 'a')
-      .replace(/â/g, 'a')
-      .replace(/î/g, 'i')
-      .replace(/[^a-z0-9-]/g, '')
-      .replace(/-+/g, '-');  // Replace multiple dashes with single dash
-    
-    for (const city of cities) {
-      paths.push({
-        params: {
-          categorie: categorySlug,
-          serviciu: trade.slug,
-          oras: city.slug,
-        },
-        props: {
-          trade,
-        },
-      });
-    }
-  }
-  
-  return paths;
-}
+export const prerender = false;
 
 const { categorie, serviciu, oras } = Astro.params;
-const { trade } = Astro.props;
+
+if (!supabase) {
+  if (import.meta.env.DEV) {
+    console.warn('Supabase client unavailable when rendering service city page');
+  }
+  return Astro.redirect('/servicii', 500);
+}
+
+const { data: trade, error: tradeError } = await supabase
+  .from('trades')
+  .select('id, name, slug, category')
+  .eq('slug', serviciu)
+  .single();
+
+if (tradeError || !trade) {
+  return Astro.redirect('/404');
+}
 
 // Use empty string for relative URLs (stay on same domain)
 const APP_URL = '';

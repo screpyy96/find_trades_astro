@@ -3,6 +3,7 @@ import Base from '../../layouts/Base.astro';
 import { trades } from '../../data/trades';
 import { getAllServicePages } from '../../lib/sanity';
 import { ServicesSearch } from '../../components/services/ServicesSearch';
+import { generateServicesPageSchema } from '../../lib/schema';
 
 // Fetch service pages from Sanity
 const servicePages = await getAllServicePages();
@@ -49,12 +50,16 @@ const stats = {
   totalWorkers: 150,
   totalCities: 42
 };
+
+// Generate structured data
+const schemaData = generateServicesPageSchema(totalTrades, totalCategories, trades);
 ---
 
 <Base 
   title={`Servicii Profesionale - ${totalTrades} Meserii în ${totalCategories} Categorii | Meserias Local`}
   description={`Director complet cu ${totalTrades} servicii profesionale în ${totalCategories} categorii: construcții, instalații, finisaje, electrice, grădinărit. ${stats.totalWorkers}+ meseriași verificați din ${stats.totalCities} orașe.`}
 >
+  <script type="application/ld+json" set:html={JSON.stringify(schemaData)} slot="head" />
 
   <!-- Hero Section -->
   <section 
