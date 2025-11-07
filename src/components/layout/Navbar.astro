@@ -5,8 +5,9 @@ import { Navbar as NavbarReact } from '../ui/Navbar';
 const currentPath = Astro.url.pathname;
 
 // Environment URLs
-// Use empty strings so all links stay on the same domain (relative URLs)
-const APP_URL = '';
+// APP_URL points to Remix app for login/register/dashboard
+// WEB_URL is empty for relative URLs on Astro site
+const APP_URL = 'https://app.meseriaslocal.ro';
 const WEB_URL = '';
 
 // For now, we're not logged in on the static site

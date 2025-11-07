@@ -4,6 +4,7 @@ import { cities } from '../../../../data';
 import { supabase } from '../../../../lib/supabase';
 
 export const prerender = false;
+export const config = { revalidate: 1800 };
 
 const { categorie, serviciu } = Astro.params;
 

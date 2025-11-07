@@ -174,8 +174,8 @@ const projectSizeMap: Record<string, string> = {
 const jobTypeDisplay = job.jobType ? jobTypeMap[job.jobType] || 'Nespecificat' : 'Nespecificat';
 const projectSizeDisplay = job.projectSize ? projectSizeMap[job.projectSize] || 'Nespecificat' : 'Nespecificat';
 
-// Use empty string for relative URLs (stay on same domain)
-const APP_URL = '';
+// APP_URL points to Remix app for login/register/dashboard
+const APP_URL = 'https://app.meseriaslocal.ro';
 ---
 
 <Base 

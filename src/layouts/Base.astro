@@ -10,15 +10,16 @@ interface Props {
   description: string;
   canonical?: string;
   ogImage?: string;
+  disableDefaultBreadcrumb?: boolean;
 }
 
-const { title, description, canonical, ogImage } = Astro.props;
+const { title, description, canonical, ogImage, disableDefaultBreadcrumb = false } = Astro.props;
 const canonicalURL = canonical || new URL(Astro.url.pathname, Astro.site).href;
 const ogImageURL = ogImage || `${Astro.site}og-image.png`;
 
 // Use empty strings for relative URLs (stay on same domain)
-const APP_URL = '';
-const WEB_URL = '';
+const APP_URL = 'https://app.meseriaslocal.ro';
+const WEB_URL = 'https://www.meseriaslocal.ro';
 ---
 
 <!DOCTYPE html>
@@ -48,25 +49,26 @@ const WEB_URL = '';
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     
-    <!-- JSON-LD Breadcrumbs -->
-    <script type="application/ld+json" set:html={JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Acasă",
-          "item": Astro.site
-        },
-        {
-          "@type": "ListItem",
-          "position": 2,
-          "name": title,
-          "item": canonicalURL
-        }
-      ]
-    })} />
+    {!disableDefaultBreadcrumb && (
+      <script type="application/ld+json" set:html={JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Acasă",
+            "item": Astro.site
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": title,
+            "item": canonicalURL
+          }
+        ]
+      })} />
+    )}
     
     <!-- Additional head content from pages -->
     <slot name="head" />

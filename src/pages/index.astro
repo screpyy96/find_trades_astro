@@ -10,8 +10,7 @@ import HomeFAQ from '../components/home/HomeFAQ.astro';
 import HomeFinalCTA from '../components/home/HomeFinalCTA.astro';
 import { generateHomepageSchema } from '../lib/schema';
 
-// Use empty string for relative URLs (stay on same domain)
-const APP_URL = '';
+// APP_URL not needed on homepage (uses Base layout which sets it)
 
 // Stats - în producție ar veni din API
 const stats = {

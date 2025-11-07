@@ -1,11 +1,12 @@
 ---
 import Base from '../../../../../layouts/Base.astro';
-import { getCityBySlug, getNearbyCities } from '../../../../../data';
+import { cities, getCityBySlug, getNearbyCities } from '../../../../../data';
 import { getServiceCityPage } from '../../../../../lib/sanity';
 import { supabase } from '../../../../../lib/supabase';
 import { generateFallbackContent } from '../../../../../lib/seo-fallback';
 
 export const prerender = false;
+export const config = { revalidate: 3600 };
 
 const { categorie, serviciu, oras } = Astro.params;
 
@@ -31,8 +32,8 @@ if (tradeError || !trade) {
   return Astro.redirect('/404');
 }
 
-// Use empty string for relative URLs (stay on same domain)
-const APP_URL = '';
+// APP_URL points to Remix app for login/register/dashboard
+const APP_URL = 'https://app.meseriaslocal.ro';
 
 const city = getCityBySlug(oras);
 
@@ -63,6 +64,9 @@ if (import.meta.env.DEV) {
 }
 
 const nearbyCities = getNearbyCities(oras);
+const nearbyCityLinks = nearbyCities.length > 0
+  ? nearbyCities
+  : cities.filter(c => c.slug !== city.slug).slice(0, 4);
 
 // Get similar services from Supabase
 let allTrades = null;
@@ -115,7 +119,7 @@ const fallbackContent = generateFallbackContent({
   citySlug: oras,
   categorySlug: categorie,
   relatedServices: similarServices,
-  relatedCities: nearbyCities
+  relatedCities: nearbyCityLinks
 });
 
 // SEO Meta Data - use Sanity content if available, otherwise use fallback
@@ -188,20 +192,228 @@ function renderPortableText(blocks: any[]) {
   }).join('');
 }
 
+interface ServiceMetrics {
+  workerCount: number;
+  verifiedCount: number;
+  avgRating: number | null;
+  jobsLast30Days: number;
+  avgBudget: number | null;
+}
+
+const METRICS_DEFAULT: ServiceMetrics = {
+  workerCount: 0,
+  verifiedCount: 0,
+  avgRating: null,
+  jobsLast30Days: 0,
+  avgBudget: null
+};
+
+function chunkArray<T>(items: T[], size: number): T[][] {
+  if (size <= 0) return [items];
+  const chunks: T[][] = [];
+  for (let i = 0; i < items.length; i += size) {
+    chunks.push(items.slice(i, i + size));
+  }
+  return chunks;
+}
+
+async function fetchServiceMetrics(params: { tradeId: number; serviceName: string; cityName: string }): Promise<ServiceMetrics> {
+  if (!supabase) return METRICS_DEFAULT;
+  const metrics: ServiceMetrics = { ...METRICS_DEFAULT };
+  const cityNeedle = params.cityName.toLowerCase();
+
+  try {
+    const { data: workerTradeRows, error: workerTradesError } = await supabase
+      .from('worker_trades')
+      .select('profile_id')
+      .contains('trade_ids', [params.tradeId]);
+
+    if (!workerTradesError && workerTradeRows && workerTradeRows.length > 0) {
+      const workerIds = workerTradeRows.map(row => row.profile_id);
+      const chunks = chunkArray(workerIds, 60);
+      let matchedProfiles: Array<{ rating: number | null; is_verified: boolean | null; address: string | null }> = [];
+
+      for (const chunk of chunks) {
+        if (chunk.length === 0) continue;
+        const { data: profileChunk, error: profileError } = await supabase
+          .from('profiles')
+          .select('id, rating, is_verified, address')
+          .in('id', chunk)
+          .eq('role', 'worker');
+
+        if (profileError || !profileChunk) continue;
+
+        matchedProfiles = matchedProfiles.concat(
+          profileChunk.filter(profile => (profile.address || '').toLowerCase().includes(cityNeedle))
+        );
+      }
+
+      metrics.workerCount = matchedProfiles.length;
+      metrics.verifiedCount = matchedProfiles.filter(profile => profile.is_verified).length;
+      const ratedProfiles = matchedProfiles.filter(profile => typeof profile.rating === 'number');
+      if (ratedProfiles.length > 0) {
+        const totalRating = ratedProfiles.reduce((sum, profile) => sum + (profile.rating || 0), 0);
+        metrics.avgRating = totalRating / ratedProfiles.length;
+      }
+    }
+
+    const createdAfter = new Date();
+    createdAfter.setDate(createdAfter.getDate() - 30);
+
+    const { data: jobRows, error: jobsError } = await supabase
+      .from('jobs')
+      .select('id, budget, address, tradeType, created_at')
+      .gte('created_at', createdAfter.toISOString())
+      .limit(500);
+
+    if (!jobsError && jobRows) {
+      const tradeNeedle = params.serviceName.toLowerCase();
+      const filteredJobs = jobRows.filter(job => {
+        const tradeMatch = job.tradeType ? job.tradeType.toLowerCase().includes(tradeNeedle) : false;
+        const cityMatch = job.address ? job.address.toLowerCase().includes(cityNeedle) : false;
+        return tradeMatch && cityMatch;
+      });
+
+      metrics.jobsLast30Days = filteredJobs.length;
+      const budgets = filteredJobs
+        .map(job => job.budget)
+        .filter((value): value is number => typeof value === 'number' && value > 0);
+      if (budgets.length > 0) {
+        metrics.avgBudget = budgets.reduce((sum, value) => sum + value, 0) / budgets.length;
+      }
+    }
+  } catch (error) {
+    console.error('Failed to compute service metrics', error);
+  }
+
+  return metrics;
+}
+
+function createLocalBusinessSchema(params: { serviceName: string; cityName: string; canonical: string; metrics: ServiceMetrics }) {
+  const schema: Record<string, any> = {
+    '@context': 'https://schema.org',
+    '@type': 'LocalBusiness',
+    name: `${params.serviceName} ${params.cityName} | Meserias Local`,
+    serviceType: params.serviceName,
+    url: params.canonical,
+    areaServed: {
+      '@type': 'Place',
+      name: params.cityName
+    },
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: params.cityName,
+      addressCountry: 'RO'
+    }
+  };
+
+  if (params.metrics.workerCount) {
+    schema.numberOfEmployees = params.metrics.workerCount;
+  }
+
+  if (params.metrics.avgRating && params.metrics.workerCount >= 3) {
+    schema.aggregateRating = {
+      '@type': 'AggregateRating',
+      ratingValue: params.metrics.avgRating.toFixed(1),
+      reviewCount: Math.max(params.metrics.workerCount, params.metrics.verifiedCount || 1)
+    };
+  }
+
+  if (params.metrics.avgBudget) {
+    schema.offers = {
+      '@type': 'Offer',
+      priceCurrency: 'RON',
+      price: Math.round(params.metrics.avgBudget),
+      availability: 'https://schema.org/InStock'
+    };
+  }
+
+  return schema;
+}
+
+function buildFaqSchema(faqItems?: Array<{ question: string; answer: string }>) {
+  if (!faqItems || faqItems.length === 0) return null;
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqItems.map(item => ({
+      '@type': 'Question',
+      name: item.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: item.answer
+      }
+    }))
+  };
+}
+
+function buildOfferCatalogSchema(priceRanges?: Array<{ service: string; minPrice: number; maxPrice: number }>, serviceName?: string, cityName?: string) {
+  if (!priceRanges || priceRanges.length === 0 || !serviceName || !cityName) return null;
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'OfferCatalog',
+    name: `${serviceName} ${cityName} - Tarife`,
+    itemListElement: priceRanges.map(price => ({
+      '@type': 'Offer',
+      name: price.service,
+      priceCurrency: 'RON',
+      priceSpecification: {
+        '@type': 'PriceSpecification',
+        priceCurrency: 'RON',
+        minPrice: price.minPrice,
+        maxPrice: price.maxPrice
+      },
+      areaServed: cityName
+    }))
+  };
+}
+
 const content = sanityContent?.content ? renderPortableText(sanityContent.content) : defaultContent;
 
 // Hero content
 const heroTitle = sanityContent?.heroTitle || fallbackContent.h1;
 const heroSubtitle = sanityContent?.heroSubtitle || `Servicii Profesionale în ${city.name}`;
 const heroDescription = sanityContent?.heroDescription || `Găsește meseriași ${service.name.toLowerCase()} verificați în ${city.name}. Compară oferte gratuite, vezi recenzii și contactează direct. Fără comisioane, răspuns rapid!`;
+
+const metrics = await fetchServiceMetrics({
+  tradeId: trade.id,
+  serviceName: service.name,
+  cityName: city.name
+});
+
+const heroStats = [
+  metrics.workerCount ? { label: 'Meseriași verificați', value: `${metrics.workerCount}+` } : null,
+  metrics.avgRating ? { label: 'Rating mediu', value: `${metrics.avgRating.toFixed(1)}/5` } : null,
+  metrics.jobsLast30Days ? { label: 'Lucrări în ultimele 30 zile', value: `${metrics.jobsLast30Days}` } : null,
+  metrics.avgBudget ? { label: 'Buget mediu acceptat', value: `${Math.round(metrics.avgBudget)} RON` } : null
+].filter(Boolean) as Array<{ label: string; value: string }>;
+
+const localBusinessSchema = sanityContent?.schema || createLocalBusinessSchema({
+  serviceName: service.name,
+  cityName: city.name,
+  canonical,
+  metrics
+});
+
+const faqSchema = buildFaqSchema(sanityContent?.faqSection);
+const offerCatalogSchema = buildOfferCatalogSchema(sanityContent?.priceRanges, service.name, city.name);
+const priceSummaryText = metrics.avgBudget
+  ? `Bugetele acceptate în ultimele 30 de zile au avut o medie de ${Math.round(metrics.avgBudget)} RON.`
+  : 'Solicită o ofertă personalizată pentru a primi prețuri exacte.';
 ---
 
-<Base title={title} description={description} canonical={canonical}>
+<Base title={title} description={description} canonical={canonical} disableDefaultBreadcrumb={true}>
   <!-- SEO Keywords -->
   <meta slot="head" name="keywords" content={keywords} />
   
   <!-- Structured Data - LocalBusiness Schema -->
-  <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(sanityContent?.schema || fallbackContent.schema)} />
+  <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(localBusinessSchema)} />
+  {faqSchema && (
+    <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+  )}
+  {offerCatalogSchema && (
+    <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(offerCatalogSchema)} />
+  )}
   
   <!-- Structured Data - Breadcrumb Schema -->
   <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify({
@@ -324,6 +536,17 @@ const heroDescription = sanityContent?.heroDescription || `Găsește meseriași 
               </div>
             </div>
           </div>
+
+          {heroStats.length > 0 && (
+            <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {heroStats.map((stat) => (
+                <div class="bg-white/10 border border-white/20 rounded-2xl px-4 py-5 shadow-sm text-center">
+                  <p class="text-2xl font-bold text-white">{stat.value}</p>
+                  <p class="text-sm text-slate-200 mt-1">{stat.label}</p>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -331,16 +554,16 @@ const heroDescription = sanityContent?.heroDescription || `Găsește meseriași 
 
   <!-- Main Content -->
   <article class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    <!-- Main H1 (only if not using Sanity content) -->
+    <!-- Secondary headline when fallback content is used -->
     {!sanityContent && (
-      <h1 class="text-3xl md:text-4xl font-bold text-slate-900 mb-8">{fallbackContent.h1}</h1>
+      <h2 class="text-3xl md:text-4xl font-bold text-slate-900 mb-8">{fallbackContent.h1}</h2>
     )}
     
     <div class="prose prose-lg max-w-none mb-12" set:html={content} />
     
     <!-- Price Ranges -->
-    {sanityContent?.priceRanges && sanityContent.priceRanges.length > 0 && (
-      <section class="mb-12">
+    {sanityContent?.priceRanges && sanityContent.priceRanges.length > 0 ? (
+      <section id="preturi" class="mb-12">
         <h2 class="text-2xl font-bold mb-6">Prețuri orientative în {city.name}</h2>
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <table class="w-full">
@@ -366,11 +589,18 @@ const heroDescription = sanityContent?.heroDescription || `Găsește meseriași 
           * Prețurile sunt orientative și pot varia în funcție de complexitatea proiectului
         </p>
       </section>
+    ) : (
+      metrics.avgBudget && (
+        <section id="preturi" class="mb-12">
+          <h2 class="text-2xl font-bold mb-4">Tarif mediu estimat în {city.name}</h2>
+          <p class="text-gray-700">{priceSummaryText}</p>
+        </section>
+      )
     )}
     
     <!-- Local Tips -->
     {sanityContent?.localTips && sanityContent.localTips.length > 0 && (
-      <section class="mb-12">
+      <section id="sfaturi-locale" class="mb-12">
         <h2 class="text-2xl font-bold mb-6">Sfaturi locale pentru {city.name}</h2>
         <div class="space-y-4">
           {sanityContent.localTips.map((tip: { title: string; description: string }) => (
@@ -385,7 +615,7 @@ const heroDescription = sanityContent?.heroDescription || `Găsește meseriași 
     
     <!-- FAQ -->
     {sanityContent?.faqSection && sanityContent.faqSection.length > 0 && (
-      <section class="mb-12">
+      <section id="intrebari-frecvente" class="mb-12">
         <h2 class="text-2xl font-bold mb-6">Întrebări Frecvente</h2>
         <div class="space-y-4">
           {sanityContent.faqSection.map((item: { question: string; answer: string }) => (
@@ -399,11 +629,11 @@ const heroDescription = sanityContent?.heroDescription || `Găsește meseriași 
     )}
     
     <!-- Nearby Cities -->
-    {nearbyCities.length > 0 && (
-      <section class="mb-12">
+    {nearbyCityLinks.length > 0 && (
+      <section id="orase-apropiate" class="mb-12">
         <h2 class="text-2xl font-bold mb-6">Orașe Apropiate</h2>
         <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {nearbyCities.map(nearbyCity => (
+          {nearbyCityLinks.map(nearbyCity => (
             <a 
               href={`/servicii/${categorie}/${serviciu}/${nearbyCity.slug}/`}
               class="p-4 bg-white rounded-lg border border-gray-200 hover:border-blue-500 hover:shadow-md transition"
@@ -417,7 +647,7 @@ const heroDescription = sanityContent?.heroDescription || `Găsește meseriași 
     
     <!-- Related Services from Sanity (if available) or Similar Services -->
     {(sanityContent?.relatedServices && sanityContent.relatedServices.length > 0) ? (
-      <section class="mb-12">
+      <section id="servicii-conexe" class="mb-12">
         <h2 class="text-2xl font-bold mb-6">Servicii Conexe în {city.name}</h2>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
           {sanityContent.relatedServices.map((relatedService: { serviceName: string; serviceSlug: string }) => {
@@ -460,19 +690,31 @@ const heroDescription = sanityContent?.heroDescription || `Găsește meseriași 
           })}
         </div>
       </section>
-    ) : similarServices.length > 0 && (
-      <section class="mb-12">
+    ) : (
+      <section id="servicii-conexe" class="mb-12">
         <h2 class="text-2xl font-bold mb-6">Servicii Similare în {city.name}</h2>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {similarServices.map(similarService => (
-            <a 
-              href={`/servicii/${categorie}/${similarService.slug}/${oras}/`}
-              class="p-4 bg-white rounded-lg border border-gray-200 hover:border-blue-500 hover:shadow-md transition text-center"
+        {similarServices.length > 0 ? (
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {similarServices.map(similarService => (
+              <a 
+                href={`/servicii/${categorie}/${similarService.slug}/${oras}/`}
+                class="p-4 bg-white rounded-lg border border-gray-200 hover:border-blue-500 hover:shadow-md transition text-center"
+              >
+                <h3 class="font-semibold">{similarService.name}</h3>
+              </a>
+            ))}
+          </div>
+        ) : (
+          <div class="bg-white rounded-xl border border-slate-200 p-6 text-center">
+            <p class="text-gray-700 mb-4">Descoperă alte servicii specializate verificate la nivel național.</p>
+            <a
+              href={`/servicii/${categorie}/`}
+              class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition"
             >
-              <h3 class="font-semibold">{similarService.name}</h3>
+              Vezi toate serviciile
             </a>
-          ))}
-        </div>
+          </div>
+        )}
       </section>
     )}
     
