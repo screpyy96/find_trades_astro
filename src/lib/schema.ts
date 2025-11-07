@@ -194,7 +194,10 @@ function getCitiesSchema() {
   return cities.map(city => ({
     "@type": "City",
     "name": city,
-    "addressCountry": "RO"
+    "containedInPlace": {
+      "@type": "Country",
+      "name": "România"
+    }
   }));
 }
 

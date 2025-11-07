@@ -4,6 +4,7 @@ import Navbar from '../components/layout/Navbar.astro';
 import MobileHeader from '../components/layout/MobileHeader.astro';
 import { MobileNavbar } from '../components/layout/MobileNavbar';
 import Footer from '../components/layout/Footer.astro';
+import Analytics from '../components/analytics/Analytics.astro';
 
 interface Props {
   title: string;
@@ -74,6 +75,9 @@ const WEB_URL = 'https://www.meseriaslocal.ro';
     <slot name="head" />
   </head>
   <body class="min-h-screen bg-white text-gray-900">
+    <!-- Analytics (GTM & Clarity) -->
+    <Analytics />
+    
     <!-- Desktop Navbar -->
     <Navbar />
     
