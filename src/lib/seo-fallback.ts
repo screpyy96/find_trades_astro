@@ -24,20 +24,28 @@ interface FallbackContent {
 }
 
 /**
+ * Helper function to capitalize first letter of each word
+ */
+function capitalizeFirst(str: string): string {
+  return str.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+}
+
+/**
  * Generate H1 title
- * Format: {{serviceName}} în {{cityName}} – Servicii Profesionale și Prețuri 2025
+ * Format: {{ServiceName}} în {{CityName}} – Servicii Profesionale și Prețuri 2025
  */
 function generateH1(serviceName: string, cityName: string): string {
-  return `${serviceName} în ${cityName} – Servicii Profesionale și Prețuri 2025`;
+  return `${capitalizeFirst(serviceName)} în ${cityName} – Servicii Profesionale și Prețuri 2025`;
 }
 
 /**
  * Generate Meta Title (max 60 characters)
- * Format: {{serviceName}} {{cityName}} | MeseriasLocal România
+ * Format: {{ServiceName}} {{CityName}} | MeseriasLocal România
  */
 function generateMetaTitle(serviceName: string, cityName: string): string {
-  const title = `${serviceName} ${cityName} | MeseriasLocal România`;
-  return title.length > 60 ? `${serviceName} ${cityName} | MeseriasLocal` : title;
+  const capitalizedService = capitalizeFirst(serviceName);
+  const title = `${capitalizedService} ${cityName} | MeseriasLocal România`;
+  return title.length > 60 ? `${capitalizedService} ${cityName} | MeseriasLocal` : title;
 }
 
 /**
@@ -55,11 +63,12 @@ function generateFallbackHtml(params: FallbackContentParams): string {
   const { serviceName, cityName, categorySlug, serviceSlug, citySlug, relatedServices, relatedCities } = params;
   
   const serviceLower = serviceName.toLowerCase();
+  const serviceLink = `/servicii/${categorySlug}/${serviceSlug}/`;
   
-  // Intro paragraph
-  const intro = `<p>Găsirea unui ${serviceLower} de încredere în ${cityName} poate fi o provocare. Pe MeseriasLocal, îți oferim acces rapid la meseriași verificați care oferă servicii profesionale de ${serviceLower} în ${cityName}. Platforma noastră conectează clienții cu profesioniști locali, asigurând transparență, prețuri competitive și răspuns rapid.</p>`;
+  // Intro paragraph - first mention of service is a link
+  const intro = `<p>Găsirea unui <a href="${serviceLink}" class="text-blue-600 hover:text-blue-700 font-semibold underline">${serviceLower}</a> de încredere în ${cityName} poate fi o provocare. Pe MeseriasLocal, îți oferim acces rapid la meseriași verificați care oferă servicii profesionale de ${serviceLower} în ${cityName}. Platforma noastră conectează clienții cu profesioniști locali, asigurând transparență, prețuri competitive și răspuns rapid.</p>`;
   
-  // Benefits paragraph with internal link
+  // Benefits paragraph
   const benefits = `<p>De ce să alegi un ${serviceLower} prin MeseriasLocal? Simplu: verificăm fiecare meseriași, oferim acces la recenzii reale de la clienți din ${cityName}, și garantăm că primești oferte personalizate în maxim 2–4 ore. Nu plătești comisioane ascunse – contactezi direct meseriașul și negociezi prețul cel mai bun pentru proiectul tău.</p>`;
   
   // How it works paragraph

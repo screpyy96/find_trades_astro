@@ -6,6 +6,7 @@ export interface City {
 }
 
 export const cities: City[] = [
+  // Reședințe de județ - ordonate după populație
   { slug: 'bucuresti', name: 'București', county: 'București', population: 1883425 },
   { slug: 'cluj-napoca', name: 'Cluj-Napoca', county: 'Cluj', population: 324576 },
   { slug: 'timisoara', name: 'Timișoara', county: 'Timiș', population: 319279 },
@@ -26,6 +27,33 @@ export const cities: City[] = [
   { slug: 'buzau', name: 'Buzău', county: 'Buzău', population: 115494 },
   { slug: 'botosani', name: 'Botoșani', county: 'Botoșani', population: 106847 },
   { slug: 'satu-mare', name: 'Satu Mare', county: 'Satu Mare', population: 102441 },
+  { slug: 'ramnicu-valcea', name: 'Râmnicu Vâlcea', county: 'Vâlcea', population: 98776 },
+  { slug: 'suceava', name: 'Suceava', county: 'Suceava', population: 92121 },
+  { slug: 'piatra-neamt', name: 'Piatra Neamț', county: 'Neamț', population: 85055 },
+  { slug: 'drobeta-turnu-severin', name: 'Drobeta-Turnu Severin', county: 'Mehedinți', population: 92617 },
+  { slug: 'focsani', name: 'Focșani', county: 'Vrancea', population: 79315 },
+  { slug: 'targoviste', name: 'Târgoviște', county: 'Dâmbovița', population: 79610 },
+  { slug: 'targu-jiu', name: 'Târgu Jiu', county: 'Gorj', population: 82504 },
+  { slug: 'tulcea', name: 'Tulcea', county: 'Tulcea', population: 73707 },
+  { slug: 'resita', name: 'Reșița', county: 'Caraș-Severin', population: 73282 },
+  { slug: 'bistrita', name: 'Bistrița', county: 'Bistrița-Năsăud', population: 75076 },
+  { slug: 'slatina', name: 'Slatina', county: 'Olt', population: 70293 },
+  { slug: 'calarasi', name: 'Călărași', county: 'Călărași', population: 65181 },
+  { slug: 'giurgiu', name: 'Giurgiu', county: 'Giurgiu', population: 54655 },
+  { slug: 'deva', name: 'Deva', county: 'Hunedoara', population: 61123 },
+  { slug: 'zalau', name: 'Zalău', county: 'Sălaj', population: 56202 },
+  { slug: 'alba-iulia', name: 'Alba Iulia', county: 'Alba', population: 63536 },
+  { slug: 'vaslui', name: 'Vaslui', county: 'Vaslui', population: 55407 },
+  { slug: 'sfantu-gheorghe', name: 'Sfântu Gheorghe', county: 'Covasna', population: 56006 },
+  { slug: 'alexandria', name: 'Alexandria', county: 'Teleorman', population: 45434 },
+  { slug: 'slobozia', name: 'Slobozia', county: 'Ialomița', population: 45891 },
+  { slug: 'miercurea-ciuc', name: 'Miercurea Ciuc', county: 'Harghita', population: 38966 },
+  
+  // Alte orașe importante
+  { slug: 'turda', name: 'Turda', county: 'Cluj', population: 47744 },
+  { slug: 'medias', name: 'Mediaș', county: 'Sibiu', population: 47204 },
+  { slug: 'roman', name: 'Roman', county: 'Neamț', population: 50713 },
+  { slug: 'hunedoara', name: 'Hunedoara', county: 'Hunedoara', population: 60525 },
 ];
 
 export function getCityBySlug(slug: string): City | undefined {

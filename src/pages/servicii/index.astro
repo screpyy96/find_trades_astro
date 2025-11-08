@@ -53,6 +53,62 @@ const stats = {
 
 // Generate structured data
 const schemaData = generateServicesPageSchema(totalTrades, totalCategories, trades);
+
+// FAQ Schema for rich snippets
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'Ce servicii găsesc pe Meserias Local?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: `Platforma Meserias Local oferă acces la ${totalTrades} servicii profesionale organizate în ${totalCategories} categorii principale: Construcții și renovări (zidari, dulgheri, constructori), Instalații (instalatori sanitari, termice, gaze), Finisaje (zugravi, gletari, parchetari), Electrice (electricieni autorizați), Grădinărit și exterior, Curățenie și mentenanță, Transport și mutări. De la proiecte mici până la renovări complete.`
+      }
+    },
+    {
+      '@type': 'Question',
+      name: 'Cum funcționează procesul de solicitare a ofertelor?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Procesul este simplu în 4 pași: 1) Postezi cererea gratuită completând un formular (2-3 minute), 2) Primești oferte în 24h de la meseriași verificați din zona ta, 3) Compari profiluri, recenzii, portofolii și prețuri, 4) Colaborezi direct cu meseriașul ales. Serviciul este 100% gratuit pentru clienți, fără costuri ascunse.'
+      }
+    },
+    {
+      '@type': 'Question',
+      name: 'Cum sunt verificați meseriașii din platformă?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: `Toți cei ${stats.totalWorkers}+ meseriași trec printr-un proces riguros: verificare identitate cu acte oficiale, validare experiență profesională și calificări, analiză portofoliu și referințe, sistem de rating transparent cu recenzii reale, monitorizare continuă a performanței. Meseriașii cu badge Verificat au trecut toate verificările și au cel puțin 3 recenzii pozitive.`
+      }
+    },
+    {
+      '@type': 'Question',
+      name: 'În ce orașe din România sunt disponibile serviciile?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: `Meserias Local acoperă ${stats.totalCities} orașe din România, inclusiv: București, Cluj-Napoca, Timișoara, Iași, Constanța, Craiova, Brașov, Galați, Ploiești, Oradea, Brăila, Arad, Pitești, Sibiu, Bacău, Târgu Mureș și multe altele. Extindem constant acoperirea în noi orașe.`
+      }
+    },
+    {
+      '@type': 'Question',
+      name: 'Cât costă să folosesc platforma Meserias Local?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Platforma este 100% gratuită pentru clienți! Nu există costuri ascunse, taxe de înscriere sau comisioane. Postarea cererilor, primirea ofertelor, accesul la profiluri și contactarea meseriașilor sunt gratuite. Plătești doar meseriașul pentru lucrarea efectuată, conform ofertei acceptate.'
+      }
+    },
+    {
+      '@type': 'Question',
+      name: 'Ce garanții am că voi primi servicii de calitate?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Meserias Local oferă: meseriași verificați și evaluați, sistem de recenzii transparent cu feedback real, suport dedicat pe toată durata proiectului, proces de mediere în caz de dispute, garanție de satisfacție. Recomandăm contract scris, verificarea portofoliului și plata doar după finalizarea lucrării.'
+      }
+    }
+  ]
+};
 ---
 
 <Base 
@@ -60,6 +116,7 @@ const schemaData = generateServicesPageSchema(totalTrades, totalCategories, trad
   description={`Director complet cu ${totalTrades} servicii profesionale în ${totalCategories} categorii: construcții, instalații, finisaje, electrice, grădinărit. ${stats.totalWorkers}+ meseriași verificați din ${stats.totalCities} orașe.`}
 >
   <script type="application/ld+json" set:html={JSON.stringify(schemaData)} slot="head" />
+  <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} slot="head" />
 
   <!-- Hero Section -->
   <section 
@@ -313,151 +370,415 @@ const schemaData = generateServicesPageSchema(totalTrades, totalCategories, trad
     </div>
   </section>
 
-  <!-- SEO Content Section -->
+  <!-- SEO Content Section - Enhanced -->
   <section class="py-16 bg-slate-50">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid lg:grid-cols-2 gap-12">
-        <!-- Main Content -->
+      <!-- Main Introduction -->
+      <div class="mb-12">
+        <h2 class="text-3xl font-bold text-slate-900 mb-6">
+          Platforma completă de servicii profesionale din România
+        </h2>
+        <div class="prose prose-slate prose-lg max-w-none">
+          <p class="text-slate-700 leading-relaxed mb-4">
+            <strong>Meserias Local</strong> este cea mai mare platformă de conectare între clienți și meseriași din România,
+            cu peste <strong>{stats.totalWorkers} profesioniști verificați</strong> în <strong>{stats.totalCities} orașe</strong>.
+            Oferim acces la <strong>{totalTrades} servicii specializate</strong>, organizate în <strong>{totalCategories} categorii</strong>,
+            de la construcții și renovări până la instalații, finisaje, electrice și grădinărit.
+          </p>
+          <p class="text-slate-700 leading-relaxed mb-4">
+            Toți meseriașii din platforma noastră sunt <strong>verificați personal</strong>, cu identitate confirmată,
+            experiență validată și recenzii reale de la clienți anteriori. Garantăm calitatea serviciilor și oferim
+            suport complet pe toată durata proiectului, de la cererea inițială până la finalizarea lucrării.
+          </p>
+        </div>
+      </div>
+
+      <!-- Two Column Layout -->
+      <div class="grid lg:grid-cols-2 gap-12 mb-12">
+        <!-- Left Column: How it Works -->
         <div>
-          <h2 class="text-2xl font-bold text-slate-900 mb-6">
-            Platforma completă de servicii profesionale din România
-          </h2>
-          <div class="prose prose-slate max-w-none">
-            <p class="text-slate-700 leading-relaxed mb-4">
-              <strong>Meserias Local</strong> este cea mai mare platformă de conectare între clienți și meseriași din România,
-              cu peste <strong>{stats.totalWorkers} profesioniști verificați</strong> în <strong>{stats.totalCities} orașe</strong>.
-              Oferim acces la {totalTrades} servicii specializate, de la construcții și renovări până la instalații și finisaje.
-            </p>
-            <p class="text-slate-700 leading-relaxed mb-4">
-              Toți meseriașii din platforma noastră sunt <strong>verificați personal</strong>, cu identitate confirmată,
-              experiență validată și recenzii reale de la clienți anteriori. Garantăm calitatea serviciilor și oferim
-              suport complet pe toată durata proiectului.
-            </p>
-            <p class="text-slate-700 leading-relaxed">
-              Procesul este simplu: postezi cererea, primești oferte gratuite în 24h, alegi meseriașul potrivit și
-              plătești doar la finalizarea lucrării. Cu garanție de calitate și suport dedicat.
-            </p>
+          <h3 class="text-2xl font-bold text-slate-900 mb-6">
+            Cum funcționează Meserias Local?
+          </h3>
+          <div class="space-y-6">
+            <div class="flex gap-4">
+              <div class="flex-shrink-0 w-10 h-10 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-bold">
+                1
+              </div>
+              <div>
+                <h4 class="font-semibold text-slate-900 mb-2">Postezi cererea gratuită</h4>
+                <p class="text-slate-600 text-sm leading-relaxed">
+                  Descrie proiectul tău în câteva minute. Specifică serviciul necesar, locația și bugetul estimat.
+                  Procesul este 100% gratuit și fără obligații.
+                </p>
+              </div>
+            </div>
+            <div class="flex gap-4">
+              <div class="flex-shrink-0 w-10 h-10 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-bold">
+                2
+              </div>
+              <div>
+                <h4 class="font-semibold text-slate-900 mb-2">Primești oferte în 24 ore</h4>
+                <p class="text-slate-600 text-sm leading-relaxed">
+                  Meseriașii verificați din zona ta vor vedea cererea și îți vor trimite oferte personalizate.
+                  Vei primi între 3-5 oferte competitive în maximum 24 de ore.
+                </p>
+              </div>
+            </div>
+            <div class="flex gap-4">
+              <div class="flex-shrink-0 w-10 h-10 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-bold">
+                3
+              </div>
+              <div>
+                <h4 class="font-semibold text-slate-900 mb-2">Compari și alegi</h4>
+                <p class="text-slate-600 text-sm leading-relaxed">
+                  Vezi profilurile complete, recenziile clienților anteriori, portofoliile de lucrări și prețurile.
+                  Contactează direct meseriașii și pune întrebări înainte de a decide.
+                </p>
+              </div>
+            </div>
+            <div class="flex gap-4">
+              <div class="flex-shrink-0 w-10 h-10 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-bold">
+                4
+              </div>
+              <div>
+                <h4 class="font-semibold text-slate-900 mb-2">Plătești la finalizare</h4>
+                <p class="text-slate-600 text-sm leading-relaxed">
+                  Stabilești detaliile cu meseriașul ales și plătești doar după ce lucrarea este finalizată conform
+                  așteptărilor. Garanție de calitate și suport dedicat pe toată durata proiectului.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Sidebar -->
+        <!-- Right Column: Benefits & Cities -->
         <div class="space-y-8">
           <!-- Benefits -->
           <div>
-            <h3 class="text-lg font-semibold text-slate-900 mb-4">
-              De ce Meserias Local?
+            <h3 class="text-2xl font-bold text-slate-900 mb-6">
+              De ce să alegi Meserias Local?
             </h3>
-            <ul class="space-y-2 text-sm text-slate-600">
-              <li class="flex items-center gap-2">
-                <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <ul class="space-y-3">
+              <li class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                 </svg>
-                Meseriași verificați și evaluați
+                <div>
+                  <strong class="text-slate-900">Meseriași verificați și evaluați</strong>
+                  <p class="text-sm text-slate-600 mt-1">Toți profesioniștii sunt verificați cu identitate confirmată și experiență validată</p>
+                </div>
               </li>
-              <li class="flex items-center gap-2">
-                <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <li class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                 </svg>
-                Oferte gratuite în 24 ore
+                <div>
+                  <strong class="text-slate-900">Oferte gratuite în 24 ore</strong>
+                  <p class="text-sm text-slate-600 mt-1">Primești între 3-5 oferte competitive fără costuri și fără obligații</p>
+                </div>
               </li>
-              <li class="flex items-center gap-2">
-                <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <li class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                 </svg>
-                Garanție de calitate
+                <div>
+                  <strong class="text-slate-900">Recenzii reale și transparente</strong>
+                  <p class="text-sm text-slate-600 mt-1">Vezi feedback-ul autentic de la clienți anteriori pentru fiecare meseriaș</p>
+                </div>
               </li>
-              <li class="flex items-center gap-2">
-                <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <li class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                 </svg>
-                Plăți securizate
-              </li>
-              <li class="flex items-center gap-2">
-                <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                </svg>
-                Suport dedicat 24/7
+                <div>
+                  <strong class="text-slate-900">Garanție de calitate</strong>
+                  <p class="text-sm text-slate-600 mt-1">Suport dedicat și protecție pentru clienți pe toată durata proiectului</p>
+                </div>
               </li>
             </ul>
           </div>
 
           <!-- Popular Cities -->
           <div>
-            <h3 class="text-lg font-semibold text-slate-900 mb-4">
-              Orașe acoperite
+            <h3 class="text-xl font-bold text-slate-900 mb-4">
+              Acoperire națională în {stats.totalCities} orașe
             </h3>
-            <div class="grid grid-cols-2 gap-2 text-sm text-slate-600">
-              <span>București</span>
-              <span>Cluj-Napoca</span>
-              <span>Timișoara</span>
-              <span>Iași</span>
-              <span>Constanța</span>
-              <span>Craiova</span>
-              <span>Brașov</span>
-              <span>Galați</span>
-              <span>Ploiești</span>
-              <span>Oradea</span>
-              <span>Brăila</span>
-              <span>Arad</span>
+            <p class="text-slate-600 text-sm mb-4">
+              Găsești meseriași verificați în toate marile orașe din România:
+            </p>
+            <div class="grid grid-cols-2 gap-2 text-sm">
+              <a href="/servicii/?oras=bucuresti" class="text-blue-600 hover:text-blue-700 hover:underline">București</a>
+              <a href="/servicii/?oras=cluj-napoca" class="text-blue-600 hover:text-blue-700 hover:underline">Cluj-Napoca</a>
+              <a href="/servicii/?oras=timisoara" class="text-blue-600 hover:text-blue-700 hover:underline">Timișoara</a>
+              <a href="/servicii/?oras=iasi" class="text-blue-600 hover:text-blue-700 hover:underline">Iași</a>
+              <a href="/servicii/?oras=constanta" class="text-blue-600 hover:text-blue-700 hover:underline">Constanța</a>
+              <a href="/servicii/?oras=craiova" class="text-blue-600 hover:text-blue-700 hover:underline">Craiova</a>
+              <a href="/servicii/?oras=brasov" class="text-blue-600 hover:text-blue-700 hover:underline">Brașov</a>
+              <a href="/servicii/?oras=galati" class="text-blue-600 hover:text-blue-700 hover:underline">Galați</a>
+              <a href="/servicii/?oras=ploiesti" class="text-blue-600 hover:text-blue-700 hover:underline">Ploiești</a>
+              <a href="/servicii/?oras=oradea" class="text-blue-600 hover:text-blue-700 hover:underline">Oradea</a>
+              <a href="/servicii/?oras=braila" class="text-blue-600 hover:text-blue-700 hover:underline">Brăila</a>
+              <a href="/servicii/?oras=arad" class="text-blue-600 hover:text-blue-700 hover:underline">Arad</a>
             </div>
-            <p class="text-xs text-slate-500 mt-2">
+            <p class="text-xs text-slate-500 mt-3">
               și alte {stats.totalCities - 12} orașe din România
             </p>
           </div>
         </div>
       </div>
+
+      <!-- Categories Overview -->
+      <div class="mt-16">
+        <h3 class="text-2xl font-bold text-slate-900 mb-6">
+          Categorii principale de servicii
+        </h3>
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {categories.slice(0, 6).map(category => {
+            const categorySlug = generateCategorySlug(category);
+            const categoryTrades = groupedTrades[category] || [];
+            const tradeCount = categoryTrades.length;
+            
+            return (
+              <div class="bg-white border border-slate-200 rounded-xl p-6 hover:shadow-lg transition-shadow">
+                <h4 class="text-lg font-bold text-slate-900 mb-3">{category}</h4>
+                <p class="text-sm text-slate-600 mb-4">
+                  {tradeCount} servicii specializate disponibile
+                </p>
+                <div class="space-y-2 mb-4">
+                  {categoryTrades.slice(0, 3).map(trade => (
+                    <a 
+                      href={`/servicii/${categorySlug}/${trade.slug}/`}
+                      class="block text-sm text-blue-600 hover:text-blue-700 hover:underline"
+                    >
+                      {trade.name}
+                    </a>
+                  ))}
+                  {tradeCount > 3 && (
+                    <span class="text-xs text-slate-500">și alte {tradeCount - 3} servicii...</span>
+                  )}
+                </div>
+                <a 
+                  href={`/servicii/?categorie=${categorySlug}`}
+                  class="text-sm font-semibold text-blue-600 hover:text-blue-700 inline-flex items-center gap-1"
+                >
+                  Vezi toate serviciile
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </a>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   </section>
 
-  <!-- FAQ Section -->
+  <!-- FAQ Section - Enhanced for SEO -->
   <section class="py-16 bg-white">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h2 class="text-2xl font-bold text-slate-900 mb-8 text-center">
-        Întrebări frecvente
+      <h2 class="text-3xl font-bold text-slate-900 mb-4 text-center">
+        Întrebări frecvente despre serviciile Meserias Local
       </h2>
-      <div class="space-y-6">
-        <div class="border border-slate-200 rounded-lg p-6">
-          <h3 class="text-lg font-semibold text-slate-900 mb-3">
-            Ce servicii găsesc pe Meserias Local?
-          </h3>
-          <p class="text-slate-600">
-            Avem {totalTrades} servicii în {totalCategories} categorii principale: construcții, instalații,
-            finisaje, electrice, grădinărit, curățenie, transport, reparații și multe altele.
-            De la zugraveli și instalații sanitare până la renovări complete și amenajări exterioare.
-          </p>
-        </div>
+      <p class="text-slate-600 text-center mb-10 max-w-2xl mx-auto">
+        Răspunsuri la cele mai comune întrebări despre platforma noastră, meseriași și procesul de colaborare
+      </p>
+      
+      <div class="space-y-4">
+        <details class="group border border-slate-200 rounded-xl p-6 hover:border-blue-300 transition-colors">
+          <summary class="flex items-center justify-between cursor-pointer list-none">
+            <h3 class="text-lg font-semibold text-slate-900 pr-4">
+              Ce servicii găsesc pe Meserias Local?
+            </h3>
+            <svg class="w-5 h-5 text-slate-500 group-open:rotate-180 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </summary>
+          <div class="mt-4 text-slate-600 leading-relaxed">
+            <p class="mb-3">
+              Platforma Meserias Local oferă acces la <strong>{totalTrades} servicii profesionale</strong> organizate în 
+              <strong>{totalCategories} categorii principale</strong>:
+            </p>
+            <ul class="list-disc list-inside space-y-1 ml-2">
+              <li><strong>Construcții și renovări</strong> - zidari, dulgheri, constructori, demolări</li>
+              <li><strong>Instalații</strong> - instalatori sanitari, termice, gaze, climatizare</li>
+              <li><strong>Finisaje</strong> - zugravi, gletari, parchetari, faianțari</li>
+              <li><strong>Electrice</strong> - electricieni autorizați, automatizări, sisteme smart</li>
+              <li><strong>Grădinărit și exterior</strong> - grădinari, peisagiști, amenajări exterioare</li>
+              <li><strong>Curățenie și mentenanță</strong> - servicii de curățenie profesională</li>
+              <li><strong>Transport și mutări</strong> - firme de mutări, transport marfă</li>
+            </ul>
+            <p class="mt-3">
+              De la proiecte mici (reparații, zugrăveli) până la renovări complete și construcții noi.
+            </p>
+          </div>
+        </details>
 
-        <div class="border border-slate-200 rounded-lg p-6">
-          <h3 class="text-lg font-semibold text-slate-900 mb-3">
-            Cum funcționează platforma?
-          </h3>
-          <p class="text-slate-600">
-            Simplu: postezi cererea ta gratuită, primești oferte de la meseriași din zona ta în 24h,
-            compari prețurile și recenziile, alegi specialistul potrivit și plătești doar la finalizarea lucrării.
-            Totul cu garanție de calitate.
-          </p>
-        </div>
+        <details class="group border border-slate-200 rounded-xl p-6 hover:border-blue-300 transition-colors">
+          <summary class="flex items-center justify-between cursor-pointer list-none">
+            <h3 class="text-lg font-semibold text-slate-900 pr-4">
+              Cum funcționează procesul de solicitare a ofertelor?
+            </h3>
+            <svg class="w-5 h-5 text-slate-500 group-open:rotate-180 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </summary>
+          <div class="mt-4 text-slate-600 leading-relaxed">
+            <p class="mb-3">Procesul este simplu și rapid, în 4 pași:</p>
+            <ol class="list-decimal list-inside space-y-2 ml-2">
+              <li><strong>Postezi cererea gratuită</strong> - completezi un formular simplu cu detaliile proiectului (2-3 minute)</li>
+              <li><strong>Primești oferte în 24h</strong> - meseriașii verificați din zona ta îți trimit oferte personalizate</li>
+              <li><strong>Compari și alegi</strong> - vezi profiluri complete, recenzii, portofolii și prețuri</li>
+              <li><strong>Colaborezi direct</strong> - contactezi meseriașul ales și stabilești detaliile proiectului</li>
+            </ol>
+            <p class="mt-3">
+              <strong>Important:</strong> Serviciul este 100% gratuit pentru clienți, fără costuri ascunse sau comisioane.
+              Plătești doar meseriașul pentru lucrarea efectuată.
+            </p>
+          </div>
+        </details>
 
-        <div class="border border-slate-200 rounded-lg p-6">
-          <h3 class="text-lg font-semibold text-slate-900 mb-3">
-            Sunt meseriașii verificați?
-          </h3>
-          <p class="text-slate-600">
-            Da, toți cei {stats.totalWorkers}+ meseriași sunt verificați personal. Confirmăm identitatea,
-            experiența profesională și validăm referințele. Plus, ai acces la recenzii reale de la
-            clienți anteriori pentru fiecare specialist.
-          </p>
-        </div>
+        <details class="group border border-slate-200 rounded-xl p-6 hover:border-blue-300 transition-colors">
+          <summary class="flex items-center justify-between cursor-pointer list-none">
+            <h3 class="text-lg font-semibold text-slate-900 pr-4">
+              Cum sunt verificați meseriașii din platformă?
+            </h3>
+            <svg class="w-5 h-5 text-slate-500 group-open:rotate-180 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </summary>
+          <div class="mt-4 text-slate-600 leading-relaxed">
+            <p class="mb-3">
+              Toți cei <strong>{stats.totalWorkers}+ meseriași</strong> din platformă trec printr-un proces riguros de verificare:
+            </p>
+            <ul class="list-disc list-inside space-y-2 ml-2">
+              <li><strong>Verificare identitate</strong> - confirmăm identitatea cu acte oficiale (CI/Pașaport)</li>
+              <li><strong>Validare experiență</strong> - verificăm experiența profesională și calificările</li>
+              <li><strong>Referințe și portofoliu</strong> - analizăm lucrările anterioare și referințele</li>
+              <li><strong>Recenzii reale</strong> - sistem de rating transparent cu feedback de la clienți reali</li>
+              <li><strong>Monitorizare continuă</strong> - urmărim performanța și calitatea serviciilor</li>
+            </ul>
+            <p class="mt-3">
+              Meseriașii cu badge "Verificat" au trecut toate verificările și au cel puțin 3 recenzii pozitive.
+            </p>
+          </div>
+        </details>
 
-        <div class="border border-slate-200 rounded-lg p-6">
-          <h3 class="text-lg font-semibold text-slate-900 mb-3">
-            În ce orașe oferiți servicii?
-          </h3>
-          <p class="text-slate-600">
-            Acoperim {stats.totalCities} orașe din România, inclusiv toate marile centre urbane:
-            București, Cluj-Napoca, Timișoara, Iași, Constanța, Brașov, Craiova, Galați,
-            Ploiești, Oradea și multe altele.
-          </p>
+        <details class="group border border-slate-200 rounded-xl p-6 hover:border-blue-300 transition-colors">
+          <summary class="flex items-center justify-between cursor-pointer list-none">
+            <h3 class="text-lg font-semibold text-slate-900 pr-4">
+              În ce orașe din România sunt disponibile serviciile?
+            </h3>
+            <svg class="w-5 h-5 text-slate-500 group-open:rotate-180 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </summary>
+          <div class="mt-4 text-slate-600 leading-relaxed">
+            <p class="mb-3">
+              Meserias Local acoperă <strong>{stats.totalCities} orașe</strong> din România, inclusiv toate marile centre urbane:
+            </p>
+            <div class="grid grid-cols-2 gap-2 mb-3">
+              <span>✓ București și Ilfov</span>
+              <span>✓ Cluj-Napoca</span>
+              <span>✓ Timișoara</span>
+              <span>✓ Iași</span>
+              <span>✓ Constanța</span>
+              <span>✓ Craiova</span>
+              <span>✓ Brașov</span>
+              <span>✓ Galați</span>
+              <span>✓ Ploiești</span>
+              <span>✓ Oradea</span>
+              <span>✓ Brăila</span>
+              <span>✓ Arad</span>
+              <span>✓ Pitești</span>
+              <span>✓ Sibiu</span>
+              <span>✓ Bacău</span>
+              <span>✓ Târgu Mureș</span>
+            </div>
+            <p>
+              Extindem constant acoperirea în noi orașe și zone. Dacă orașul tău nu apare în listă,
+              postează cererea - mulți meseriași acceptă proiecte și în localitățile învecinate.
+            </p>
+          </div>
+        </details>
+
+        <details class="group border border-slate-200 rounded-xl p-6 hover:border-blue-300 transition-colors">
+          <summary class="flex items-center justify-between cursor-pointer list-none">
+            <h3 class="text-lg font-semibold text-slate-900 pr-4">
+              Cât costă să folosesc platforma Meserias Local?
+            </h3>
+            <svg class="w-5 h-5 text-slate-500 group-open:rotate-180 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </summary>
+          <div class="mt-4 text-slate-600 leading-relaxed">
+            <p class="mb-3">
+              <strong>Platforma este 100% gratuită pentru clienți!</strong> Nu există costuri ascunse, taxe de înscriere sau comisioane.
+            </p>
+            <ul class="list-disc list-inside space-y-1 ml-2">
+              <li>Postarea cererilor este gratuită și nelimitată</li>
+              <li>Primirea ofertelor este gratuită</li>
+              <li>Accesul la profiluri și recenzii este gratuit</li>
+              <li>Contactarea meseriașilor este gratuită</li>
+            </ul>
+            <p class="mt-3">
+              Plătești doar meseriașul pentru lucrarea efectuată, conform ofertei acceptate.
+              Prețurile sunt negociate direct între tine și meseriaș, fără intermediari.
+            </p>
+          </div>
+        </details>
+
+        <details class="group border border-slate-200 rounded-xl p-6 hover:border-blue-300 transition-colors">
+          <summary class="flex items-center justify-between cursor-pointer list-none">
+            <h3 class="text-lg font-semibold text-slate-900 pr-4">
+              Ce garanții am că voi primi servicii de calitate?
+            </h3>
+            <svg class="w-5 h-5 text-slate-500 group-open:rotate-180 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </summary>
+          <div class="mt-4 text-slate-600 leading-relaxed">
+            <p class="mb-3">Meserias Local oferă multiple garanții pentru protecția clienților:</p>
+            <ul class="list-disc list-inside space-y-2 ml-2">
+              <li><strong>Meseriași verificați</strong> - toți profesioniștii sunt verificați și evaluați</li>
+              <li><strong>Sistem de recenzii transparent</strong> - vezi feedback real de la clienți anteriori</li>
+              <li><strong>Suport dedicat</strong> - echipa noastră te ajută pe toată durata proiectului</li>
+              <li><strong>Proces de mediere</strong> - intervenim în caz de dispute sau probleme</li>
+              <li><strong>Garanție de satisfacție</strong> - lucrăm pentru rezolvarea oricărei nemulțumiri</li>
+            </ul>
+            <p class="mt-3">
+              Recomandăm să ceri mereu contract scris, să verifici portofoliul și recenziile,
+              și să plătești doar după finalizarea lucrării conform specificațiilor.
+            </p>
+          </div>
+        </details>
+      </div>
+
+      <!-- CTA after FAQ -->
+      <div class="mt-12 text-center bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8 border border-blue-100">
+        <h3 class="text-xl font-bold text-slate-900 mb-3">
+          Mai ai întrebări?
+        </h3>
+        <p class="text-slate-600 mb-6">
+          Echipa noastră este aici să te ajute. Contactează-ne sau postează o cerere gratuită.
+        </p>
+        <div class="flex flex-wrap items-center justify-center gap-4">
+          <a
+            href="https://app.meseriaslocal.ro/cere-oferta"
+            class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-xl hover:from-amber-600 hover:to-orange-600 transition-all duration-200 shadow-lg hover:shadow-xl"
+          >
+            Cere ofertă gratuită
+            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          </a>
+          <a
+            href="/contact"
+            class="inline-flex items-center px-6 py-3 bg-white text-slate-700 font-semibold rounded-xl border-2 border-slate-300 hover:border-slate-400 transition-colors"
+          >
+            Contactează-ne
+          </a>
         </div>
       </div>
     </div>
