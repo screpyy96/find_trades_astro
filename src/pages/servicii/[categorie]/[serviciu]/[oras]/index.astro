@@ -145,7 +145,11 @@ function renderPortableText(blocks: any[]) {
     return acc;
   }, {});
   
-  return blocks.map((block: any) => {
+  let html = '';
+  let inList = false;
+  let listType = '';
+  
+  blocks.forEach((block: any, index: number) => {
     if (block._type === 'block') {
       const children = block.children?.map((child: any) => {
         let text = child.text || '';
@@ -159,18 +163,18 @@ function renderPortableText(blocks: any[]) {
               if (linkDef._type === 'link') {
                 const href = linkDef.href || '';
                 const target = href.startsWith('http') ? ' target="_blank" rel="noopener noreferrer"' : '';
-                text = `<a href="${href}"${target} class="text-blue-600 hover:text-blue-700 underline">${text}</a>`;
+                text = `<a href="${href}"${target} class="text-blue-600 hover:text-blue-700 font-medium underline decoration-2 underline-offset-2">${text}</a>`;
               }
             }
             // Standard marks
             else if (mark === 'strong') {
-              text = `<strong>${text}</strong>`;
+              text = `<strong class="font-semibold text-slate-900">${text}</strong>`;
             } else if (mark === 'em') {
               text = `<em>${text}</em>`;
             } else if (mark === 'underline') {
               text = `<u>${text}</u>`;
             } else if (mark === 'code') {
-              text = `<code class="bg-slate-100 px-1 py-0.5 rounded text-sm">${text}</code>`;
+              text = `<code class="bg-slate-100 px-1.5 py-0.5 rounded text-sm font-mono">${text}</code>`;
             }
           });
         }
@@ -178,18 +182,72 @@ function renderPortableText(blocks: any[]) {
         return text;
       }).join('') || '';
       
-      // Handle different block styles
-      if (block.style === 'h2') return `<h2 class="text-2xl font-bold text-slate-900 mt-8 mb-4">${children}</h2>`;
-      if (block.style === 'h3') return `<h3 class="text-xl font-semibold text-slate-900 mt-6 mb-3">${children}</h3>`;
-      if (block.style === 'h4') return `<h4 class="text-lg font-semibold text-slate-900 mt-4 mb-2">${children}</h4>`;
-      if (block.listItem === 'bullet') return `<li class="ml-4 mb-2">${children}</li>`;
-      if (block.listItem === 'number') return `<li class="ml-4 mb-2">${children}</li>`;
-      if (block.style === 'blockquote') return `<blockquote class="border-l-4 border-blue-500 pl-4 italic text-slate-700 my-4">${children}</blockquote>`;
-      
-      return `<p class="text-slate-700 leading-relaxed mb-4">${children}</p>`;
+      // Handle list items
+      if (block.listItem) {
+        const currentListType = block.listItem === 'bullet' ? 'ul' : 'ol';
+        
+        // Start new list if needed
+        if (!inList || listType !== currentListType) {
+          if (inList) html += `</${listType}>`;
+          html += `<${currentListType} class="space-y-3 my-8">`;
+          inList = true;
+          listType = currentListType;
+        }
+        
+        if (block.listItem === 'bullet') {
+          html += `<li class="flex items-start gap-3 text-slate-700 leading-relaxed text-base"><span class="text-blue-600 font-bold text-xl mt-0.5 flex-shrink-0">•</span><span>${children}</span></li>`;
+        } else {
+          html += `<li class="text-slate-700 leading-relaxed text-base">${children}</li>`;
+        }
+        
+        // Close list if next block is not a list item
+        const nextBlock = blocks[index + 1];
+        if (!nextBlock || !nextBlock.listItem) {
+          html += `</${listType}>`;
+          inList = false;
+          listType = '';
+        }
+      } else {
+        // Close any open list
+        if (inList) {
+          html += `</${listType}>`;
+          inList = false;
+          listType = '';
+        }
+        
+        // Handle different block styles - premium visual design
+        if (block.style === 'h2') {
+          html += `<h2 class="text-2xl md:text-3xl font-bold text-slate-900 mt-12 mb-6 pb-3 border-b-2 border-gradient-to-r from-blue-500 to-purple-500 flex items-center gap-3">
+            <span class="w-1.5 h-8 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full"></span>
+            ${children}
+          </h2>`;
+        } else if (block.style === 'h3') {
+          html += `<h3 class="text-xl md:text-2xl font-semibold text-slate-900 mt-10 mb-4 flex items-center gap-3">
+            <span class="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center text-white text-sm flex-shrink-0">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+            </span>
+            <span>${children}</span>
+          </h3>`;
+        } else if (block.style === 'h4') {
+          html += `<h4 class="text-lg md:text-xl font-semibold text-slate-900 mt-8 mb-3 flex items-center gap-2">
+            <span class="w-1 h-6 bg-blue-500 rounded-full"></span>
+            ${children}
+          </h4>`;
+        } else if (block.style === 'blockquote') {
+          html += `<blockquote class="border-l-4 border-blue-500 bg-gradient-to-r from-blue-50 to-transparent pl-6 pr-4 py-5 italic text-slate-700 my-8 rounded-r-xl shadow-sm">${children}</blockquote>`;
+        } else {
+          html += `<p class="text-slate-700 leading-relaxed mb-6 text-base">${children}</p>`;
+        }
+      }
     }
-    return '';
-  }).join('');
+  });
+  
+  // Close any remaining open list
+  if (inList) {
+    html += `</${listType}>`;
+  }
+  
+  return html;
 }
 
 interface ServiceMetrics {
@@ -558,7 +616,34 @@ const priceSummaryText = metrics.avgBudget
       <h2 class="text-3xl md:text-4xl font-bold text-slate-900 mb-8">{fallbackContent.h1}</h2>
     )}
     
-    <div class="prose prose-lg max-w-none mb-12" set:html={content} />
+    <!-- Content with premium visual design - hidden by default, expandable -->
+    {sanityContent && (
+      <div class="mb-12">
+        <details class="group">
+          <summary class="cursor-pointer list-none">
+            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 rounded-xl p-6 border border-blue-200 transition-all duration-200 flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <h2 class="text-xl font-bold text-slate-900">Informații detaliate despre {service.name.toLowerCase()} în {city.name}</h2>
+                  <p class="text-sm text-slate-600 mt-1">Click pentru a citi ghidul complet</p>
+                </div>
+              </div>
+              <svg class="w-6 h-6 text-slate-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </summary>
+          <div class="mt-4 bg-white rounded-xl p-6 md:p-8 border border-slate-200 shadow-sm">
+            <div class="max-w-none seo-content" set:html={content} />
+          </div>
+        </details>
+      </div>
+    )}
     
     <!-- Price Ranges -->
     {sanityContent?.priceRanges && sanityContent.priceRanges.length > 0 ? (
@@ -737,34 +822,102 @@ const priceSummaryText = metrics.avgBudget
 </Base>
 
 <style>
-  .prose {
-    color: #374151;
+  /* Premium SEO Content Styling */
+  .seo-content {
+    font-size: 1rem;
+    line-height: 1.75;
   }
   
-  .prose h2 {
-    font-size: 1.875rem;
+  /* Headings with premium styling */
+  .seo-content h2 {
+    scroll-margin-top: 100px;
+  }
+  
+  .seo-content h3 {
+    scroll-margin-top: 100px;
+  }
+  
+  /* Paragraphs with better readability */
+  .seo-content p {
+    max-width: 75ch;
+  }
+  
+  /* Lists with better spacing */
+  .seo-content ul {
+    background: linear-gradient(to right, #f8fafc 0%, #ffffff 100%);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border-left: 4px solid #3b82f6;
+  }
+  
+  .seo-content ol {
+    background: linear-gradient(to right, #fef3c7 0%, #ffffff 100%);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border-left: 4px solid #f59e0b;
+    counter-reset: item;
+  }
+  
+  .seo-content ol li {
+    counter-increment: item;
+    position: relative;
+    padding-left: 2rem;
+  }
+  
+  .seo-content ol li::before {
+    content: counter(item);
+    position: absolute;
+    left: 0;
+    top: 0;
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-weight: 700;
-    margin-top: 2rem;
-    margin-bottom: 1rem;
+    font-size: 0.75rem;
   }
   
-  .prose h3 {
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin-top: 1.5rem;
-    margin-bottom: 0.75rem;
+  /* Links with premium hover effect */
+  .seo-content a {
+    position: relative;
+    transition: all 0.2s;
   }
   
-  .prose p {
-    margin-bottom: 1rem;
+  .seo-content a:hover {
+    color: #1d4ed8;
+    transform: translateX(2px);
   }
   
-  .prose ul, .prose ol {
-    margin-left: 1.5rem;
-    margin-bottom: 1rem;
+  /* Blockquotes with premium design */
+  .seo-content blockquote {
+    position: relative;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   }
   
-  .prose li {
-    margin-bottom: 0.5rem;
+  .seo-content blockquote::before {
+    content: '"';
+    position: absolute;
+    top: -10px;
+    left: 10px;
+    font-size: 4rem;
+    color: #3b82f6;
+    opacity: 0.2;
+    font-family: Georgia, serif;
+  }
+  
+  /* Strong text with better emphasis */
+  .seo-content strong {
+    background: linear-gradient(to right, #dbeafe 0%, transparent 100%);
+    padding: 0 4px;
+    border-radius: 3px;
+  }
+  
+  /* Code blocks */
+  .seo-content code {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   }
 </style>
