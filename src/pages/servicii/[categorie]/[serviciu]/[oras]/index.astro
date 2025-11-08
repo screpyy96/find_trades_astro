@@ -382,7 +382,6 @@ const metrics = await fetchServiceMetrics({
 });
 
 const heroStats = [
-  metrics.workerCount ? { label: 'Meseriași verificați', value: `${metrics.workerCount}+` } : null,
   metrics.avgRating ? { label: 'Rating mediu', value: `${metrics.avgRating.toFixed(1)}/5` } : null,
   metrics.jobsLast30Days ? { label: 'Lucrări în ultimele 30 zile', value: `${metrics.jobsLast30Days}` } : null,
   metrics.avgBudget ? { label: 'Buget mediu acceptat', value: `${Math.round(metrics.avgBudget)} RON` } : null
