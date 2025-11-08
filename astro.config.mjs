@@ -6,7 +6,7 @@ import react from '@astrojs/react';
 export default defineConfig({
   site: 'https://www.meseriaslocal.ro',
   output: 'server',
-  trailingSlash: 'ignore',
+  trailingSlash: 'always',
   adapter: vercel({
     webAnalytics: {
       enabled: true
@@ -19,6 +19,18 @@ export default defineConfig({
     })
   ],
   build: {
-    format: 'directory'
+    format: 'directory',
+    inlineStylesheets: 'auto'
+  },
+  vite: {
+    build: {
+      cssCodeSplit: true,
+      minify: 'esbuild',
+      rollupOptions: {
+        output: {
+          manualChunks: undefined
+        }
+      }
+    }
   }
 });

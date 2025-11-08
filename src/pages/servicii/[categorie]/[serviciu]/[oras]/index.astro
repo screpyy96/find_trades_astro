@@ -294,7 +294,7 @@ function createLocalBusinessSchema(params: { serviceName: string; cityName: stri
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
     name: `${params.serviceName} ${params.cityName} | Meserias Local`,
-    serviceType: params.serviceName,
+    description: `Servicii ${params.serviceName.toLowerCase()} în ${params.cityName} prin Meserias Local`,
     url: params.canonical,
     areaServed: {
       '@type': 'AdministrativeArea',

@@ -1,6 +1,9 @@
 import { romanianCities } from '../lib/romanian-cities.js';
 import { trades } from '../data/trades.js';
 
+// Prerender this page at build time instead of on every request
+export const prerender = true;
+
 function slugify(text: string): string {
   return text
     .toLowerCase()
@@ -31,10 +34,8 @@ export async function GET() {
   // ========================================
   const staticPages = [
     { url: '/', priority: '1.0', changefreq: 'hourly' },
-    { url: '/servicii', priority: '0.95', changefreq: 'daily' },
-    { url: '/meseriasi', priority: '0.9', changefreq: 'daily' },
-    { url: '/solicitari', priority: '0.9', changefreq: 'daily' },
-    { url: '/blog', priority: '0.8', changefreq: 'daily' },
+    { url: '/servicii/', priority: '0.95', changefreq: 'daily' },
+    { url: '/blog/', priority: '0.8', changefreq: 'daily' },
   ];
 
   staticPages.forEach(page => {
@@ -64,7 +65,7 @@ export async function GET() {
       if (!categorySlug) return;
 
       urls.push(`  <url>
-    <loc>${xmlEscape(`${baseUrl}/servicii/${categorySlug}`)}</loc>
+    <loc>${xmlEscape(`${baseUrl}/servicii/${categorySlug}/`)}</loc>
     <lastmod>${currentDate}</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
@@ -84,7 +85,7 @@ export async function GET() {
       if (!categorySlug || !tradeSlug) return;
 
       urls.push(`  <url>
-    <loc>${xmlEscape(`${baseUrl}/servicii/${categorySlug}/${tradeSlug}`)}</loc>
+    <loc>${xmlEscape(`${baseUrl}/servicii/${categorySlug}/${tradeSlug}/`)}</loc>
     <lastmod>${currentDate}</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.85</priority>
@@ -110,7 +111,7 @@ export async function GET() {
         const citySlug = slugify(city).toLowerCase();
         if (!citySlug) return;
 
-        const url = `${baseUrl}/servicii/${categorySlug}/${tradeSlug}/${citySlug}`;
+        const url = `${baseUrl}/servicii/${categorySlug}/${tradeSlug}/${citySlug}/`;
         if (seenUrls.has(url)) return;
         seenUrls.add(url);
 
@@ -135,7 +136,7 @@ ${urls.join('\n')}
   return new Response(sitemap, {
     headers: {
       'Content-Type': 'application/xml; charset=utf-8',
-      'Cache-Control': 'public, max-age=1800',
+      'Cache-Control': 'public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800',
       'X-Robots-Tag': 'noindex',
     },
   });

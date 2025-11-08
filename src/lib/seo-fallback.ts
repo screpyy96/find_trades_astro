@@ -84,7 +84,7 @@ function generateSchema(params: FallbackContentParams): any {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
     name: `${serviceName} ${cityName} | MeseriasLocal`,
-    serviceType: serviceName,
+    description: `Servicii ${serviceName.toLowerCase()} disponibile în ${cityName} prin MeseriasLocal`,
     areaServed: {
       '@type': 'AdministrativeArea',
       name: cityName
