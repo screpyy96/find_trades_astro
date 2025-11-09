@@ -30,7 +30,7 @@ const schemaData = generateHomepageSchema(stats, trades);
 >
   <script type="application/ld+json" set:html={JSON.stringify(schemaData)} slot="head" />
   <!-- Hero Section cu React Component -->
-  <ModernHero client:load trades={trades} stats={stats} />
+  <ModernHero client:idle trades={trades} stats={stats} />
 
   <!-- Testimonials Section -->
   <HomeTestimonials />

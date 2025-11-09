@@ -2,7 +2,6 @@ import { useCallback, useMemo } from "react";
 import { HeroBadge } from "./HeroBadge";
 import { HeroHeading } from "./HeroHeading";
 import { HeroSearch } from "./HeroSearch";
-import { HeroStats } from "./HeroStats";
 import { AppDownloadBadges } from "../mobile-app/AppDownloadBadges";
 import { HeroBackground } from "./HeroBackground";
 import type { Trade } from "../../types/database";
@@ -94,7 +93,7 @@ export function ModernHero({ trades = [], stats }: ModernHeroProps) {
                 <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex items-center gap-4">
                     <div className="bg-white rounded-2xl p-4 shadow-lg">
-                      <img src="/logo.svg" alt="Meserias Local App" className="h-14 w-auto" />
+                      <img src="/logo.svg" alt="Meserias Local App" className="h-14 w-auto" width="48" height="56" loading="lazy" decoding="async" />
                     </div>
                     <div className="space-y-1">
                       <div className="text-white font-bold text-lg flex items-center gap-2">
@@ -166,7 +165,7 @@ export function ModernHero({ trades = [], stats }: ModernHeroProps) {
                     {/* Logo mare în centru */}
                     <div className="text-center space-y-3">
                       <div className="bg-white rounded-2xl p-4 shadow-lg inline-block">
-                        <img src="/logo.svg" alt="" className="h-16 w-auto" />
+                        <img src="/logo.svg" alt="" className="h-16 w-auto" width="55" height="64" loading="lazy" decoding="async" />
                       </div>
                       <div className="text-slate-900 font-bold text-base tracking-tight">Meserias Local</div>
                       <div className="text-slate-600 text-sm">Găsește meseriași<br />rapid și sigur</div>

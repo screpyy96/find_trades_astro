@@ -71,8 +71,8 @@ export function MobileNavbar({ currentPath, appUrl = '', webUrl = '' }: MobileNa
   ];
 
   const informationalLinks = [
-    { icon: <Info className="w-5 h-5" />, label: 'Despre Noi', href: `${webUrl}/despre` },
-    { icon: <Mail className="w-5 h-5" />, label: 'Contact', href: `${webUrl}/contact` },
+    { icon: <Info className="w-5 h-5" />, label: 'Despre Noi', href: `${webUrl}/despre-noi` },
+    { icon: <Mail className="w-5 h-5" />, label: 'Contact', href: `${appUrl}/contact` },
     { icon: <BookOpen className="w-5 h-5" />, label: 'Blog', href: `${webUrl}/blog` },
   ];
 

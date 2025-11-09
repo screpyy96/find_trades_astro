@@ -90,7 +90,7 @@ const jobCount = jobsList.length;
         </div>
       </div>
     ) : (
-      <JobsClientList client:load jobs={jobsList} />
+      <JobsClientList client:visible jobs={jobsList} />
     )}
   </div>
 </Base>

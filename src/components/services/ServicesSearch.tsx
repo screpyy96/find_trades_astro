@@ -14,11 +14,9 @@ interface GroupedTrades {
 
 interface ServicesSearchProps {
   trades: Trade[];
-  groupedTrades: GroupedTrades;
-  categories: string[];
 }
 
-export function ServicesSearch({ trades, groupedTrades, categories }: ServicesSearchProps) {
+export function ServicesSearch({ trades }: ServicesSearchProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
   // Filter trades based on search query only

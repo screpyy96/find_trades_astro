@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Star, MapPin, Phone, Award, CheckCircle, Camera, Grid3X3, TrendingUp, BarChart3, ExternalLink, Badge, X, CalendarDays, Shield, Zap, Users, Share2, Flag, Send, Briefcase } from 'lucide-react';
 import { format } from 'date-fns';
-import { ro } from 'date-fns/locale/ro';
+import ro from 'date-fns/locale/ro';
 import { createClient } from '@supabase/supabase-js';
 
 interface WorkerProfile {

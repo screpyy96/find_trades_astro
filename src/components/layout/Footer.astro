@@ -10,7 +10,7 @@ const APP_URL = import.meta.env.PUBLIC_APP_URL || 'https://app.meseriaslocal.ro'
       <!-- Coloana 1: Brand & Descriere -->
       <div class="flex flex-col gap-4">
         <div class="flex items-center gap-3">
-          <img src="/logo.svg" alt="" class="h-10 w-auto" />
+          <img src="/logo.svg" alt="" class="h-10 w-auto" width="34" height="40" />
           <span class="text-xl font-bold tracking-tight text-slate-900">Meserias Local</span>
         </div>
         <p class="text-slate-700 text-sm leading-relaxed">
@@ -72,8 +72,8 @@ const APP_URL = import.meta.env.PUBLIC_APP_URL || 'https://app.meseriaslocal.ro'
         <nav aria-label="Suport & Contact">
           <ul class="space-y-2 text-sm">
             <li><a href={`${APP_URL}/contact`} class="text-slate-700 hover:text-slate-900 transition-colors">Contact</a></li>
-            <li><a href={`${APP_URL}/contact`} class="text-slate-700 hover:text-slate-900 transition-colors">Întrebări frecvente (FAQ)</a></li>
-            <li><a href={`${APP_URL}/contact`} class="text-slate-700 hover:text-slate-900 transition-colors">Centru de ajutor</a></li>
+            <li><a href="/faq/" class="text-slate-700 hover:text-slate-900 transition-colors">Întrebări frecvente (FAQ)</a></li>
+            <li><a href="/suport/" class="text-slate-700 hover:text-slate-900 transition-colors">Centru de ajutor</a></li>
           </ul>
         </nav>
         <div class="mt-6 space-y-3 text-sm text-slate-700">
@@ -160,9 +160,9 @@ const APP_URL = import.meta.env.PUBLIC_APP_URL || 'https://app.meseriaslocal.ro'
           </div>
         </div>
         <div class="flex flex-wrap items-center gap-4 text-sm">
-          <a href={`${APP_URL}/termeni-si-conditii`} class="text-slate-700 hover:text-slate-900 transition-colors">Termeni și condiții</a>
-          <a href={`${APP_URL}/politica-confidentialitate`} class="text-slate-700 hover:text-slate-900 transition-colors">Politica de confidențialitate</a>
-          <a href={`${APP_URL}/gdpr`} class="text-slate-700 hover:text-slate-900 transition-colors">GDPR</a>
+          <a href="/termeni-si-conditii/" class="text-slate-700 hover:text-slate-900 transition-colors">Termeni și condiții</a>
+          <a href="/politica-de-confidentialitate/" class="text-slate-700 hover:text-slate-900 transition-colors">Politica de confidențialitate</a>
+          <a href="/gdpr/" class="text-slate-700 hover:text-slate-900 transition-colors">GDPR</a>
         </div>
       </div>
     </div>

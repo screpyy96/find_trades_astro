@@ -28,6 +28,8 @@ const WEB_URL = 'https://www.meseriaslocal.ro';
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalURL} />
@@ -88,10 +90,11 @@ const WEB_URL = 'https://www.meseriaslocal.ro';
     <MobileNavbar client:load currentPath={Astro.url.pathname} appUrl={APP_URL} webUrl={WEB_URL} />
     
     <!-- Add padding: top for mobile navbar only, bottom for mobile bottom nav -->
-    <main class="pt-16 lg:pt-0 pb-24 lg:pb-0">
+    <main class="pt-16 lg:pt-24 pb-24 lg:pb-0">
       <slot />
     </main>
     
     <Footer />
+    <div class="h-24 lg:hidden" aria-hidden="true"></div>
   </body>
 </html>

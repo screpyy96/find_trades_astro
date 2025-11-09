@@ -13,7 +13,9 @@ export default defineConfig({
     }
   }),
   integrations: [
-    react(),
+    react({
+      experimentalReactChildren: true
+    }),
     tailwind({
       applyBaseStyles: false,
     })
@@ -28,7 +30,14 @@ export default defineConfig({
       minify: 'esbuild',
       rollupOptions: {
         output: {
-          manualChunks: undefined
+          manualChunks: (id) => {
+            if (id.includes('node_modules')) {
+              if (id.includes('react') || id.includes('react-dom')) {
+                return 'react-vendor';
+              }
+              return 'vendor';
+            }
+          }
         }
       }
     }

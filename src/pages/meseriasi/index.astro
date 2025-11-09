@@ -46,7 +46,32 @@ const { url: supabaseUrl, anonKey: supabaseAnonKey } = getPublicSupabaseConfig()
 
   <div class="relative">
     <!-- Hero Section -->
-    <HeroBackground className="py-12 lg:py-16 lg:pt-32" client:load>
+    <div 
+      data-navbar-transparent="true"
+      class="relative overflow-hidden py-12 lg:py-16 lg:pt-32"
+      style="background: linear-gradient(180deg, #1b1f1d 0%, #21251f 50%, #2a302b 100%)"
+    >
+      <!-- Background decorations -->
+      <div class="pointer-events-none absolute inset-0">
+        <div class="absolute inset-0 bg-[radial-gradient(120%_90%_at_15%_-10%,rgba(16,185,129,0.35),rgba(4,21,14,0.9)_55%,rgba(2,10,8,0.98)_95%)]"></div>
+      </div>
+
+      <!-- Colorful glows -->
+      <div class="pointer-events-none absolute inset-0 overflow-hidden">
+        <div class="absolute -top-32 -left-28 h-[260px] w-[260px] md:h-[460px] md:w-[460px] rounded-full bg-gradient-to-br from-emerald-400/60 via-emerald-300/15 to-transparent blur-[90px] md:blur-3xl opacity-90"></div>
+        <div class="absolute top-8 right-6 h-[200px] w-[200px] md:h-[340px] md:w-[340px] rounded-full bg-gradient-to-bl from-lime-300/45 via-lime-200/15 to-transparent blur-2xl opacity-75"></div>
+        <div class="absolute -bottom-48 -right-20 h-[260px] w-[260px] md:h-[380px] md:w-[380px] rounded-full bg-gradient-to-br from-emerald-500/55 via-teal-400/20 to-transparent blur-[110px] opacity-80"></div>
+      </div>
+
+      <!-- Animated geometric pattern -->
+      <div class="absolute inset-0 opacity-15">
+        <div
+          class="absolute inset-0"
+          style="background-image: linear-gradient(rgba(45, 51, 45, 0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(45, 51, 45, 0.4) 1px, transparent 1px); background-size: 60px 60px"
+        ></div>
+      </div>
+
+      <!-- Content -->
       <div class="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center max-w-4xl mx-auto">
           <!-- Heading -->
@@ -77,7 +102,7 @@ const { url: supabaseUrl, anonKey: supabaseAnonKey } = getPublicSupabaseConfig()
                 aria-label="Caută meseriași"
               >
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                 </svg>
                 Caută
               </button>
@@ -101,12 +126,12 @@ const { url: supabaseUrl, anonKey: supabaseAnonKey } = getPublicSupabaseConfig()
           </div>
         </div>
       </div>
-    </HeroBackground>
+    </div>
 
     <!-- Tradesmen List - React Component -->
     <section id="lista" class="scroll-mt-20 bg-slate-50">
       <TradesmenClientList 
-        client:load 
+        client:visible 
         initialSearch={searchTerm}
         initialSort={sortMethod}
         supabaseUrl={supabaseUrl}

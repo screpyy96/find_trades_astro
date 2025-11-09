@@ -1,0 +1,202 @@
+---
+import Base from '../layouts/Base.astro';
+
+const LAST_UPDATED = '9 noiembrie 2025';
+---
+
+<Base
+  title="Ghid GDPR Meserias Local"
+  description="Înțelege modul în care Meserias Local respectă GDPR: drepturile utilizatorilor, procese interne, responsabilități și recomandări pentru clienți și meseriași."
+>
+  <section class="bg-slate-950 text-slate-100 py-16">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <p class="text-sm uppercase tracking-widest text-emerald-300 font-semibold mb-4">Protecția datelor</p>
+      <h1 class="text-4xl sm:text-5xl font-extrabold mb-6 leading-tight">Ghid practic GDPR pentru Meserias Local</h1>
+      <p class="text-lg text-slate-300 leading-relaxed max-w-3xl">
+        Acest ghid explică modul în care platforma <strong>Meserias Local</strong> respectă Regulamentul (UE) 2016/679 (GDPR) și ce măsuri luăm pentru a proteja datele personale
+        ale clienților și meseriașilor. Aici găsești și recomandări concrete pentru utilizatori, astfel încât colaborarea să fie sigură, transparentă și legală.
+      </p>
+      <div class="mt-8 inline-flex items-center gap-3 px-5 py-3 rounded-full bg-slate-900/60 border border-slate-700">
+        <span class="text-sm text-slate-400">Ultima actualizare</span>
+        <span class="text-sm font-semibold text-white">{LAST_UPDATED}</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-white py-16 lg:py-24">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="bg-slate-50 border-b border-slate-200 px-6 sm:px-10 py-6">
+          <h2 class="text-2xlfont-semibold text-slate-900">Cuprins</h2>
+          <p class="mt-2 text-sm text-slate-500">Capitolele principale ale ghidului.</p>
+        </div>
+        <div class="px-6 sm:px-10 py-8">
+          <ol class="grid gap-3 text-sm text-slate-600 sm:grid-cols-2">
+            <li><a class="hover:text-emerald-600 transition" href="#principii">1. Principiile GDPR aplicate</a></li>
+            <li><a class="hover:text-emerald-600 transition" href="#roluri">2. Rolurile în prelucrare</a></li>
+            <li><a class="hover:text-emerald-600 transition" href="#ciclul">3. Ciclul de viață al datelor</a></li>
+            <li><a class="hover:text-emerald-600 transition" href="#drepturi">4. Drepturile utilizatorilor</a></li>
+            <li><a class="hover:text-emerald-600 transition" href="#clienti">5. Recomandări pentru clienți</a></li>
+            <li><a class="hover:text-emerald-600 transition" href="#meseriasi">6. Recomandări pentru meseriași</a></li>
+            <li><a class="hover:text-emerald-600 transition" href="#parteneri">7. Furnizori și parteneri</a></li>
+            <li><a class="hover:text-emerald-600 transition" href="#incidente">8. Gestionarea incidentelor</a></li>
+            <li><a class="hover:text-emerald-600 transition" href="#documentatie">9. Documentație și audit</a></li>
+            <li><a class="hover:text-emerald-600 transition" href="#workflow">10. Fluxuri interne</a></li>
+            <li><a class="hover:text-emerald-600 transition" href="#resurse">11. Resurse utile</a></li>
+            <li><a class="hover:text-emerald-600 transition" href="#contact">12. Contact și suport GDPR</a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-white pb-20">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
+      <article id="principii" class="space-y-5">
+        <header class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">1</div>
+          <h2 class="text-3xl font-semibold text-slate-900">Principiile GDPR aplicate de Meserias Local</h2>
+        </header>
+        <p class="text-slate-600 leading-relaxed">
+          Ne ghidăm toate procesele după principiile GDPR: legalitate, echitate, transparență, limitarea scopului, minimizarea datelor, exactitatea,
+          limitarea stocării, integritatea/confidențialitatea și responsabilitatea (accountability). Fiecare componentă a platformei este evaluată periodic
+          pentru a respecta aceste principii.
+        </p>
+      </article>
+
+      <article id="roluri" class="space-y-5">
+        <header class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">2</div>
+          <h2 class="text-3xl font-semibold text-slate-900">Rolurile în prelucrarea datelor</h2>
+        </header>
+        <p class="text-slate-600 leading-relaxed">
+          <strong>Meserias Local SRL</strong> acționează ca operator de date pentru utilizatorii platformei. Pentru anumite interacțiuni, meseriașii pot deveni operatori sau
+          operatori independenți atunci când gestionează datele clienților (ex. ofertele personalizate). Furnizorii noștri (hosting, email, analytics) acționează ca persoane împuternicite și
+          au obligații contractuale stricte privind protecția datelor.
+        </p>
+      </article>
+
+      <article id="ciclul" class="space-y-5">
+        <header class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">3</div>
+          <h2 class="text-3xl font-semibold text-slate-900">Ciclul de viață al datelor în platformă</h2>
+        </header>
+        <p class="text-slate-600 leading-relaxed">
+          Datele sunt colectate în momentul creării contului sau al completării formularelor, sunt păstrate în baze de date securizate, utilizate pentru furnizarea serviciilor și
+          ulterior anonimizate sau șterse conform politicilor interne. Accesul este reglementat prin roluri, autentificare și audit. Log-urile tehnice sunt păstrate pentru diagnostic și securitate.
+        </p>
+      </article>
+
+      <article id="drepturi" class="space-y-5">
+        <header class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">4</div>
+          <h2 class="text-3xl font-semibold text-slate-900">Drepturile utilizatorilor și cum le onorăm</h2>
+        </header>
+        <p class="text-slate-600 leading-relaxed">
+          Punem la dispoziție mecanisme pentru exercitarea dreptului de acces, rectificare, ștergere, restricționare, portabilitate, opoziție și de a nu face obiectul unei decizii automatizate.
+          Solicitările pot fi trimise prin email la <a href="mailto:contact@meseriaslocal.ro" class="text-emerald-600 font-semibold hover:underline">contact@meseriaslocal.ro</a> sau prin formularul de contact din aplicație.
+          Răspundem în maximum 30 de zile și oferim suport suplimentar atunci când este necesar.
+        </p>
+      </article>
+
+      <article id="clienti" class="space-y-5">
+        <header class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">5</div>
+          <h2 class="text-3xl font-semibold text-slate-900">Recomandări GDPR pentru clienți</h2>
+        </header>
+        <ul class="text-slate-600 leading-relaxed list-disc pl-6 space-y-2">
+          <li>Partajează doar informațiile relevante proiectului și evită transmiterea datelor sensibile prin chat-ul platformei.</li>
+          <li>Revizuiește profilurile meseriașilor și verifică recenziile înainte de a accepta o ofertă.</li>
+          <li>Folosește canalele oficiale pentru comunicare și păstrează istoricul discuțiilor în platformă pentru transparență.</li>
+          <li>Informează-ne imediat dacă observi utilizări neautorizate ale datelor tale.</li>
+        </ul>
+      </article>
+
+      <article id="meseriasi" class="space-y-5">
+        <header class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">6</div>
+          <h2 class="text-3xl font-semibold text-slate-900">Recomandări GDPR pentru meseriași</h2>
+        </header>
+        <ul class="text-slate-600 leading-relaxed list-disc pl-6 space-y-2">
+          <li>Utilizează datele clienților doar pentru scopul convenit și nu le transfera terților fără consimțământ.</li>
+          <li>Asigură-te că dispozitivele de lucru sunt protejate (parole puternice, antivirus actualizat, criptare).</li>
+          <li>Respectă cererile clienților privind ștergerea sau actualizarea datelor și informează-ne dacă primești astfel de solicitări.</li>
+          <li>Păstrează documentele fizice într-un mediu sigur și distruge-le corespunzător când nu mai sunt necesare.</li>
+        </ul>
+      </article>
+
+      <article id="parteneri" class="space-y-5">
+        <header class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">7</div>
+          <h2 class="text-3xl font-semibold text-slate-900">Furnizori și parteneri de încredere</h2>
+        </header>
+        <p class="text-slate-600 leading-relaxed">
+          Evaluăm periodic furnizorii cu care colaborăm (hosting, livrare email, analytics, suport) și încheiem acorduri de prelucrare a datelor (DPA) care le impun standarde ridicate de securitate.
+          Lista principalilor furnizori este disponibilă la cerere. Te încurajăm să consulți și <a href="/politica-de-confidentialitate/" class="text-emerald-600 font-semibold hover:underline">Politica de Confidențialitate</a> pentru detalii complete.
+        </p>
+      </article>
+
+      <article id="incidente" class="space-y-5">
+        <header class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">8</div>
+          <h2 class="text-3xl font-semibold text-slate-900">Gestionarea incidentelor de securitate</h2>
+        </header>
+        <p class="text-slate-600 leading-relaxed">
+          Avem proceduri documentate pentru identificarea și raportarea incidentelor de securitate. În cazul unui incident ce poate afecta drepturile persoanelor vizate, notificăm autoritățile competente în maximum 72 de ore
+          și informăm utilizatorii impactați. Orice suspiciune poate fi raportată imediat la <a href="mailto:contact@meseriaslocal.ro" class="text-emerald-600 font-semibold hover:underline">contact@meseriaslocal.ro</a>.
+        </p>
+      </article>
+
+      <article id="documentatie" class="space-y-5">
+        <header class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">9</div>
+          <h2 class="text-3xl font-semibold text-slate-900">Documentație și audit intern</h2>
+        </header>
+        <p class="text-slate-600 leading-relaxed">
+          Menținem registre de evidență a prelucrărilor, politici interne și proceduri operaționale. Organizăm audituri interne periodice pentru a verifica conformitatea GDPR și actualizăm documentația ori de câte ori apar schimbări.
+          Efectuăm evaluări de impact (DPIA) atunci când introducem funcționalități noi cu risc ridicat.
+        </p>
+      </article>
+
+      <article id="workflow" class="space-y-5">
+        <header class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">10</div>
+          <h2 class="text-3xl font-semibold text-slate-900">Fluxuri interne și instruirea echipei</h2>
+        </header>
+        <p class="text-slate-600 leading-relaxed">
+          Echipa Meserias Local urmează training-uri recurente despre protecția datelor, phishing, securitatea parolelor și incidente raportabile. Avem proceduri clare pentru onboarding/offboarding,
+          acces la date și răspuns rapid la solicitările utilizatorilor. Orice acces neautorizat este investigat imediat.
+        </p>
+      </article>
+
+      <article id="resurse" class="space-y-5">
+        <header class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">11</div>
+          <h2 class="text-3xl font-semibold text-slate-900">Resurse utile pentru utilizatori</h2>
+        </header>
+        <ul class="text-slate-600 leading-relaxed list-disc pl-6 space-y-2">
+          <li><a href="https://www.dataprotection.ro/" class="text-emerald-600 font-semibold hover:underline" target="_blank" rel="noopener noreferrer">ANSPDCP</a> – Autoritatea națională de supraveghere.</li>
+          <li><a href="https://edpb.europa.eu/edpb/en" class="text-emerald-600 font-semibold hover:underline" target="_blank" rel="noopener noreferrer">European Data Protection Board</a> – Ghiduri și recomandări.</li>
+          <li><a href="/politica-de-confidentialitate/" class="text-emerald-600 font-semibold hover:underline">Politica de Confidențialitate</a> – detalii despre datele colectate și scopuri.</li>
+          <li><a href="/termeni-si-conditii/" class="text-emerald-600 font-semibold hover:underline">Termeni și Condiții</a> – cadrul contractual al platformei.</li>
+        </ul>
+      </article>
+
+      <article id="contact" class="space-y-5">
+        <header class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">12</div>
+          <h2 class="text-3xl font-semibold text-slate-900">Contact și suport GDPR</h2>
+        </header>
+        <p class="text-slate-600 leading-relaxed">
+          Pentru întrebări, clarificări sau raportarea unei probleme legate de protecția datelor, ne poți contacta folosind detaliile de mai jos. Răspundem prompt și colaborăm cu tine pentru a găsi soluția potrivită.
+        </p>
+        <ul class="text-slate-600 leading-relaxed list-disc pl-6 space-y-2">
+          <li>Email: <a href="mailto:contact@meseriaslocal.ro" class="text-emerald-600 font-semibold hover:underline">contact@meseriaslocal.ro</a></li>
+          <li>Formular online: <a href="https://app.meseriaslocal.ro/contact" class="text-emerald-600 font-semibold hover:underline">Disponibil în aplicația Meserias Local</a></li>
+          <li>Adresa poștală: detalii actualizate în pagina <a href="/despre-noi/" class="text-emerald-600 font-semibold hover:underline">Despre Noi</a></li>
+          <li>Autoritatea competentă: <a href="https://www.dataprotection.ro/" class="text-emerald-600 font-semibold hover:underline" target="_blank" rel="noopener noreferrer">ANSPDCP</a></li>
+        </ul>
+      </article>
+    </div>
+  </section>
+</Base>
