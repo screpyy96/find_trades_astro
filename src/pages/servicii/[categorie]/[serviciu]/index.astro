@@ -175,9 +175,9 @@ const faqSchema = {
 
 <Base title={title} description={description}>
   <meta slot="head" name="keywords" content={keywords} />
-  <script type="application/ld+json" set:html={JSON.stringify(serviceSchema)} slot="head" />
-  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} slot="head" />
-  <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} slot="head" />
+  <script is:inline type="application/ld+json" set:html={JSON.stringify(serviceSchema)} slot="head" />
+  <script is:inline type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} slot="head" />
+  <script is:inline type="application/ld+json" set:html={JSON.stringify(faqSchema)} slot="head" />
   <!-- Hero Section - Same colors as homepage -->
   <section 
     class="relative overflow-hidden py-16 lg:py-20"

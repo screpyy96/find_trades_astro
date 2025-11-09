@@ -102,8 +102,8 @@ const breadcrumbSchema = {
 
 <Base title={title} description={description}>
   <meta slot="head" name="keywords" content={keywords} />
-  <script type="application/ld+json" set:html={JSON.stringify(categorySchema)} slot="head" />
-  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} slot="head" />
+  <script is:inline type="application/ld+json" set:html={JSON.stringify(categorySchema)} slot="head" />
+  <script is:inline type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} slot="head" />
 
   <!-- Hero Section -->
   <section 

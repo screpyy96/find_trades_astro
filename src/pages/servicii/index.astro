@@ -115,8 +115,8 @@ const faqSchema = {
   title={`Servicii Profesionale - ${totalTrades} Meserii în ${totalCategories} Categorii | Meserias Local`}
   description={`Director complet cu ${totalTrades} servicii profesionale în ${totalCategories} categorii: construcții, instalații, finisaje, electrice, grădinărit. ${stats.totalWorkers}+ meseriași verificați din ${stats.totalCities} orașe.`}
 >
-  <script type="application/ld+json" set:html={JSON.stringify(schemaData)} slot="head" />
-  <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} slot="head" />
+  <script is:inline type="application/ld+json" set:html={JSON.stringify(schemaData)} slot="head" />
+  <script is:inline type="application/ld+json" set:html={JSON.stringify(faqSchema)} slot="head" />
 
   <!-- Hero Section -->
   <section 
