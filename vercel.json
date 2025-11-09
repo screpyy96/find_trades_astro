@@ -19,5 +19,23 @@
         }
       ]
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/studio/:path*",
+      "destination": "https://7094dn36.api.sanity.io/:path*"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/cere-oferta",
+      "destination": "https://app.meseriaslocal.ro/cere-oferta",
+      "permanent": true
+    },
+    {
+      "source": "/cere-oferta/",
+      "destination": "https://app.meseriaslocal.ro/cere-oferta",
+      "permanent": true
+    }
   ]
 }

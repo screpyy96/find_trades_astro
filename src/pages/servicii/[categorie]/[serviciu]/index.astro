@@ -2,6 +2,7 @@
 import Base from '../../../../layouts/Base.astro';
 import { cities } from '../../../../data';
 import { supabase } from '../../../../lib/supabase';
+import { getServicePage } from '../../../../lib/sanity';
 
 export const prerender = false;
 export const config = { revalidate: 1800 };
@@ -32,14 +33,148 @@ const service = {
   categorySlug: categorie,
 };
 
+// Try to get custom content from Sanity
+const sanityContent = await getServicePage(serviciu);
+
+// Debug logging
+if (import.meta.env.DEV) {
+  console.log('🔍 Service Page Sanity Query:');
+  console.log('  tradeSlug:', serviciu);
+  console.log('  Found content:', sanityContent ? '✅ YES' : '❌ NO');
+  if (sanityContent) {
+    console.log('  Title:', sanityContent.title);
+    console.log('  Has content:', !!sanityContent.content);
+  }
+}
+
+// Helper to render portable text with support for links and marks
+function renderPortableText(blocks: any[]) {
+  if (!blocks) return '';
+  
+  // Track marks that are links
+  const markDefs = blocks.reduce((acc: any, block: any) => {
+    if (block.markDefs) {
+      block.markDefs.forEach((def: any) => {
+        acc[def._key] = def;
+      });
+    }
+    return acc;
+  }, {});
+  
+  let html = '';
+  let inList = false;
+  let listType = '';
+  
+  blocks.forEach((block: any, index: number) => {
+    if (block._type === 'block') {
+      const children = block.children?.map((child: any) => {
+        let text = child.text || '';
+        
+        // Process marks (bold, italic, links, etc.)
+        if (child.marks && child.marks.length > 0) {
+          child.marks.forEach((mark: string) => {
+            // Check if it's a link mark
+            if (markDefs[mark]) {
+              const linkDef = markDefs[mark];
+              if (linkDef._type === 'link') {
+                const href = linkDef.href || '';
+                const target = href.startsWith('http') ? ' target="_blank" rel="noopener noreferrer"' : '';
+                text = `<a href="${href}"${target} class="text-blue-600 hover:text-blue-700 font-medium underline decoration-2 underline-offset-2">${text}</a>`;
+              }
+            }
+            // Standard marks
+            else if (mark === 'strong') {
+              text = `<strong class="font-semibold text-slate-900">${text}</strong>`;
+            } else if (mark === 'em') {
+              text = `<em>${text}</em>`;
+            } else if (mark === 'underline') {
+              text = `<u>${text}</u>`;
+            } else if (mark === 'code') {
+              text = `<code class="bg-slate-100 px-1.5 py-0.5 rounded text-sm font-mono">${text}</code>`;
+            }
+          });
+        }
+        
+        return text;
+      }).join('') || '';
+      
+      // Handle list items
+      if (block.listItem) {
+        const currentListType = block.listItem === 'bullet' ? 'ul' : 'ol';
+        
+        // Start new list if needed
+        if (!inList || listType !== currentListType) {
+          if (inList) html += `</${listType}>`;
+          html += `<${currentListType} class="space-y-3 my-8">`;
+          inList = true;
+          listType = currentListType;
+        }
+        
+        if (block.listItem === 'bullet') {
+          html += `<li class="flex items-start gap-3 text-slate-700 leading-relaxed text-base"><span class="text-blue-600 font-bold text-xl mt-0.5 flex-shrink-0">•</span><span>${children}</span></li>`;
+        } else {
+          html += `<li class="text-slate-700 leading-relaxed text-base">${children}</li>`;
+        }
+        
+        // Close list if next block is not a list item
+        const nextBlock = blocks[index + 1];
+        if (!nextBlock || !nextBlock.listItem) {
+          html += `</${listType}>`;
+          inList = false;
+          listType = '';
+        }
+      } else {
+        // Close any open list
+        if (inList) {
+          html += `</${listType}>`;
+          inList = false;
+          listType = '';
+        }
+        
+        // Handle different block styles - premium visual design
+        if (block.style === 'h2') {
+          html += `<h2 class="text-2xl md:text-3xl font-bold text-slate-900 mt-12 mb-6 pb-3 border-b-2 border-gradient-to-r from-blue-500 to-purple-500 flex items-center gap-3">
+            <span class="w-1.5 h-8 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full"></span>
+            ${children}
+          </h2>`;
+        } else if (block.style === 'h3') {
+          html += `<h3 class="text-xl md:text-2xl font-semibold text-slate-900 mt-10 mb-4 flex items-center gap-3">
+            <span class="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center text-white text-sm flex-shrink-0">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+            </span>
+            <span>${children}</span>
+          </h3>`;
+        } else if (block.style === 'h4') {
+          html += `<h4 class="text-lg md:text-xl font-semibold text-slate-900 mt-8 mb-3 flex items-center gap-2">
+            <span class="w-1 h-6 bg-blue-500 rounded-full"></span>
+            ${children}
+          </h4>`;
+        } else if (block.style === 'blockquote') {
+          html += `<blockquote class="border-l-4 border-blue-500 bg-gradient-to-r from-blue-50 to-transparent pl-6 pr-4 py-5 italic text-slate-700 my-8 rounded-r-xl shadow-sm">${children}</blockquote>`;
+        } else {
+          html += `<p class="text-slate-700 leading-relaxed mb-6 text-base">${children}</p>`;
+        }
+      }
+    }
+  });
+  
+  // Close any remaining open list
+  if (inList) {
+    html += `</${listType}>`;
+  }
+  
+  return html;
+}
+
 // Helper function to capitalize first letter of each word for better readability
 const capitalizeFirst = (str: string) => {
   return str.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
 };
 
-const title = `${capitalizeFirst(service.name)} - Meseriași Verificați  `;
-const description = `Găsește profesioniști pentru ${service.name.toLowerCase()} în orașul tău. Peste 150+ meseriași verificați în 42 orașe. Oferte gratuite în 24h, recenzii reale, garanție de calitate.`;
-const keywords = `${service.name.toLowerCase()}, ${service.name.toLowerCase()} profesionist, ${service.name.toLowerCase()} verificat, preț ${service.name.toLowerCase()}, ${service.name.toLowerCase()} România, meseriași ${service.name.toLowerCase()}`;
+// Use Sanity content if available, otherwise use defaults
+const title = sanityContent?.title || `${capitalizeFirst(service.name)} - Meseriași Verificați`;
+const description = sanityContent?.metaDescription || `Găsește profesioniști pentru ${service.name.toLowerCase()} în orașul tău. Peste 150+ meseriași verificați în 42 orașe. Oferte gratuite în 24h, recenzii reale, garanție de calitate.`;
+const keywords = sanityContent?.seoKeywords?.join(', ') || `${service.name.toLowerCase()}, ${service.name.toLowerCase()} profesionist, ${service.name.toLowerCase()} verificat, preț ${service.name.toLowerCase()}, ${service.name.toLowerCase()} România, meseriași ${service.name.toLowerCase()}`;
 
 // Group cities by county for better organization
 const citiesByCounty: Record<string, typeof cities> = {};
@@ -222,16 +357,15 @@ const faqSchema = {
 
         <!-- Main Heading -->
         <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
-          {capitalizeFirst(service.name)} în România
+          {sanityContent?.heroTitle || `${capitalizeFirst(service.name)} în România`}
         </h1>
 
         <p class="text-xl text-slate-300 mb-4">
-          Meseriași verificați în peste 42 de orașe
+          {sanityContent?.heroSubtitle || 'Meseriași verificați în peste 42 de orașe'}
         </p>
 
         <p class="text-lg text-slate-300 mb-8 leading-relaxed max-w-3xl mx-auto">
-          Găsește profesioniști de încredere în orașul tău. Primește oferte gratuite în 24 ore, 
-          compară prețuri și recenzii, alege cel mai bun meseriaș pentru proiectul tău.
+          {sanityContent?.heroDescription || `Găsește profesioniști de încredere în orașul tău. Primește oferte gratuite în 24 ore, compară prețuri și recenzii, alege cel mai bun meseriaș pentru proiectul tău.`}
         </p>
 
         <!-- CTA Button -->
@@ -310,21 +444,27 @@ const faqSchema = {
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Introduction -->
       <div class="max-w-4xl mx-auto mb-16">
-        <h2 class="text-3xl font-bold text-slate-900 mb-6">
-          Găsește profesioniști pentru {service.name.toLowerCase()} din România
-        </h2>
-        <div class="prose prose-slate prose-lg max-w-none">
-          <p class="text-slate-700 leading-relaxed">
-            Pe <strong>Meserias Local</strong> găsești peste <strong>150+ profesioniști verificați</strong> pentru servicii de {service.name.toLowerCase()} în 
-            <strong>42 de orașe</strong> din România. Toți meseriașii din platformă sunt verificați personal, 
-            cu identitate confirmată, experiență validată și recenzii reale de la clienți anteriori.
-          </p>
-          <p class="text-slate-700 leading-relaxed">
-            Procesul este simplu și rapid: postezi cererea gratuită, primești 3-5 oferte personalizate în 24 de ore,
-            compari prețurile și recenziile, apoi alegi meseriașul potrivit pentru proiectul tău. Fără comisioane,
-            fără costuri ascunse, plătești doar pentru lucrarea efectuată.
-          </p>
-        </div>
+        {sanityContent?.content ? (
+          <div class="prose prose-slate prose-lg max-w-none" set:html={renderPortableText(sanityContent.content)} />
+        ) : (
+          <>
+            <h2 class="text-3xl font-bold text-slate-900 mb-6">
+              Găsește profesioniști pentru {service.name.toLowerCase()} din România
+            </h2>
+            <div class="prose prose-slate prose-lg max-w-none">
+              <p class="text-slate-700 leading-relaxed">
+                Pe <strong>Meserias Local</strong> găsești peste <strong>150+ profesioniști verificați</strong> pentru servicii de {service.name.toLowerCase()} în 
+                <strong>42 de orașe</strong> din România. Toți meseriașii din platformă sunt verificați personal, 
+                cu identitate confirmată, experiență validată și recenzii reale de la clienți anteriori.
+              </p>
+              <p class="text-slate-700 leading-relaxed">
+                Procesul este simplu și rapid: postezi cererea gratuită, primești 3-5 oferte personalizate în 24 de ore,
+                compari prețurile și recenziile, apoi alegi meseriașul potrivit pentru proiectul tău. Fără comisioane,
+                fără costuri ascunse, plătești doar pentru lucrarea efectuată.
+              </p>
+            </div>
+          </>
+        )}
       </div>
 
       <!-- Two Column Layout -->
@@ -447,6 +587,30 @@ const faqSchema = {
         </div>
       </div>
 
+      <!-- Price Ranges from Sanity -->
+      {sanityContent?.priceRanges && sanityContent.priceRanges.length > 0 && (
+        <div class="max-w-4xl mx-auto mb-16">
+          <h3 class="text-2xl font-bold text-slate-900 mb-6">
+            Prețuri orientative pentru {service.name.toLowerCase()}
+          </h3>
+          <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6">
+            <div class="space-y-4">
+              {sanityContent.priceRanges.map((price: any) => (
+                <div class="flex justify-between items-center py-3 border-b border-blue-200 last:border-0">
+                  <span class="text-slate-700 font-medium">{price.service}</span>
+                  <span class="text-blue-700 font-bold">
+                    {price.minPrice} - {price.maxPrice} RON
+                  </span>
+                </div>
+              ))}
+            </div>
+            <p class="text-sm text-slate-600 mt-4">
+              * Prețurile sunt orientative și pot varia în funcție de complexitatea proiectului și materiale.
+            </p>
+          </div>
+        </div>
+      )}
+
       <!-- How to Choose Section -->
       <div class="max-w-4xl mx-auto mb-16">
         <h3 class="text-2xl font-bold text-slate-900 mb-6">
@@ -517,6 +681,24 @@ const faqSchema = {
       </p>
       
       <div class="space-y-4">
+        {sanityContent?.faqSection && sanityContent.faqSection.length > 0 ? (
+          sanityContent.faqSection.map((faq: any) => (
+            <details class="group border border-slate-200 rounded-xl p-6 bg-white hover:border-blue-300 transition-colors">
+              <summary class="flex items-center justify-between cursor-pointer list-none">
+                <h3 class="text-lg font-semibold text-slate-900 pr-4">
+                  {faq.question}
+                </h3>
+                <svg class="w-5 h-5 text-slate-500 group-open:rotate-180 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <div class="mt-4 text-slate-600 leading-relaxed whitespace-pre-line">
+                {faq.answer}
+              </div>
+            </details>
+          ))
+        ) : (
+          // Default FAQ if no Sanity content
         <details class="group border border-slate-200 rounded-xl p-6 bg-white hover:border-blue-300 transition-colors">
           <summary class="flex items-center justify-between cursor-pointer list-none">
             <h3 class="text-lg font-semibold text-slate-900 pr-4">
@@ -633,6 +815,7 @@ const faqSchema = {
             </p>
           </div>
         </details>
+        )}
       </div>
     </div>
   </section>

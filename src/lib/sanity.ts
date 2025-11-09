@@ -10,6 +10,7 @@ const sanityClient = createClient({
 
 export interface ServicePage {
   _id: string;
+  _type?: string;
   title: string;
   slug: { current: string };
   tradeSlug: string;
@@ -46,58 +47,39 @@ export interface ServicePage {
   schema?: any; // JSON-LD schema override
 }
 
+const servicePageProjection = `{
+  _id,
+  _type,
+  title,
+  slug,
+  tradeSlug,
+  citySlug,
+  tradeName,
+  cityName,
+  categoryName,
+  categorySlug,
+  isPublished,
+  publishedAt,
+  heroTitle,
+  heroSubtitle,
+  heroDescription,
+  metaDescription,
+  seoKeywords,
+  content,
+  faqSection,
+  priceRanges,
+  localTips,
+  relatedServices
+}`;
+
 export async function getAllServicePages(): Promise<ServicePage[]> {
-  const query = `*[_type == "servicePage" && isPublished == true] | order(publishedAt desc) {
-    _id,
-    title,
-    slug,
-    tradeSlug,
-    citySlug,
-    tradeName,
-    cityName,
-    categoryName,
-    categorySlug,
-    isPublished,
-    publishedAt,
-    heroTitle,
-    heroSubtitle,
-    heroDescription,
-    metaDescription,
-    seoKeywords,
-    content,
-    faqSection,
-    priceRanges,
-    localTips,
-    relatedServices
-  }`;
+  const query = `*[_type == "servicePage" && isPublished == true] | order(publishedAt desc) ${servicePageProjection}`;
   
   return sanityClient.fetch(query);
 }
 
 export async function getServicePageBySlug(slug: string): Promise<ServicePage | null> {
-  const query = `*[_type == "servicePage" && slug.current == $slug && isPublished == true][0] {
-    _id,
-    title,
-    slug,
-    tradeSlug,
-    citySlug,
-    tradeName,
-    cityName,
-    categoryName,
-    categorySlug,
-    isPublished,
-    publishedAt,
-    heroTitle,
-    heroSubtitle,
-    heroDescription,
-    metaDescription,
-    seoKeywords,
-    content,
-    faqSection,
-    priceRanges,
-    localTips,
-    relatedServices
-  }`;
+  const query = `*[_type == "servicePage" && slug.current == $slug && isPublished == true][0] ${servicePageProjection}`;
   
   return sanityClient.fetch(query, { slug });
 }
@@ -108,29 +90,12 @@ export async function getServiceCityPage(tradeSlug: string, citySlug: string): P
   const normalizedCitySlug = citySlug.toLowerCase();
   
   // First try: Match by tradeSlug and citySlug fields
-  const queryByFields = `*[_type == "servicePage" && lower(tradeSlug) == $tradeSlug && lower(citySlug) == $citySlug && isPublished == true][0] {
-    _id,
-    title,
-    slug,
-    tradeSlug,
-    citySlug,
-    tradeName,
-    cityName,
-    categoryName,
-    categorySlug,
-    isPublished,
-    publishedAt,
-    heroTitle,
-    heroSubtitle,
-    heroDescription,
-    metaDescription,
-    seoKeywords,
-    content,
-    faqSection,
-    priceRanges,
-    localTips,
-    relatedServices
-  }`;
+  const queryByFields = `*[
+    _type == "servicePage" &&
+    lower(tradeSlug) == $tradeSlug &&
+    lower(citySlug) == $citySlug &&
+    isPublished == true
+  ] | order(coalesce(publishedAt, _updatedAt) desc) [0] ${servicePageProjection}`;
   
   let result = await sanityClient.fetch(queryByFields, { 
     tradeSlug: normalizedTradeSlug, 
@@ -140,29 +105,11 @@ export async function getServiceCityPage(tradeSlug: string, citySlug: string): P
   // Second try: If not found, try matching by slug pattern (for legacy data)
   // Pattern: slug contains both tradeSlug and citySlug
   if (!result) {
-    const queryBySlugPattern = `*[_type == "servicePage" && slug.current match "*" + $tradeSlug + "*" && isPublished == true] {
-      _id,
-      title,
-      slug,
-      tradeSlug,
-      citySlug,
-      tradeName,
-      cityName,
-      categoryName,
-      categorySlug,
-      isPublished,
-      publishedAt,
-      heroTitle,
-      heroSubtitle,
-      heroDescription,
-      metaDescription,
-      seoKeywords,
-      content,
-      faqSection,
-      priceRanges,
-      localTips,
-      relatedServices
-    }`;
+    const queryBySlugPattern = `*[
+      _type == "servicePage" &&
+      slug.current match "*" + $tradeSlug + "*" &&
+      isPublished == true
+    ] ${servicePageProjection}`;
     
     const results = await sanityClient.fetch(queryBySlugPattern, { 
       tradeSlug: normalizedTradeSlug
@@ -186,6 +133,15 @@ export async function getServiceCityPage(tradeSlug: string, citySlug: string): P
     }
   }
   
+  // Third try: fallback to general (no-city) content so we at least render Sanity text
+  if (!result) {
+    result = await fetchGeneralServicePage(normalizedTradeSlug);
+    
+    if (!result && process.env.NODE_ENV === 'development') {
+      console.warn(`⚠️ No Sanity city page for ${tradeSlug}/${citySlug}, and no general service page found. Falling back to generated SEO content.`);
+    }
+  }
+  
   // Debug logging in development
   if (process.env.NODE_ENV === 'development') {
     console.log('🔍 Sanity getServiceCityPage:');
@@ -196,6 +152,54 @@ export async function getServiceCityPage(tradeSlug: string, citySlug: string): P
       console.log('  Found slug:', result.slug?.current);
       console.log('  Found tradeSlug:', result.tradeSlug);
       console.log('  Found citySlug:', result.citySlug);
+    }
+  }
+  
+  return result;
+}
+
+async function fetchGeneralServicePage(normalizedTradeSlug: string) {
+  const queryGeneralServicePage = `*[
+    lower(tradeSlug) == $tradeSlug &&
+    isPublished == true &&
+    (
+      (_type == "servicePage" && (!defined(citySlug) || citySlug == "")) ||
+      _type == "servicePageNoCity"
+    )
+  ] | order(coalesce(publishedAt, _updatedAt) desc) [0] ${servicePageProjection}`;
+  
+  return sanityClient.fetch(queryGeneralServicePage, { tradeSlug: normalizedTradeSlug });
+}
+
+// Get service page content without city (for service overview pages)
+// Returns a page for this service without a specific city (general service page)
+export async function getServicePage(tradeSlug: string): Promise<ServicePage | null> {
+  const normalizedTradeSlug = tradeSlug.toLowerCase();
+  
+  // First try: Look for general pages either stored as servicePage without citySlug
+  // or using the dedicated servicePageNoCity schema
+  let result = await fetchGeneralServicePage(normalizedTradeSlug);
+  
+  // Second try: If no general page found, get the first city-specific page as fallback
+  if (!result) {
+    const queryWithCity = `*[
+      _type == "servicePage" &&
+      lower(tradeSlug) == $tradeSlug &&
+      isPublished == true
+    ] | order(coalesce(publishedAt, _updatedAt) desc) [0] ${servicePageProjection}`;
+    
+    result = await sanityClient.fetch(queryWithCity, { tradeSlug: normalizedTradeSlug });
+  }
+  
+  if (process.env.NODE_ENV === 'development') {
+    console.log('🔍 Sanity getServicePage (no city):');
+    console.log('  Input tradeSlug:', tradeSlug, '→', normalizedTradeSlug);
+    console.log('  Result:', result ? '✅ Found' : '❌ Not found');
+    if (result) {
+      console.log('  Found title:', result.title);
+      console.log('  Found citySlug:', result.citySlug || 'N/A (general page)');
+      console.log('  Is general page:', !result.citySlug);
+      console.log('  Document type:', (result as any)._type || 'unknown');
     }
   }
   

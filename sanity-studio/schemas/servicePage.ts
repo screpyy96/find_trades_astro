@@ -61,10 +61,9 @@ export default defineType({
     }),
     defineField({
       name: 'citySlug',
-      title: 'Oraș (Slug)',
+      title: 'Oraș (Slug) - OPȚIONAL pentru pagini generale',
       type: 'string',
-      description: 'Selectează slug-ul orașului',
-      validation: (Rule) => Rule.required(),
+      description: 'Lasă gol pentru pagini generale de serviciu (fără oraș specific). Completează pentru pagini specifice unui oraș.',
       options: {
         list: [
           { title: 'București', value: 'bucuresti' },
