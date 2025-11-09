@@ -159,7 +159,7 @@ export default defineType({
       title: 'Hero - Subtitlu',
       type: 'string',
       description: 'Ex: Electrician București - Servicii Electrice Profesionale',
-      validation: (Rule) => Rule.max(100),
+      validation: (Rule: any) => Rule.max(100),
     }),
     defineField({
       name: 'heroDescription',
@@ -167,7 +167,7 @@ export default defineType({
       type: 'text',
       rows: 3,
       description: 'Descriere scurtă pentru hero (2-3 propoziții)',
-      validation: (Rule) => Rule.max(300),
+      validation: (Rule: any) => Rule.max(300),
     }),
     // SEO FIELDS
     defineField({
@@ -176,7 +176,7 @@ export default defineType({
       type: 'text',
       rows: 2,
       description: 'Descriere pentru motoarele de căutare (150-160 caractere)',
-      validation: (Rule) => Rule.max(160),
+      validation: (Rule: any) => Rule.max(160),
     }),
     defineField({
       name: 'seoKeywords',
@@ -235,7 +235,7 @@ export default defineType({
                     name: 'href',
                     type: 'url',
                     title: 'URL',
-                    validation: (Rule) => Rule.uri({
+                    validation: (Rule: any) => Rule.uri({
                       allowRelative: true,
                       scheme: ['http', 'https', 'mailto', 'tel']
                     })
@@ -288,7 +288,7 @@ export default defineType({
           ],
           preview: {
             select: { title: 'service', minPrice: 'minPrice', maxPrice: 'maxPrice' },
-            prepare({ title, minPrice, maxPrice }) {
+            prepare({ title, minPrice, maxPrice }: any) {
               return {
                 title: title,
                 subtitle: `${minPrice} - ${maxPrice} RON`,

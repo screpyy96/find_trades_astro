@@ -205,7 +205,8 @@ const description = `${workerName}${location}: ${tradeNames}. ` +
   `${rating > 0 ? `★${rating.toFixed(1)} ` : ''}` +
   `Contactați pentru ofertă gratuită!`;
 
-const avatarUrl = worker.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(worker.name || 'M')}&background=3B82F6&color=fff&size=400`;
+// Avatar URL is handled in the component
+// const avatarUrl = worker.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(worker.name || 'M')}&background=3B82F6&color=fff&size=400`;
 ---
 
 <Base title={title} description={description}>
