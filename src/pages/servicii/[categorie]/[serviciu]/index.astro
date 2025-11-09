@@ -9,6 +9,10 @@ export const config = { revalidate: 1800 };
 
 const { categorie, serviciu } = Astro.params;
 
+if (!categorie || !serviciu) {
+  return Astro.redirect('/404');
+}
+
 if (!supabase) {
   if (import.meta.env.DEV) {
     console.warn('Supabase client unavailable when rendering service page');
