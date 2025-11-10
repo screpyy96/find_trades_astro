@@ -5,6 +5,7 @@ import MobileHeader from '../components/layout/MobileHeader.astro';
 import { MobileNavbar } from '../components/layout/MobileNavbar';
 import Footer from '../components/layout/Footer.astro';
 import Analytics from '../components/analytics/Analytics.astro';
+import { ChatbotWidget } from '../components/chatbot/ChatbotWidget';
 
 interface Props {
   title: string;
@@ -96,6 +97,8 @@ const WEB_URL = 'https://www.meseriaslocal.ro';
     
     <Footer />
     <div class="h-24 lg:hidden" aria-hidden="true"></div>
-
+    
+    <!-- AI Chatbot Widget -->
+    <ChatbotWidget client:load remixUrl={APP_URL} />
   </body>
 </html>
