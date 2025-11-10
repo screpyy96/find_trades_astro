@@ -134,6 +134,7 @@ export function MobileNavbar({ currentPath, appUrl = '', webUrl = '' }: MobileNa
         style={{ maxHeight: '85vh' }}
         role="dialog"
         aria-modal="true"
+        aria-label="Meniu de navigare"
       >
         {/* Drag Handle */}
         <div className="p-4 cursor-pointer" onClick={closeDrawer}>
