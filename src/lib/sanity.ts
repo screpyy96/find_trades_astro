@@ -133,12 +133,20 @@ export async function getServiceCityPage(tradeSlug: string, citySlug: string): P
     }
   }
   
-  // Third try: fallback to general (no-city) content so we at least render Sanity text
+  // Third try: fallback to general (no-city) content ONLY if it's truly general
+  // This allows city pages to inherit general service content when no city-specific content exists
   if (!result) {
-    result = await fetchGeneralServicePage(normalizedTradeSlug);
+    const generalPage = await fetchGeneralServicePage(normalizedTradeSlug);
     
-    if (!result && process.env.NODE_ENV === 'development') {
-      console.warn(`⚠️ No Sanity city page for ${tradeSlug}/${citySlug}, and no general service page found. Falling back to generated SEO content.`);
+    // Only use general page if it truly has no citySlug (is a general page)
+    if (generalPage && !generalPage.citySlug) {
+      result = generalPage;
+      
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`  ℹ️ Using general service page as fallback for ${tradeSlug}/${citySlug}`);
+      }
+    } else if (process.env.NODE_ENV === 'development') {
+      console.warn(`⚠️ No Sanity content for ${tradeSlug}/${citySlug}. Falling back to generated SEO content.`);
     }
   }
   
@@ -176,20 +184,9 @@ async function fetchGeneralServicePage(normalizedTradeSlug: string) {
 export async function getServicePage(tradeSlug: string): Promise<ServicePage | null> {
   const normalizedTradeSlug = tradeSlug.toLowerCase();
   
-  // First try: Look for general pages either stored as servicePage without citySlug
-  // or using the dedicated servicePageNoCity schema
-  let result = await fetchGeneralServicePage(normalizedTradeSlug);
-  
-  // Second try: If no general page found, get the first city-specific page as fallback
-  if (!result) {
-    const queryWithCity = `*[
-      _type == "servicePage" &&
-      lower(tradeSlug) == $tradeSlug &&
-      isPublished == true
-    ] | order(coalesce(publishedAt, _updatedAt) desc) [0] ${servicePageProjection}`;
-    
-    result = await sanityClient.fetch(queryWithCity, { tradeSlug: normalizedTradeSlug });
-  }
+  // ONLY look for general pages (without citySlug)
+  // Do NOT fallback to city-specific pages to avoid content mixing
+  const result = await fetchGeneralServicePage(normalizedTradeSlug);
   
   if (process.env.NODE_ENV === 'development') {
     console.log('🔍 Sanity getServicePage (no city):');
@@ -200,6 +197,8 @@ export async function getServicePage(tradeSlug: string): Promise<ServicePage | n
       console.log('  Found citySlug:', result.citySlug || 'N/A (general page)');
       console.log('  Is general page:', !result.citySlug);
       console.log('  Document type:', (result as any)._type || 'unknown');
+    } else {
+      console.log('  ℹ️ No general service page found - will use fallback content');
     }
   }
   
