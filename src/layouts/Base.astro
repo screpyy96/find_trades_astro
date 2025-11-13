@@ -31,6 +31,8 @@ const WEB_URL = 'https://www.meseriaslocal.ro';
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
     <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href={APP_URL} />
+    <link rel="preconnect" href={APP_URL} crossorigin />
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalURL} />
@@ -81,8 +83,23 @@ const WEB_URL = 'https://www.meseriaslocal.ro';
     <!-- Analytics (GTM & Clarity) -->
     <Analytics />
     
-    <!-- Desktop Navbar -->
-    <Navbar />
+    <!-- Desktop Navbar with loading optimization -->
+    <div class="navbar-container">
+      <Navbar />
+    </div>
+    
+    <style>
+      .navbar-container {
+        min-height: 64px;
+        background: white;
+        border-bottom: 1px solid #e2e8f0;
+      }
+      @media (max-width: 1024px) {
+        .navbar-container {
+          display: none;
+        }
+      }
+    </style>
     
     <!-- Mobile Header (simple, just logo) -->
     <MobileHeader />
