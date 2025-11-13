@@ -227,6 +227,12 @@ export interface BlogPost {
         _ref: string;
       };
     };
+    bio?: string;
+    socialLinks?: {
+      twitter?: string;
+      linkedin?: string;
+      website?: string;
+    };
   };
   category?: {
     name: string;
