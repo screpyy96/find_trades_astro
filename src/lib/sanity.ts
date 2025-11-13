@@ -281,7 +281,7 @@ export async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> 
     excerpt,
     content,
     featuredImage,
-    "author": author->{name, avatar},
+    "author": author->{name, avatar, bio, socialLinks},
     "category": category->{name, slug},
     tags,
     publishedAt,
