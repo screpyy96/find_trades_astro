@@ -163,7 +163,7 @@ function renderPortableText(blocks: any[]) {
               if (linkDef._type === 'link') {
                 const href = linkDef.href || '';
                 const target = href.startsWith('http') ? ' target="_blank" rel="noopener noreferrer"' : '';
-                text = `<a href="${href}"${target} class="text-blue-600 hover:text-blue-700 font-medium underline decoration-2 underline-offset-2">${text}</a>`;
+                text = `<a href="${href}"${target} class="text-emerald-600 hover:text-emerald-700 font-medium underline decoration-2 underline-offset-2">${text}</a>`;
               }
             }
             // Standard marks
@@ -195,7 +195,7 @@ function renderPortableText(blocks: any[]) {
         }
         
         if (block.listItem === 'bullet') {
-          html += `<li class="flex items-start gap-3 text-slate-700 leading-relaxed text-base"><span class="text-blue-600 font-bold text-xl mt-0.5 flex-shrink-0">•</span><span>${children}</span></li>`;
+          html += `<li class="flex items-start gap-3 text-slate-700 leading-relaxed text-base"><span class="text-emerald-600 font-bold text-xl mt-0.5 flex-shrink-0">•</span><span>${children}</span></li>`;
         } else {
           html += `<li class="text-slate-700 leading-relaxed text-base">${children}</li>`;
         }
@@ -217,24 +217,24 @@ function renderPortableText(blocks: any[]) {
         
         // Handle different block styles - premium visual design
         if (block.style === 'h2') {
-          html += `<h2 class="text-2xl md:text-3xl font-bold text-slate-900 mt-12 mb-6 pb-3 border-b-2 border-gradient-to-r from-blue-500 to-purple-500 flex items-center gap-3">
-            <span class="w-1.5 h-8 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full"></span>
+          html += `<h2 class="text-2xl md:text-3xl font-bold text-slate-900 mt-12 mb-6 pb-3 border-b-2 border-gradient-to-r from-emerald-500 to-teal-500 flex items-center gap-3">
+            <span class="w-1.5 h-8 bg-gradient-to-b from-emerald-500 to-teal-500 rounded-full"></span>
             ${children}
           </h2>`;
         } else if (block.style === 'h3') {
           html += `<h3 class="text-xl md:text-2xl font-semibold text-slate-900 mt-10 mb-4 flex items-center gap-3">
-            <span class="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center text-white text-sm flex-shrink-0">
+            <span class="w-8 h-8 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg flex items-center justify-center text-white text-sm flex-shrink-0">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
             </span>
             <span>${children}</span>
           </h3>`;
         } else if (block.style === 'h4') {
           html += `<h4 class="text-lg md:text-xl font-semibold text-slate-900 mt-8 mb-3 flex items-center gap-2">
-            <span class="w-1 h-6 bg-blue-500 rounded-full"></span>
+            <span class="w-1 h-6 bg-emerald-500 rounded-full"></span>
             ${children}
           </h4>`;
         } else if (block.style === 'blockquote') {
-          html += `<blockquote class="border-l-4 border-blue-500 bg-gradient-to-r from-blue-50 to-transparent pl-6 pr-4 py-5 italic text-slate-700 my-8 rounded-r-xl shadow-sm">${children}</blockquote>`;
+          html += `<blockquote class="border-l-4 border-emerald-500 bg-gradient-to-r from-emerald-50 to-transparent pl-6 pr-4 py-5 italic text-slate-700 my-8 rounded-r-xl shadow-sm">${children}</blockquote>`;
         } else {
           html += `<p class="text-slate-700 leading-relaxed mb-6 text-base">${children}</p>`;
         }
@@ -439,10 +439,11 @@ const metrics = await fetchServiceMetrics({
   cityName: city.name
 });
 
+// Afișează stats doar dacă sunt impresionante (evită 1.7/5 sau 1 lucrare)
 const heroStats = [
-  metrics.avgRating ? { label: 'Rating mediu', value: `${metrics.avgRating.toFixed(1)}/5` } : null,
-  metrics.jobsLast30Days ? { label: 'Lucrări în ultimele 30 zile', value: `${metrics.jobsLast30Days}` } : null,
-  metrics.avgBudget ? { label: 'Buget mediu acceptat', value: `${Math.round(metrics.avgBudget)} RON` } : null
+  (metrics.avgRating && metrics.avgRating >= 4.0) ? { label: 'Rating mediu', value: `${metrics.avgRating.toFixed(1)}/5` } : null,
+  (metrics.jobsLast30Days && metrics.jobsLast30Days >= 5) ? { label: 'Lucrări în ultimele 30 zile', value: `${metrics.jobsLast30Days}` } : null,
+  (metrics.avgBudget && metrics.avgBudget >= 100) ? { label: 'Buget mediu acceptat', value: `${Math.round(metrics.avgBudget)} RON` } : null
 ].filter(Boolean) as Array<{ label: string; value: string }>;
 
 const localBusinessSchema = createLocalBusinessSchema({
@@ -518,13 +519,13 @@ const priceSummaryText = metrics.avgBudget
 
     <!-- Floating geometric shapes -->
     <div class="absolute inset-0 opacity-15">
-      <div class="absolute top-24 left-40 w-14 h-14 border-2 border-blue-400/30 rounded-full animate-pulse" style="animation-delay: 0.5s"></div>
+      <div class="absolute top-24 left-40 w-14 h-14 border-2 border-emerald-400/30 rounded-full animate-pulse" style="animation-delay: 0.5s"></div>
       <div class="absolute top-48 left-20 w-10 h-10 bg-emerald-400/15 rounded-full animate-bounce" style="animation-delay: 1s"></div>
-      <div class="absolute top-20 right-28 w-16 h-16 border-2 border-purple-400/30 rounded-full animate-pulse" style="animation-delay: 1.5s"></div>
-      <div class="absolute top-52 right-16 w-12 h-12 bg-blue-400/15 rounded-full animate-bounce" style="animation-delay: 2s"></div>
+      <div class="absolute top-20 right-28 w-16 h-16 border-2 border-teal-400/30 rounded-full animate-pulse" style="animation-delay: 1.5s"></div>
+      <div class="absolute top-52 right-16 w-12 h-12 bg-emerald-400/15 rounded-full animate-bounce" style="animation-delay: 2s"></div>
     </div>
 
-    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="relative z-10 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
       <div class="max-w-4xl mx-auto">
         <!-- Breadcrumbs - Subtle & Clean (like Remix) -->
         <nav class="flex justify-center mb-6">
@@ -585,11 +586,11 @@ const priceSummaryText = metrics.avgBudget
               </svg>
             </a>
             <div class="flex items-center gap-2 text-slate-400 text-sm">
-              <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-green-500/20 border border-green-400/30">
-                <span class="text-green-300 text-xs font-medium">Răspuns rapid</span>
+              <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-400/30">
+                <span class="text-emerald-300 text-xs font-medium">Răspuns rapid</span>
               </div>
-              <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-blue-500/20 border border-blue-400/30">
-                <span class="text-blue-300 text-xs font-medium">100% gratuit</span>
+              <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-teal-500/20 border border-teal-400/30">
+                <span class="text-teal-300 text-xs font-medium">100% gratuit</span>
               </div>
             </div>
           </div>
@@ -610,102 +611,268 @@ const priceSummaryText = metrics.avgBudget
   </section>
 
   <!-- Main Content -->
-  <article class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    <!-- Secondary headline when fallback content is used -->
-    {!sanityContent && (
-      <h2 class="text-3xl md:text-4xl font-bold text-slate-900 mb-8">{fallbackContent.h1}</h2>
-    )}
+  <article class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-8 sm:py-12">
     
-    <!-- Content with premium visual design - hidden by default, expandable -->
-    {sanityContent && (
-      <div class="mb-12">
-        <details class="group">
-          <summary class="cursor-pointer list-none">
-            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 rounded-xl p-6 border border-blue-200 transition-all duration-200 flex items-center justify-between">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <div>
-                  <h2 class="text-xl font-bold text-slate-900">Informații detaliate despre {service.name.toLowerCase()} în {city.name}</h2>
-                  <p class="text-sm text-slate-600 mt-1">Click pentru a citi ghidul complet</p>
-                </div>
-              </div>
-              <svg class="w-6 h-6 text-slate-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8">
+      <!-- Main Content Column -->
+      <div class="lg:col-span-2">
+        
+        <!-- De ce Meseriaș Local - SECȚIUNE DEDICATĂ -->
+        <section class="mb-8 sm:mb-12 bg-white rounded-2xl p-4 sm:p-8 border border-slate-200 shadow-sm">
+          <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mb-4 sm:mb-6 flex items-center gap-3">
+            <span class="w-10 h-10 bg-emerald-600 rounded-lg flex items-center justify-center">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
+            </span>
+            De ce să folosești Meseriaș Local?
+          </h2>
+          <div class="grid md:grid-cols-2 gap-3 sm:gap-6">
+            <div class="flex gap-3">
+              <div class="w-10 h-10 sm:w-12 sm:h-12 bg-emerald-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5 sm:w-6 sm:h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="font-semibold text-slate-900 mb-2">Conectare Directă</h3>
+                <p class="text-slate-600 text-sm">Vorbești direct cu meseriașii, fără intermediari. Tu decizi cu cine lucrezi.</p>
+              </div>
             </div>
-          </summary>
-          <div class="mt-4 bg-white rounded-xl p-6 md:p-8 border border-slate-200 shadow-sm">
-            <div class="max-w-none seo-content" set:html={content} />
+            <div class="flex gap-4">
+              <div class="w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <svg class="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="font-semibold text-slate-900 mb-2">Fără Comisioane</h3>
+                <p class="text-slate-600 text-sm">Nu plătești nimic platformei. Prețul convenit e prețul final.</p>
+              </div>
+            </div>
+            <div class="flex gap-4">
+              <div class="w-12 h-12 bg-cyan-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <svg class="w-6 h-6 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="font-semibold text-slate-900 mb-2">Oferte în 24h</h3>
+                <p class="text-slate-600 text-sm">Primești oferte personalizate rapid, de obicei în câteva ore.</p>
+              </div>
+            </div>
+            <div class="flex gap-4">
+              <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="font-semibold text-slate-900 mb-2">Meseriași Verificați</h3>
+                <p class="text-slate-600 text-sm">Toți profesioniștii sunt verificați și au recenzii reale.</p>
+              </div>
+            </div>
           </div>
-        </details>
-      </div>
-    )}
-    
-    <!-- Price Ranges -->
-    {sanityContent?.priceRanges && sanityContent.priceRanges.length > 0 ? (
-      <section id="preturi" class="mb-12">
-        <h2 class="text-2xl font-bold mb-6">Prețuri orientative în {city.name}</h2>
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <table class="w-full">
-            <thead class="bg-gray-50">
-              <tr>
-                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Serviciu</th>
-                <th class="px-6 py-3 text-right text-sm font-semibold text-gray-900">Preț</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200">
-              {sanityContent.priceRanges.map((price: { service: string; minPrice: number; maxPrice: number }) => (
-                <tr>
-                  <td class="px-6 py-4 text-sm text-gray-700">{price.service}</td>
-                  <td class="px-6 py-4 text-sm text-gray-900 font-semibold text-right">
-                    {price.minPrice} - {price.maxPrice} RON
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <p class="text-sm text-gray-500 mt-4">
-          * Prețurile sunt orientative și pot varia în funcție de complexitatea proiectului
-        </p>
-      </section>
-    ) : (
-      metrics.avgBudget && (
-        <section id="preturi" class="mb-12">
-          <h2 class="text-2xl font-bold mb-4">Tarif mediu estimat în {city.name}</h2>
-          <p class="text-gray-700">{priceSummaryText}</p>
+          <div class="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-slate-200">
+            <a
+              href={`${APP_URL}/cere-oferta?tradeId=${trade.id}&title=${encodeURIComponent(service.name)}`}
+              class="inline-flex items-center px-4 sm:px-6 py-2.5 sm:py-3 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 transition-all shadow-lg hover:shadow-xl text-sm sm:text-base"
+            >
+              Cere Ofertă Gratuită Acum
+              <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </a>
+          </div>
         </section>
-      )
-    )}
+
+        <!-- Content - VIZIBIL BY DEFAULT -->
+        {sanityContent && (
+          <div class="mb-8 sm:mb-12 bg-white rounded-2xl p-4 sm:p-8 border border-slate-200 shadow-sm">
+            <div class="max-w-none seo-content" set:html={content} />
+            
+            <!-- CTA în mijlocul conținutului -->
+            <div class="my-8 sm:my-12 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-4 sm:p-6 border border-amber-200 text-center">
+              <p class="text-slate-900 font-semibold mb-4">Ai nevoie de {service.name.toLowerCase()} în {city.name}?</p>
+              <a
+                href={`${APP_URL}/cere-oferta?tradeId=${trade.id}&title=${encodeURIComponent(service.name)}`}
+                class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-lg hover:from-amber-600 hover:to-orange-600 transition-all"
+              >
+                Solicită Oferte Gratuite
+                <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </a>
+            </div>
+          </div>
+        )}
     
+      </div>
+
+      <!-- Sidebar Column -->
+      <div class="lg:col-span-1">
+        <div class="sticky top-24 space-y-6">
+          
+          <!-- CTA Card -->
+          <div class="bg-gradient-to-br from-emerald-600 to-teal-600 rounded-2xl p-4 sm:p-6 text-white shadow-xl">
+            <h3 class="text-xl font-bold mb-3">Cere Ofertă Gratuită</h3>
+            <p class="text-emerald-100 text-sm mb-4">Primești oferte personalizate în 2-4 ore</p>
+            <a
+              href={`${APP_URL}/cere-oferta?tradeId=${trade.id}&title=${encodeURIComponent(service.name)}`}
+              class="block w-full text-center px-6 py-3 bg-white text-emerald-600 font-semibold rounded-xl hover:bg-emerald-50 transition-all shadow-lg"
+            >
+              Solicită Acum
+            </a>
+            <div class="mt-4 pt-4 border-t border-white/20 space-y-2 text-sm">
+              <div class="flex items-center gap-2">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+                <span>Fără comisioane</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+                <span>Răspuns rapid</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+                <span>Meseriași verificați</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Price Ranges - SIDEBAR -->
+          {sanityContent?.priceRanges && sanityContent.priceRanges.length > 0 && (
+            <div class="bg-white rounded-2xl p-4 sm:p-6 border border-slate-200 shadow-sm">
+              <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Prețuri în {city.name}
+              </h3>
+              <div class="space-y-3">
+                {sanityContent.priceRanges.slice(0, 5).map((price: { service: string; minPrice: number; maxPrice: number }) => (
+                  <div class="flex justify-between items-start gap-2 pb-3 border-b border-slate-100 last:border-0">
+                    <span class="text-sm text-slate-700">{price.service}</span>
+                    <span class="text-sm font-semibold text-slate-900 whitespace-nowrap">{price.minPrice}-{price.maxPrice} lei</span>
+                  </div>
+                ))}
+              </div>
+              <p class="text-xs text-slate-500 mt-4">* Prețuri orientative</p>
+            </div>
+          )}
+
+          <!-- Cartiere - SIDEBAR -->
+          {city.neighborhoods && city.neighborhoods.length > 0 && (
+            <div class="bg-white rounded-2xl p-4 sm:p-6 border border-slate-200 shadow-sm">
+              <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                Acoperim toate cartierele
+              </h3>
+              <div class="flex flex-wrap gap-2">
+                {city.neighborhoods.slice(0, 8).map((neighborhood: string) => (
+                  <span class="px-3 py-1.5 bg-slate-100 text-slate-700 text-xs font-medium rounded-full">
+                    {neighborhood}
+                  </span>
+                ))}
+              </div>
+              <p class="text-xs text-slate-500 mt-4">Meseriași disponibili în toate zonele din {city.name}</p>
+            </div>
+          )}
+
+        </div>
+      </div>
+    </div>
+    
+    <!-- Cartiere Section - MAIN CONTENT -->
+    {city.neighborhoods && city.neighborhoods.length > 0 && (
+      <section id="cartiere" class="mb-8 sm:mb-12 max-w-4xl">
+        <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-4 sm:p-8 border border-green-200">
+          <h2 class="text-2xl md:text-3xl font-bold text-slate-900 mb-6 flex items-center gap-3">
+            <span class="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </span>
+            Acoperim toate cartierele din {city.name}
+          </h2>
+          <p class="text-slate-700 mb-6">
+            Meseriașii noștri {service.name.toLowerCase()} sunt disponibili în toate zonele din {city.name}. Indiferent unde te afli, găsești rapid un profesionist verificat.
+          </p>
+          <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+            {city.neighborhoods.map((neighborhood: string) => (
+              <div class="bg-white rounded-lg px-4 py-3 border border-green-200 text-center">
+                <span class="text-slate-900 font-medium text-sm">{neighborhood}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    )}
+
     <!-- Local Tips -->
     {sanityContent?.localTips && sanityContent.localTips.length > 0 && (
-      <section id="sfaturi-locale" class="mb-12">
-        <h2 class="text-2xl font-bold mb-6">Sfaturi locale pentru {city.name}</h2>
-        <div class="space-y-4">
+      <section id="sfaturi-locale" class="mb-8 sm:mb-12 max-w-4xl">
+        <h2 class="text-2xl md:text-3xl font-bold text-slate-900 mb-6 flex items-center gap-3">
+          <span class="w-10 h-10 bg-amber-600 rounded-lg flex items-center justify-center">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+          </span>
+          Sfaturi locale pentru {city.name}
+        </h2>
+        <div class="grid md:grid-cols-2 gap-6">
           {sanityContent.localTips.map((tip: { title: string; description: string }) => (
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
-              <h3 class="text-lg font-semibold text-gray-900 mb-2">{tip.title}</h3>
-              <p class="text-gray-700">{tip.description}</p>
+            <div class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-6">
+              <h3 class="text-lg font-semibold text-slate-900 mb-3 flex items-center gap-2">
+                <svg class="w-5 h-5 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                </svg>
+                {tip.title}
+              </h3>
+              <p class="text-slate-700 leading-relaxed">{tip.description}</p>
             </div>
           ))}
         </div>
       </section>
     )}
     
-    <!-- FAQ -->
+    <!-- FAQ - ÎMBUNĂTĂȚIT -->
     {sanityContent?.faqSection && sanityContent.faqSection.length > 0 && (
-      <section id="intrebari-frecvente" class="mb-12">
-        <h2 class="text-2xl font-bold mb-6">Întrebări Frecvente</h2>
+      <section id="intrebari-frecvente" class="mb-8 sm:mb-12 max-w-4xl">
+        <h2 class="text-2xl md:text-3xl font-bold text-slate-900 mb-6 flex items-center gap-3">
+          <span class="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </span>
+          Întrebări Frecvente
+        </h2>
         <div class="space-y-4">
-          {sanityContent.faqSection.map((item: { question: string; answer: string }) => (
-            <details class="bg-gray-50 rounded-lg p-4">
-              <summary class="font-semibold cursor-pointer">{item.question}</summary>
-              <p class="mt-2 text-gray-700">{item.answer}</p>
+          {sanityContent.faqSection.map((item: { question: string; answer: string }, index: number) => (
+            <details class="group bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all">
+              <summary class="cursor-pointer list-none p-6 flex items-center justify-between">
+                <div class="flex items-start gap-4 flex-1">
+                  <span class="w-8 h-8 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center font-bold text-sm flex-shrink-0">
+                    {index + 1}
+                  </span>
+                  <h3 class="font-semibold text-slate-900 text-lg">{item.question}</h3>
+                </div>
+                <svg class="w-6 h-6 text-slate-400 group-open:rotate-180 transition-transform flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <div class="px-6 pb-6 pl-18">
+                <p class="text-slate-700 leading-relaxed">{item.answer}</p>
+              </div>
             </details>
           ))}
         </div>
@@ -714,13 +881,13 @@ const priceSummaryText = metrics.avgBudget
     
     <!-- Nearby Cities -->
     {nearbyCityLinks.length > 0 && (
-      <section id="orase-apropiate" class="mb-12">
+      <section id="orase-apropiate" class="mb-8 sm:mb-12">
         <h2 class="text-2xl font-bold mb-6">Orașe Apropiate</h2>
         <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
           {nearbyCityLinks.map(nearbyCity => (
             <a 
               href={`/servicii/${categorie}/${serviciu}/${nearbyCity.slug}/`}
-              class="p-4 bg-white rounded-lg border border-gray-200 hover:border-blue-500 hover:shadow-md transition"
+              class="p-4 bg-white rounded-lg border border-gray-200 hover:border-emerald-500 hover:shadow-md transition"
             >
               <h3 class="font-semibold">{service.name} {nearbyCity.name}</h3>
             </a>
@@ -766,7 +933,7 @@ const priceSummaryText = metrics.avgBudget
             return (
               <a 
                 href={`/servicii/${relatedCategorySlug}/${cleanSlug}/${oras}/`}
-                class="p-4 bg-white rounded-lg border border-gray-200 hover:border-blue-500 hover:shadow-md transition text-center"
+                class="p-4 bg-white rounded-lg border border-gray-200 hover:border-emerald-500 hover:shadow-md transition text-center"
               >
                 <h3 class="font-semibold">{relatedService.serviceName}</h3>
               </a>
@@ -782,7 +949,7 @@ const priceSummaryText = metrics.avgBudget
             {similarServices.map(similarService => (
               <a 
                 href={`/servicii/${categorie}/${similarService.slug}/${oras}/`}
-                class="p-4 bg-white rounded-lg border border-gray-200 hover:border-blue-500 hover:shadow-md transition text-center"
+                class="p-4 bg-white rounded-lg border border-gray-200 hover:border-emerald-500 hover:shadow-md transition text-center"
               >
                 <h3 class="font-semibold">{similarService.name}</h3>
               </a>
@@ -793,7 +960,7 @@ const priceSummaryText = metrics.avgBudget
             <p class="text-gray-700 mb-4">Descoperă alte servicii specializate verificate la nivel național.</p>
             <a
               href={`/servicii/${categorie}/`}
-              class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition"
+              class="inline-flex items-center justify-center px-4 py-2 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition"
             >
               Vezi toate serviciile
             </a>
@@ -803,9 +970,9 @@ const priceSummaryText = metrics.avgBudget
     )}
     
     <!-- Final CTA Section -->
-    <section class="mt-16 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8 text-center border border-blue-100">
-      <h2 class="text-2xl font-bold text-slate-900 mb-4">Gata să Începi Proiectul Tău?</h2>
-      <p class="text-slate-700 mb-6 max-w-2xl mx-auto">
+    <section class="mt-12 sm:mt-16 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl p-6 sm:p-8 text-center border border-emerald-100">
+      <h2 class="text-xl sm:text-2xl font-bold text-slate-900 mb-3 sm:mb-4">Gata să Începi Proiectul Tău?</h2>
+      <p class="text-slate-700 mb-4 sm:mb-6 max-w-2xl mx-auto text-sm sm:text-base">
         Primește oferte gratuite de la meseriași verificați din {city.name}. Răspuns rapid în 2–4 ore, fără comisioane ascunse.
       </p>
       <a
@@ -844,10 +1011,10 @@ const priceSummaryText = metrics.avgBudget
   
   /* Lists with better spacing */
   .seo-content ul {
-    background: linear-gradient(to right, #f8fafc 0%, #ffffff 100%);
+    background: linear-gradient(to right, #f0fdf4 0%, #ffffff 100%);
     border-radius: 12px;
     padding: 1.5rem;
-    border-left: 4px solid #3b82f6;
+    border-left: 4px solid #10b981;
   }
   
   .seo-content ol {
@@ -888,7 +1055,7 @@ const priceSummaryText = metrics.avgBudget
   }
   
   .seo-content a:hover {
-    color: #1d4ed8;
+    color: #059669;
     transform: translateX(2px);
   }
   
@@ -904,14 +1071,14 @@ const priceSummaryText = metrics.avgBudget
     top: -10px;
     left: 10px;
     font-size: 4rem;
-    color: #3b82f6;
+    color: #10b981;
     opacity: 0.2;
     font-family: Georgia, serif;
   }
   
   /* Strong text with better emphasis */
   .seo-content strong {
-    background: linear-gradient(to right, #dbeafe 0%, transparent 100%);
+    background: linear-gradient(to right, #d1fae5 0%, transparent 100%);
     padding: 0 4px;
     border-radius: 3px;
   }
