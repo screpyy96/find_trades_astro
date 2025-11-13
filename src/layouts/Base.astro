@@ -5,6 +5,7 @@ import MobileHeader from '../components/layout/MobileHeader.astro';
 import { MobileNavbar } from '../components/layout/MobileNavbar';
 import Footer from '../components/layout/Footer.astro';
 import Analytics from '../components/analytics/Analytics.astro';
+import CookieConsent from '../components/utils/CookieConsent.astro';
 
 interface Props {
   title: string;
@@ -96,5 +97,8 @@ const WEB_URL = 'https://www.meseriaslocal.ro';
     
     <Footer />
     <div class="h-24 lg:hidden" aria-hidden="true"></div>
+    
+    <!-- Cookie Consent Banner -->
+    <CookieConsent />
   </body>
 </html>
