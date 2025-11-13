@@ -3,6 +3,7 @@ export interface City {
   name: string;
   county: string;
   population?: number;
+  neighborhoods?: string[];
 }
 
 export const cities: City[] = [
