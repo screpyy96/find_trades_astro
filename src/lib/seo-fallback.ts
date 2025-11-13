@@ -44,8 +44,8 @@ function generateH1(serviceName: string, cityName: string): string {
  */
 function generateMetaTitle(serviceName: string, cityName: string): string {
   const capitalizedService = capitalizeFirst(serviceName);
-  const title = `${capitalizedService} ${cityName} | MeseriasLocal România`;
-  return title.length > 60 ? `${capitalizedService} ${cityName} | MeseriasLocal` : title;
+  const title = `${capitalizedService} ${cityName} | Meserias Local România`;
+  return title.length > 60 ? `${capitalizedService} ${cityName} | Meserias Local` : title;
 }
 
 /**

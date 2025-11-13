@@ -77,12 +77,13 @@ export async function GET() {
   ]);
 
   // ========================================
-  // 1️⃣ STATIC PAGES
+  // 1️⃣ STATIC PAGES (ONLY PUBLIC PAGES)
   // ========================================
   const staticPages = [
-    { url: '/', priority: '1.0', changefreq: 'hourly' },
-    { url: '/servicii/', priority: '0.95', changefreq: 'daily' },
-    { url: '/blog/', priority: '0.8', changefreq: 'daily' },
+    { url: '/', priority: '1.0', changefreq: 'daily' },
+    { url: '/servicii/', priority: '0.9', changefreq: 'daily' },
+    { url: '/blog/', priority: '0.7', changefreq: 'daily' },
+    // NOTE: /meseriasi and /solicitari are NOT included - they're dynamic user content
   ];
 
   staticPages.forEach(page => {
@@ -96,7 +97,7 @@ export async function GET() {
   });
 
   // ========================================
-  // 2️⃣ BLOG POSTS
+  // 2️⃣ BLOG CONTENT
   // ========================================
   blogPosts
     ?.filter(post => post?.slug)
@@ -106,39 +107,18 @@ export async function GET() {
       urls.push(`  <url>
     <loc>${xmlEscape(loc)}</loc>
     <lastmod>${lastMod}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>`);
-    });
-
-  blogCategories
-    ?.filter(category => category?.slug)
-    .forEach(category => {
-      const lastMod = category._updatedAt ? new Date(category._updatedAt).toISOString() : currentDate;
-      const loc = ensureTrailingSlash(`${baseUrl}/blog/categorie/${category.slug}`);
-      urls.push(`  <url>
-    <loc>${xmlEscape(loc)}</loc>
-    <lastmod>${lastMod}</lastmod>
-    <changefreq>weekly</changefreq>
+    <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>`);
     });
 
-  blogAuthors
-    ?.filter(author => author?.slug)
-    .forEach(author => {
-      const lastMod = author._updatedAt ? new Date(author._updatedAt).toISOString() : currentDate;
-      const loc = ensureTrailingSlash(`${baseUrl}/blog/autor/${author.slug}`);
-      urls.push(`  <url>
-    <loc>${xmlEscape(loc)}</loc>
-    <lastmod>${lastMod}</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>`);
-    });
+  // NOTE: Blog categories and authors are NOT included in sitemap
+  // - Categories are just filtering pages, not unique content
+  // - Authors are not standalone pages
+  // Only individual blog posts are indexed for better crawl budget
 
   // ========================================
-  // 3️⃣ SERVICE CATEGORIES
+  // 3️⃣ SERVICE PAGES (SEO LANDING PAGES)
   // ========================================
   if (trades && trades.length > 0) {
     const categories = Array.from(
@@ -149,6 +129,7 @@ export async function GET() {
       )
     );
 
+    // Service categories (e.g., /servicii/constructii/)
     categories.forEach(category => {
       if (!category || !category.trim()) return;
       const categorySlug = slugify(category).toLowerCase();
@@ -158,14 +139,12 @@ export async function GET() {
       urls.push(`  <url>
     <loc>${xmlEscape(loc)}</loc>
     <lastmod>${currentDate}</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
   </url>`);
     });
 
-    // ========================================
-    // 4️⃣ SERVICE PAGES (without city)
-    // ========================================
+    // Service pages without city (e.g., /servicii/constructii/zugrav/)
     trades.forEach(trade => {
       if (!trade.category || !trade.category.trim()) return;
 
@@ -179,15 +158,13 @@ export async function GET() {
       urls.push(`  <url>
     <loc>${xmlEscape(loc)}</loc>
     <lastmod>${currentDate}</lastmod>
-    <changefreq>daily</changefreq>
+    <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>`);
     });
 
-    // ========================================
-    // 5️⃣ SERVICE + CITY COMBINATIONS (Top 100 cities)
-    // ========================================
-    const priorityCities = romanianCities.slice(0, 100);
+    // Service + City combinations (Top 50 cities - HIGHEST PRIORITY for long-tail SEO)
+    const priorityCities = romanianCities.slice(0, 50);
     const seenUrls = new Set<string>();
 
     trades.forEach(trade => {
@@ -210,12 +187,21 @@ export async function GET() {
         urls.push(`  <url>
     <loc>${xmlEscape(url)}</loc>
     <lastmod>${currentDate}</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
   </url>`);
       });
     });
   }
+
+  // ========================================
+  // NOTE: EXCLUDED FROM SITEMAP
+  // ========================================
+  // - /meseriasi/* - Individual tradesman profiles (noindex, private)
+  // - /solicitari/* - Job posts (noindex, private)
+  // - /dashboard/* - User dashboards (noindex, private)
+  // - /cere-oferta - Form page (noindex)
+  // - /login, /register - Auth pages (noindex)
 
   // ========================================
   // 5️⃣ GENERATE SITEMAP
