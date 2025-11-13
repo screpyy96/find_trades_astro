@@ -49,4 +49,56 @@ const schemaData = generateHomepageSchema(stats, trades);
 
   <!-- Final CTA Section -->
   <HomeFinalCTA />
+
+  <!-- Analytics Tracking Script -->
+  <script is:inline>
+    // Track CTA clicks
+    document.addEventListener('DOMContentLoaded', () => {
+      // Track "Cere Ofertă" buttons
+      document.querySelectorAll('a[href*="cere-oferta"], button[data-action="cere-oferta"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (window.dataLayer) {
+            window.dataLayer.push({
+              event: 'cere_oferta_click',
+              category: 'conversion',
+              action: 'click',
+              label: 'homepage_cta',
+              page_location: window.location.href
+            });
+          }
+        });
+      });
+
+      // Track service card clicks
+      document.querySelectorAll('a[href*="/servicii/"]').forEach(link => {
+        link.addEventListener('click', function() {
+          const service = this.getAttribute('href')?.split('/').filter(Boolean).pop() || 'unknown';
+          if (window.dataLayer) {
+            window.dataLayer.push({
+              event: 'service_click',
+              category: 'engagement',
+              action: 'click',
+              service: service,
+              source: 'homepage'
+            });
+          }
+        });
+      });
+
+      // Track search interactions
+      const searchInput = document.querySelector('input[type="search"], input[placeholder*="Caută"]');
+      if (searchInput) {
+        searchInput.addEventListener('focus', () => {
+          if (window.dataLayer) {
+            window.dataLayer.push({
+              event: 'search_focus',
+              category: 'engagement',
+              action: 'focus',
+              label: 'homepage_search'
+            });
+          }
+        });
+      }
+    });
+  </script>
 </Base>

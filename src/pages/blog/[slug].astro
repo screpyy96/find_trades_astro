@@ -386,10 +386,12 @@ function renderPortableText(blocks: any[]) {
     </div>
   </article>
 
-  <!-- Reading Progress Script -->
-  <script is:inline>
+  <!-- Reading Progress & Analytics Script -->
+  <script is:inline define:vars={{ articleTitle: post.title, articleCategory: post.category?.name, readingTime: post.readingTime }}>
     // Reading progress bar
     const progressBar = document.getElementById('reading-progress');
+    let scrollDepthTracked = { 25: false, 50: false, 75: false, 100: false };
+    
     if (progressBar) {
       window.addEventListener('scroll', () => {
         const windowHeight = window.innerHeight;
@@ -397,8 +399,61 @@ function renderPortableText(blocks: any[]) {
         const scrolled = window.scrollY;
         const progress = (scrolled / documentHeight) * 100;
         progressBar.style.width = `${Math.min(progress, 100)}%`;
+        
+        // Track scroll depth milestones
+        if (window.dataLayer) {
+          if (progress >= 25 && !scrollDepthTracked[25]) {
+            scrollDepthTracked[25] = true;
+            window.dataLayer.push({ event: 'scroll_depth', scroll_depth: 25, article_title: articleTitle });
+          }
+          if (progress >= 50 && !scrollDepthTracked[50]) {
+            scrollDepthTracked[50] = true;
+            window.dataLayer.push({ event: 'scroll_depth', scroll_depth: 50, article_title: articleTitle });
+          }
+          if (progress >= 75 && !scrollDepthTracked[75]) {
+            scrollDepthTracked[75] = true;
+            window.dataLayer.push({ event: 'scroll_depth', scroll_depth: 75, article_title: articleTitle });
+          }
+          if (progress >= 90 && !scrollDepthTracked[100]) {
+            scrollDepthTracked[100] = true;
+            window.dataLayer.push({ 
+              event: 'blog_read_complete', 
+              category: 'content',
+              article_title: articleTitle,
+              article_category: articleCategory,
+              reading_time: readingTime
+            });
+          }
+        }
       });
     }
+
+    // Track blog view
+    if (window.dataLayer) {
+      window.dataLayer.push({
+        event: 'blog_view',
+        category: 'content',
+        article_title: articleTitle,
+        article_category: articleCategory,
+        reading_time: readingTime
+      });
+    }
+
+    // Track social share clicks
+    document.querySelectorAll('a[href*="facebook.com/sharer"], a[href*="twitter.com/intent"], a[href*="linkedin.com/sharing"]').forEach(link => {
+      link.addEventListener('click', function() {
+        const platform = this.href.includes('facebook') ? 'facebook' : 
+                        this.href.includes('twitter') ? 'twitter' : 'linkedin';
+        if (window.dataLayer) {
+          window.dataLayer.push({
+            event: 'social_share',
+            category: 'engagement',
+            platform: platform,
+            article_title: articleTitle
+          });
+        }
+      });
+    });
 
     // Smooth scroll for internal links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
