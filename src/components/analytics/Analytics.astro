@@ -1,105 +1,38 @@
 ---
 // Analytics component for Astro
-// Loads GTM and Clarity scripts only in production and after user interaction
+// Loads GTM and Clarity scripts
 
 const GTM_ID = import.meta.env.PUBLIC_GTM_ID;
 const CLARITY_ID = import.meta.env.PUBLIC_CLARITY_ID;
-const isProd = import.meta.env.PROD;
 ---
 
-{isProd && (GTM_ID || CLARITY_ID) && (
-  <script define:vars={{ GTM_ID, CLARITY_ID }}>
-    // Only load in production
-    if (typeof window !== 'undefined') {
-      let analyticsLoaded = false;
+<!-- Initialize dataLayer before GTM loads -->
+{GTM_ID && (
+  <script is:inline define:vars={{ GTM_ID }}>
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      'gtm.start': new Date().getTime(),
+      event: 'gtm.js'
+    });
+  </script>
+  
+  <!-- GTM Script -->
+  <script is:inline async src={`https://www.googletagmanager.com/gtm.js?id=${GTM_ID}`}></script>
+)}
 
-      // Check for analytics consent
-      const hasAnalyticsConsent = () => {
-        const consent = localStorage.getItem('cookie-consent') ||
-          localStorage.getItem('analytics-consent') ||
-          document.cookie.includes('analytics=true');
-        return !!consent;
-      };
-
-      // Load analytics after user interaction
-      const loadAnalytics = () => {
-        if (analyticsLoaded) return;
-        analyticsLoaded = true;
-
-        // Load GTM
-        if (GTM_ID && !window.gtmDidInit) {
-          try {
-            window.dataLayer = window.dataLayer || [];
-            window.dataLayer.push({
-              'gtm.start': new Date().getTime(),
-              event: 'gtm.js',
-              'gtm.uniqueEventId': Math.random().toString(36).substr(2, 9)
-            });
-
-            const gtmScript = document.createElement('script');
-            gtmScript.async = true;
-            gtmScript.defer = true;
-            gtmScript.src = `https://www.googletagmanager.com/gtm.js?id=${GTM_ID}`;
-            gtmScript.onerror = () => {
-              console.warn('GTM failed to load');
-            };
-            document.head.appendChild(gtmScript);
-            window.gtmDidInit = true;
-          } catch (error) {
-            console.warn('GTM initialization error:', error);
-          }
-        }
-
-        // Load Clarity
-        if (CLARITY_ID && !window.clarityDidInit) {
-          try {
-            (function(c,l,a,r,i,t,y){
-              c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-              t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-              y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-            })(window, document, "clarity", "script", CLARITY_ID);
-            window.clarityDidInit = true;
-          } catch (error) {
-            console.warn('Clarity initialization error:', error);
-          }
-        }
-
-        // Cleanup listeners
-        document.removeEventListener('scroll', userInteracted);
-        document.removeEventListener('click', userInteracted);
-        document.removeEventListener('keydown', userInteracted);
-      };
-
-      const userInteracted = () => {
-        loadAnalytics();
-      };
-
-      // Check consent or wait for user interaction
-      const initAnalytics = () => {
-        if (hasAnalyticsConsent()) {
-          loadAnalytics();
-        } else {
-          // Load after user interaction
-          document.addEventListener('scroll', userInteracted, { once: true, passive: true });
-          document.addEventListener('click', userInteracted, { once: true });
-          document.addEventListener('keydown', userInteracted, { once: true });
-        }
-      };
-
-      // Delay initialization to avoid blocking
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => {
-          setTimeout(initAnalytics, 2000);
-        });
-      } else {
-        setTimeout(initAnalytics, 2000);
-      }
-    }
+<!-- Clarity Script -->
+{CLARITY_ID && (
+  <script is:inline type="text/javascript" define:vars={{ CLARITY_ID }}>
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", CLARITY_ID);
   </script>
 )}
 
 <!-- GTM noscript fallback -->
-{isProd && GTM_ID && (
+{GTM_ID && (
   <noscript>
     <iframe 
       src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}

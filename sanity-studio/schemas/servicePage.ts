@@ -206,7 +206,7 @@ export default defineType({
       name: 'content',
       title: 'Conținut SEO',
       type: 'array',
-      description: 'Scrie conținut util pentru utilizatori - internal linking se face automat!',
+      description: 'Scrie conținut util pentru utilizatori ',
       of: [
         {
           type: 'block',
