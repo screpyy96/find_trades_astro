@@ -7,6 +7,10 @@ import { getServicePage } from '../../../../lib/sanity';
 export const prerender = false;
 export const config = { revalidate: 1800 };
 
+// Set headers for proper indexing
+Astro.response.headers.set('X-Robots-Tag', 'index, follow');
+Astro.response.headers.set('Cache-Control', 'public, max-age=1800, s-maxage=1800, stale-while-revalidate=86400');
+
 const { categorie, serviciu } = Astro.params;
 
 if (!categorie || !serviciu) {
