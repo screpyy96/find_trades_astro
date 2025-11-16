@@ -15,32 +15,83 @@ const { url: supabaseUrl, anonKey: supabaseAnonKey } = getPublicSupabaseConfig()
 ---
 
 <Base 
-  title="Găsește Meseriași Verificați | Meserias Local"
-  description="Mii de meseriași verificați în România. Electricieni, zugravi, instalatori, constructori. Oferte gratuite, recenzii reale."
+  title="Meseriași Verificați din România | Electricieni, Zugravi, Instalatori | Meserias Local"
+  description="Găsești rapid meseriași verificați din România. Mii de profesioniști: electricieni, zugravi, instalatori, constructori. Recenzii reale, oferte gratuite, contact direct."
 >
-  <!-- Schema.org structured data -->
+  <!-- Enhanced Schema.org structured data -->
   <script is:inline type="application/ld+json" set:html={JSON.stringify({
     "@context": "https://schema.org",
-    "@type": "ItemList",
+    "@type": "WebPage",
     "name": "Meseriași Verificați din România",
-    "description": "Lista completă de meseriași verificați și profesioniști din România",
+    "description": "Platformă pentru găsirea meseriașilor verificați din România. Electricieni, zugravi, instalatori, constructori și alți specialiști.",
     "url": "https://www.meseriaslocal.ro/meseriasi",
-    "numberOfItems": "mii",
-    "itemListElement": [{
-      "@type": "ListItem",
-      "position": 1,
-      "item": {
-        "@type": "Person",
-        "name": "Meseriași Verificați",
-        "jobTitle": "Profesioniști în Construcții și Reparații",
-        "description": "Electricieni, zugravi, instalatori, constructori și alți specialiști"
-      }
-    }],
+    "inLanguage": "ro-RO",
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": "Meserias Local",
+      "url": "https://www.meseriaslocal.ro"
+    },
+    "about": {
+      "@type": "Thing",
+      "name": "Servicii de Construcții și Reparații"
+    },
+    "audience": {
+      "@type": "Audience",
+      "audienceType": "Clienți din România care caută meseriași"
+    },
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://www.meseriaslocal.ro/meseriasi/?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    },
     "mainEntity": {
+      "@type": "ItemList",
+      "name": "Meseriași Verificați din România",
+      "description": "Lista completă de meseriași verificați și profesioniști din România",
+      "numberOfItems": "1000+",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "item": {
+            "@type": "Person",
+            "name": "Electricieni Verificați",
+            "jobTitle": "Electrician",
+            "description": "Instalații electrice, reparații, mentenanță"
+          }
+        },
+        {
+          "@type": "ListItem", 
+          "position": 2,
+          "item": {
+            "@type": "Person",
+            "name": "Zugravi Verificați",
+            "jobTitle": "Zugrav",
+            "description": "Vopsitorie interior/exterior, finisaje"
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "item": {
+            "@type": "Person",
+            "name": "Instalatori Verificați",
+            "jobTitle": "Instalator",
+            "description": "Instalații sanitare, încălzire, canalizare"
+          }
+        }
+      ]
+    },
+    "provider": {
       "@type": "Organization",
       "name": "Meserias Local",
       "url": "https://www.meseriaslocal.ro",
-      "description": "Platformă pentru găsirea meseriașilor verificați din România"
+      "logo": "https://www.meseriaslocal.ro/icon-192.png",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "customer service",
+        "availableLanguage": "Romanian"
+      }
     }
   })} />
 
@@ -84,7 +135,7 @@ const { url: supabaseUrl, anonKey: supabaseAnonKey } = getPublicSupabaseConfig()
 
           <!-- Search Form -->
           <form method="get" action="/meseriasi/" class="max-w-3xl mx-auto mb-6">
-            <div class="flex flex-col sm:flex-row gap-3 p-2 bg-white rounded-xl shadow-lg">
+            <div class="flex flex-col sm:flex-row gap-3 p-2 bg-white/90 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
               <label for="hero-search" class="sr-only">Caută meseriași</label>
               <input
                 id="hero-search"
@@ -93,15 +144,15 @@ const { url: supabaseUrl, anonKey: supabaseAnonKey } = getPublicSupabaseConfig()
                 inputmode="search"
                 autocomplete="off"
                 placeholder="Caută: electrician, zugrav, instalator, oraș..."
-                class="flex-1 rounded-lg border-0 bg-transparent px-4 py-3 text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                class="flex-1 rounded-lg border-0 bg-transparent px-4 py-3 text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all duration-300"
                 value={searchTerm}
               />
               <button
                 type="submit"
-                class="inline-flex items-center justify-center rounded-lg bg-amber-500 px-6 py-3 text-white font-semibold hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-colors"
+                class="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 px-6 py-3 text-white font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all duration-300 hover:shadow-lg hover:scale-105 transform"
                 aria-label="Caută meseriași"
               >
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5 mr-2 transition-transform duration-300 group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                 </svg>
                 Caută
@@ -111,18 +162,34 @@ const { url: supabaseUrl, anonKey: supabaseAnonKey } = getPublicSupabaseConfig()
 
           <!-- Quick search suggestions -->
           <div class="flex flex-wrap items-center justify-center gap-3 text-sm">
-            <span class="text-slate-300">Căutări populare:</span>
-            <a href="/meseriasi/?q=electrician" class="text-slate-200 hover:text-white underline">
+            <span class="text-slate-300 font-medium">Căutări populare:</span>
+            <a href="/meseriasi/?q=electrician" class="text-slate-200 hover:text-white underline transition-colors duration-200 hover:underline-offset-2">
               electrician
             </a>
             <span class="text-slate-300">•</span>
-            <a href="/meseriasi/?q=zugrav" class="text-slate-200 hover:text-white underline">
+            <a href="/meseriasi/?q=zugrav" class="text-slate-200 hover:text-white underline transition-colors duration-200 hover:underline-offset-2">
               zugrav
             </a>
             <span class="text-slate-300">•</span>
-            <a href="/meseriasi/?q=instalator" class="text-slate-200 hover:text-white underline">
+            <a href="/meseriasi/?q=instalator" class="text-slate-200 hover:text-white underline transition-colors duration-200 hover:underline-offset-2">
               instalator
             </a>
+            <span class="text-slate-300">•</span>
+            <a href="/meseriasi/?q=constructor" class="text-slate-200 hover:text-white underline transition-colors duration-200 hover:underline-offset-2">
+              constructor
+            </a>
+            <span class="text-slate-300">•</span>
+            <a href="/meseriasi/?q=finisor" class="text-slate-200 hover:text-white underline transition-colors duration-200 hover:underline-offset-2">
+              finisor
+            </a>
+          </div>
+          
+          <!-- Additional search hints -->
+          <div class="mt-6 flex flex-wrap items-center justify-center gap-2 text-xs text-slate-400">
+            <span class="px-2 py-1 bg-slate-700/30 rounded-full">+1000 meseriași</span>
+            <span class="px-2 py-1 bg-slate-700/30 rounded-full">Verificați</span>
+            <span class="px-2 py-1 bg-slate-700/30 rounded-full">Recenzii reale</span>
+            <span class="px-2 py-1 bg-slate-700/30 rounded-full">Disponibili rapid</span>
           </div>
         </div>
       </div>

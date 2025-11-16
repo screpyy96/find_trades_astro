@@ -39,8 +39,7 @@ Accesează dashboard-ul Vercel și adaugă următoarele variabile de mediu:
 
 ```env
 # Supabase (obligatoriu pentru funcționarea site-ului)
-PUBLIC_SUPABASE_URL=https://rcnpakhabqbqmnvuwjzo.supabase.co
-PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjbnBha2hhYnFicW1udnV3anpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjg1ODI3ODcsImV4cCI6MjA0NDE1ODc4N30.IalgVgBGKcLkuypZqiuC99MMSYPDJ3vz7X4trWKiOiE
+
 
 # Cross-app navigation (opțional - dacă nu sunt setate, folosește fallback-uri)
 PUBLIC_APP_URL=https://app.meseriaslocal.ro

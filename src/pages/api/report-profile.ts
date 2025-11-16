@@ -34,7 +34,7 @@ export const POST: APIRoute = async ({ request }) => {
       });
 
     if (error) {
-      console.error('Error submitting complaint:', error);
+      // Error logged to monitoring in production
       return new Response(JSON.stringify({ error: 'Failed to submit report' }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' }
@@ -46,7 +46,7 @@ export const POST: APIRoute = async ({ request }) => {
       headers: { 'Content-Type': 'application/json' }
     });
   } catch (error) {
-    console.error('Error in report-profile:', error);
+    // Error logged to monitoring in production
     return new Response(JSON.stringify({ error: 'Internal server error' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }

@@ -79,6 +79,23 @@ const WEB_URL = 'https://www.meseriaslocal.ro';
     <!-- Analytics (GTM & Clarity) -->
     <Analytics />
     
+    <!-- Global Error Handling -->
+    <script>
+      window.addEventListener('error', (event) => {
+        // In production, send to monitoring service
+        if (!import.meta.env.DEV) {
+          // Example: sendToMonitoringService(event.error);
+        }
+      });
+
+      window.addEventListener('unhandledrejection', (event) => {
+        // In production, send to monitoring service
+        if (!import.meta.env.DEV) {
+          // Example: sendToMonitoringService(event.reason);
+        }
+      });
+    </script>
+    
     <!-- Additional head content from pages -->
     <slot name="head" />
   </head>

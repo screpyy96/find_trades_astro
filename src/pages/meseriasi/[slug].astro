@@ -203,13 +203,93 @@ const title = `${workerName} - ${primaryTrade}${location} | Meserias Local`;
 const rating = worker.rating || 0;
 const description = `${workerName}${location}: ${tradeNames}. ` +
   `${rating > 0 ? `★${rating.toFixed(1)} ` : ''}` +
-  `Contactați pentru ofertă gratuită!`;
+  `Meseriaș verificat cu ${reviews?.length || 0} recenzii. Contactați pentru ofertă gratuită!`;
+
+// Enhanced Open Graph meta tags
+const ogImage = worker.avatar_url || `https://www.meseriaslocal.ro/icon-192.png`;
+const ogUrl = `https://www.meseriaslocal.ro/meseriasi/${slug}`;
+
+// Canonical URL
+const canonicalUrl = `https://www.meseriaslocal.ro/meseriasi/${slug}`;
 
 // Avatar URL is handled in the component
 // const avatarUrl = worker.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(worker.name || 'M')}&background=3B82F6&color=fff&size=400`;
 ---
 
-<Base title={title} description={description}>
+<Base title={title} description={description} canonical={canonicalUrl} ogImage={ogImage}>
+  <!-- Enhanced Schema.org structured data for worker profile -->
+  <script is:inline type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": ["Person", "ProfessionalService"],
+    "name": workerName,
+    "jobTitle": primaryTrade,
+    "description": worker.bio || `Specialist în ${tradeNames}`,
+    "url": canonicalUrl,
+    "image": worker.avatar_url || `https://www.meseriaslocal.ro/icon-192.png`,
+    "telephone": worker.phone,
+    "address": worker.address ? {
+      "@type": "PostalAddress",
+      "addressLocality": location.replace(' din ', ''),
+      "addressCountry": "RO"
+    } : undefined,
+    "geo": worker.coordinates ? {
+      "@type": "GeoCoordinates",
+      "latitude": worker.coordinates.lat,
+      "longitude": worker.coordinates.lng
+    } : undefined,
+    "aggregateRating": rating > 0 ? {
+      "@type": "AggregateRating",
+      "ratingValue": rating,
+      "ratingCount": reviews?.length || 0,
+      "bestRating": 5,
+      "worstRating": 1,
+      "reviewCount": reviews?.length || 0
+    } : undefined,
+    "review": (reviews || []).slice(0, 5).map((review: any) => ({
+      "@type": "Review",
+      "author": {
+        "@type": "Person",
+        "name": review.profiles?.name || "Client Anonim"
+      },
+      "reviewRating": {
+        "@type": "Rating",
+        "ratingValue": review.rating || 5
+      },
+      "reviewBody": review.comment || "",
+      "datePublished": review.created_at
+    })),
+    "hasOccupation": {
+      "@type": "Occupation",
+      "name": primaryTrade,
+      "occupationLocation": {
+        "@type": "City",
+        "name": location.replace(' din ', '') || "România"
+      }
+    },
+    "knowsAbout": trades.map((trade: any) => trade.name),
+    "worksFor": {
+      "@type": "Organization",
+      "name": "Meserias Local",
+      "url": "https://www.meseriaslocal.ro"
+    },
+    "areaServed": location ? {
+      "@type": "City",
+      "name": location.replace(' din ', '')
+    } : {
+      "@type": "Country",
+      "name": "România"
+    },
+    "availableChannel": {
+      "@type": "ServiceChannel",
+      "servicePhone": worker.phone,
+      "serviceType": "Meserii profesionale"
+    },
+    "providerMobility": "Dynamic",
+    "serviceType": tradeNames,
+    "sameAs": [
+      `https://www.meseriaslocal.ro/meseriasi/${slug}`
+    ]
+  })} />
   <TradesmanProfile 
     client:idle 
     worker={{

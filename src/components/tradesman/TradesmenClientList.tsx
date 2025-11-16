@@ -3,6 +3,8 @@ import { Search, Loader2, Filter } from 'lucide-react';
 import { TradesmanCard } from './TradesmanCard';
 import { TradesmanCardSkeleton } from './TradesmanCardSkeleton';
 import { useInView } from 'react-intersection-observer';
+import { ServicePageCache, CacheKeys } from '../../lib/cache';
+import { trades } from '../../data';
 
 interface Worker {
   id: string;
@@ -97,129 +99,210 @@ export function TradesmenClientList({
     setIsLoading(true);
     setError(null);
     
-    console.log('📡 Fetching workers...', { page: pageNum, reset });
+    console.log('📡 Fetching workers...', { page: pageNum, reset, filters: { searchTerm, selectedCity, selectedTrade, minRating, onlyVerified, onlyOnline } });
     
     try {
-
+      // Check if any filters are applied
+      const hasFilters = searchTerm || selectedCity || selectedTrade || minRating || !onlyVerified || onlyOnline;
+      
+      console.log('🔍 Filter check:', { hasFilters, searchTerm, selectedCity, selectedTrade, minRating, onlyVerified, onlyOnline });
+      
       let query = supabase
         .from('profiles')
         .select('id, name, avatar_url, address, bio, rating, is_verified, is_online, phone')
         .eq('role', 'worker')
         .not('name', 'is', null);
 
-      // Apply verified filter
-      if (onlyVerified) {
-        query = query.eq('is_verified', true);
-      }
-
-      // Apply online filter
-      if (onlyOnline) {
-        query = query.eq('is_online', true);
-      }
-
-      // Apply rating filter
-      if (minRating) {
-        query = query.gte('rating', minRating);
-      }
-
-      // Apply search filter
-      if (searchTerm) {
-        query = query.or(`name.ilike.%${searchTerm}%,bio.ilike.%${searchTerm}%,address.ilike.%${searchTerm}%`);
-      }
-
-      // Apply city filter
-      if (selectedCity) {
-        query = query.ilike('address', `%${selectedCity}%`);
-      }
-
-      // Apply sorting
-      if (sortMethod === 'rating') {
-        query = query.order('rating', { ascending: false });
-      } else if (sortMethod === 'name') {
-        query = query.order('name', { ascending: true });
-      } else if (sortMethod === 'newest') {
-        query = query.order('created_at', { ascending: false });
-      }
-
-      // Pagination
-      const from = pageNum * ITEMS_PER_PAGE;
-      const to = from + ITEMS_PER_PAGE - 1;
-      query = query.range(from, to);
-
-      const { data, error: fetchError } = await query;
-
-      if (fetchError) {
-        throw new Error(fetchError.message);
-      }
-
-      if (data && data.length > 0) {
-        // Get worker IDs from current page
-        const workerIds = data.map((w: any) => w.id);
-
-        // Fetch worker_trades for these workers
-        const { data: workerTradesData } = await supabase
-          .from('worker_trades')
-          .select('profile_id, trade_ids')
-          .in('profile_id', workerIds);
-
-        // Collect all unique trade IDs
-        const allTradeIds = new Set<number>();
-        workerTradesData?.forEach((wt: any) => {
-          if (wt.trade_ids && Array.isArray(wt.trade_ids)) {
-            wt.trade_ids.forEach((id: number) => allTradeIds.add(id));
-          }
-        });
-
-        // Fetch trade details
-        let trades: any[] = [];
-        if (allTradeIds.size > 0) {
-          const { data: tradeData } = await supabase
-            .from('trades')
-            .select('id, name, slug')
-            .in('id', Array.from(allTradeIds));
-          trades = tradeData || [];
+      if (hasFilters) {
+        console.log('🎯 Filters applied - using filtered search');
+        
+        // Apply search filter (general search from hero)
+        if (searchTerm) {
+          console.log('🔍 Applying search filter:', searchTerm);
+          query = query.or(`name.ilike.%${searchTerm}%,bio.ilike.%${searchTerm}%,address.ilike.%${searchTerm}%`);
         }
 
-        // Create maps for efficient lookup
-        const tradeMap = new Map(trades.map((t: any) => [t.id, t]));
-        const workerTradesMap = new Map(
-          workerTradesData?.map((wt: any) => [wt.profile_id, wt.trade_ids]) || []
-        );
+        // Apply verified filter
+        if (onlyVerified) {
+          query = query.eq('is_verified', true);
+        }
 
-        // Map trades to workers
-        let workersWithTrades = (data as any[]).map((worker: any) => {
-          const tradeIds = (workerTradesMap.get(worker.id) || []) as number[];
-          const workerTrades = tradeIds
-            .map((id: number) => tradeMap.get(id))
-            .filter(Boolean);
+        // Apply online filter
+        if (onlyOnline) {
+          query = query.eq('is_online', true);
+        }
 
-          return {
-            ...worker,
-            trades: workerTrades
-          };
-        });
+        // Apply rating filter
+        if (minRating) {
+          query = query.gte('rating', minRating);
+        }
 
-        // Client-side filter by trade name if specified
-        if (selectedTrade) {
-          const tradeLower = selectedTrade.toLowerCase();
-          workersWithTrades = workersWithTrades.filter((worker: any) => {
-            return worker.trades?.some((trade: any) => 
-              trade.name?.toLowerCase().includes(tradeLower)
-            );
+        // Apply city filter
+        if (selectedCity) {
+          console.log('🏙️ Applying city filter:', selectedCity);
+          query = query.ilike('address', `%${selectedCity}%`);
+        }
+
+        // When filters are active, load all workers (no pagination) for proper client-side filtering
+        console.log('📊 Loading all workers for client-side filtering...');
+        const { data, error: fetchError } = await query;
+
+        if (fetchError) {
+          throw new Error(fetchError.message);
+        }
+
+        if (data && data.length > 0) {
+          // Get worker IDs from current page
+          const workerIds = data.map((w: any) => w.id);
+
+          // Fetch worker_trades for these workers
+          const { data: workerTradesData } = await supabase
+            .from('worker_trades')
+            .select('profile_id, trade_ids')
+            .in('profile_id', workerIds);
+
+          // Collect all unique trade IDs
+          const allTradeIds = new Set<number>();
+          workerTradesData?.forEach((wt: any) => {
+            if (wt.trade_ids && Array.isArray(wt.trade_ids)) {
+              wt.trade_ids.forEach((id: number) => allTradeIds.add(id));
+            }
           });
+
+          // Fetch trade details with caching
+          let trades: any[] = [];
+          if (allTradeIds.size > 0) {
+            const tradesCacheKey = CacheKeys.trades();
+            let cachedTrades = (window as any).__WORKERS_CACHE?.get(tradesCacheKey);
+            
+            if (!cachedTrades) {
+              const { data: tradeData } = await supabase
+                .from('trades')
+                .select('id, name, slug')
+                .in('id', Array.from(allTradeIds));
+              trades = tradeData || [];
+              
+              // Cache trades data
+              if (!(window as any).__WORKERS_CACHE) {
+                (window as any).__WORKERS_CACHE = new Map();
+              }
+              (window as any).__WORKERS_CACHE.set(tradesCacheKey, trades);
+            } else {
+              trades = cachedTrades;
+            }
+          }
+
+          // Create maps for efficient lookup
+          const tradeMap = new Map((trades || []).map((t: any) => [t.id, t]));
+          const workerTradesMap = new Map(
+            workerTradesData?.map((wt: any) => [wt.profile_id, wt.trade_ids]) || []
+          );
+
+          // Map trades to workers
+          let workersWithTrades = data.map((worker: any) => {
+            const tradeIds = workerTradesMap.get(worker.id) || [];
+            const workerTrades = (Array.isArray(tradeIds) ? tradeIds : []).map((id: number) => tradeMap.get(id)).filter(Boolean);
+            
+            return {
+              ...worker,
+              trades: workerTrades
+            };
+          });
+
+          // Client-side filter by trade name if specified
+          if (selectedTrade) {
+            const tradeLower = selectedTrade.toLowerCase();
+            console.log('🔧 Trade Filter Debug:', { 
+              selectedTrade, 
+              beforeFilter: workersWithTrades.length,
+              cityFilter: selectedCity 
+            });
+            
+            workersWithTrades = workersWithTrades.filter((worker: any) => {
+              const hasTrade = worker.trades?.some((trade: any) => 
+                trade.name?.toLowerCase().includes(tradeLower)
+              );
+              
+              if (hasTrade) {
+                console.log(`✅ Trade Match: ${worker.name}`, { 
+                  address: worker.address,
+                  trades: worker.trades?.map((t: any) => t.name) 
+                });
+              }
+              
+              return hasTrade;
+            });
+            
+            console.log('🔧 Trade Filter Results:', { 
+              afterFilter: workersWithTrades.length 
+            });
+          }
+
+          // Apply client-side pagination after all filtering
+          const from = pageNum * ITEMS_PER_PAGE;
+          const to = from + ITEMS_PER_PAGE;
+          const paginatedWorkers = workersWithTrades.slice(from, to);
+
+          console.log('📄 Client-side pagination:', { 
+            totalFiltered: workersWithTrades.length,
+            page: pageNum,
+            from, 
+            to,
+            itemsOnPage: paginatedWorkers.length 
+          });
+
+          if (reset) {
+            setWorkers(paginatedWorkers as Worker[]);
+          } else {
+            setWorkers((prev: Worker[]) => [...prev, ...(paginatedWorkers as Worker[])]);
+          }
+          setHasMore(workersWithTrades.length > to);
+        } else {
+          console.log('📊 No workers found after filtering');
+          if (reset) {
+            setWorkers([]);
+          }
+          setHasMore(false);
+        }
+      } else {
+        console.log('📊 No filters - using default pagination');
+        
+        // Apply default verified filter for main listing
+        query = query.eq('is_verified', true);
+
+        // Apply sorting
+        if (sortMethod === 'rating') {
+          query = query.order('rating', { ascending: false });
+        } else if (sortMethod === 'name') {
+          query = query.order('name', { ascending: true });
+        } else if (sortMethod === 'newest') {
+          query = query.order('created_at', { ascending: false });
         }
 
+        // Apply pagination
+        const from = pageNum * ITEMS_PER_PAGE;
+        const to = from + ITEMS_PER_PAGE - 1;
+        query = query.range(from, to);
+
+        const { data, error: fetchError } = await query;
+
+        if (fetchError) {
+          throw new Error(fetchError.message);
+        }
+
+        console.log('📊 Default pagination results:', { 
+          totalWorkers: data?.length || 0, 
+          page: pageNum,
+          from, 
+          to 
+        });
+
         if (reset) {
-          setWorkers(workersWithTrades as Worker[]);
+          setWorkers(data as Worker[]);
         } else {
-          setWorkers((prev: Worker[]) => [...prev, ...(workersWithTrades as Worker[])]);
+          setWorkers((prev: Worker[]) => [...prev, ...(data as Worker[])]);
         }
-        setHasMore(data.length === ITEMS_PER_PAGE);
-      } else {
-        if (reset) {
-          setWorkers([]);
-        }
-        setHasMore(false);
+        setHasMore(data && data.length === ITEMS_PER_PAGE);
       }
     } catch (err) {
       console.error('❌ Error fetching workers:', err);
@@ -313,14 +396,19 @@ export function TradesmenClientList({
               <label htmlFor="trade" className="block text-sm font-semibold text-slate-700 mb-2">
                 Meserie
               </label>
-              <input
+              <select
                 id="trade"
-                type="text"
                 value={selectedTrade}
                 onChange={(e) => setSelectedTrade(e.target.value)}
-                placeholder="Ex: electrician, zugrav..."
                 className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-              />
+              >
+                <option value="">Orice meserie</option>
+                {(trades || []).map((trade: any) => (
+                  <option key={trade.id} value={trade.name}>
+                    {trade.name}
+                  </option>
+                ))}
+              </select>
             </div>
 
             {/* Quick filters */}

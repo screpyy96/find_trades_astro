@@ -3,20 +3,36 @@ interface SupabaseConfig {
   anonKey?: string;
 }
 
-const runtimeEnv = typeof process !== 'undefined' ? process.env : undefined;
+import { validateEnvironment } from './env-validation';
 
-export function getPublicSupabaseConfig(): SupabaseConfig {
-  const url =
-    import.meta.env.PUBLIC_SUPABASE_URL ||
-    runtimeEnv?.PUBLIC_SUPABASE_URL ||
-    runtimeEnv?.SUPABASE_URL ||
-    undefined;
+// Validate environment and get configuration
+const { config } = validateEnvironment();
 
-  const anonKey =
-    import.meta.env.PUBLIC_SUPABASE_ANON_KEY ||
-    runtimeEnv?.PUBLIC_SUPABASE_ANON_KEY ||
-    runtimeEnv?.SUPABASE_ANON_KEY ||
-    undefined;
+export function getPublicSupabaseConfig() {
+  return {
+    url: config.supabase.url || '',
+    anonKey: config.supabase.anonKey || ''
+  };
+}
 
-  return { url, anonKey };
+export function getAppConfig() {
+  return {
+    url: config.app.url,
+    webUrl: config.web.url
+  };
+}
+
+export function getSanityConfig() {
+  return config.sanity ? {
+    projectId: config.sanity.projectId,
+    dataset: config.sanity.dataset,
+    token: config.sanity.token
+  } : null;
+}
+
+export function getAnalyticsConfig() {
+  return config.analytics ? {
+    gtmId: config.analytics.gtmId,
+    clarityId: config.analytics.clarityId
+  } : null;
 }

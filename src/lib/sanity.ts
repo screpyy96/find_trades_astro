@@ -24,6 +24,8 @@ export interface ServicePage {
   heroTitle?: string;
   heroSubtitle?: string;
   heroDescription?: string;
+  seoTitle?: string;
+  seoDescription?: string;
   metaDescription?: string;
   seoKeywords?: string[];
   content?: PortableTextBlock[];
@@ -63,6 +65,8 @@ const servicePageProjection = `{
   heroTitle,
   heroSubtitle,
   heroDescription,
+  seoTitle,
+  seoDescription,
   metaDescription,
   seoKeywords,
   content,
@@ -89,6 +93,12 @@ export async function getServiceCityPage(tradeSlug: string, citySlug: string): P
   const normalizedTradeSlug = tradeSlug.toLowerCase();
   const normalizedCitySlug = citySlug.toLowerCase();
   
+  if (import.meta.env.DEV) {
+    console.log('🔍 getServiceCityPage Debug:');
+    console.log('  tradeSlug:', tradeSlug, '-> normalized:', normalizedTradeSlug);
+    console.log('  citySlug:', citySlug, '-> normalized:', normalizedCitySlug);
+  }
+  
   // First try: Match by tradeSlug and citySlug fields
   const queryByFields = `*[
     _type == "servicePage" &&
@@ -101,6 +111,10 @@ export async function getServiceCityPage(tradeSlug: string, citySlug: string): P
     tradeSlug: normalizedTradeSlug, 
     citySlug: normalizedCitySlug 
   });
+  
+  if (import.meta.env.DEV) {
+    console.log('  First query result:', result);
+  }
   
   // Second try: If not found, try matching by slug pattern (for legacy data)
   // Pattern: slug contains both tradeSlug and citySlug
@@ -141,25 +155,22 @@ export async function getServiceCityPage(tradeSlug: string, citySlug: string): P
     // Only use general page if it truly has no citySlug (is a general page)
     if (generalPage && !generalPage.citySlug) {
       result = generalPage;
-      
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`  ℹ️ Using general service page as fallback for ${tradeSlug}/${citySlug}`);
-      }
-    } else if (process.env.NODE_ENV === 'development') {
-      console.warn(`⚠️ No Sanity content for ${tradeSlug}/${citySlug}. Falling back to generated SEO content.`);
     }
   }
   
-  // Debug logging in development
-  if (process.env.NODE_ENV === 'development') {
-    console.log('🔍 Sanity getServiceCityPage:');
-    console.log('  Input tradeSlug:', tradeSlug, '→', normalizedTradeSlug);
-    console.log('  Input citySlug:', citySlug, '→', normalizedCitySlug);
-    console.log('  Result:', result ? '✅ Found' : '❌ Not found');
-    if (result) {
-      console.log('  Found slug:', result.slug?.current);
-      console.log('  Found tradeSlug:', result.tradeSlug);
-      console.log('  Found citySlug:', result.citySlug);
+  if (import.meta.env.DEV) {
+    console.log('  Final result being returned:', result);
+    console.log('  seoTitle in result:', result?.seoTitle);
+    console.log('  seoDescription in result:', result?.seoDescription);
+    
+    // Debug: Check all zugravi pages in Sanity
+    if (normalizedTradeSlug.includes('zugrav')) {
+      console.log('🔍 Checking all zugravi pages in Sanity...');
+      const allZugraviQuery = `*[_type == "servicePage" && lower(tradeSlug) match "*zugrav*" && isPublished == true] {
+        _id, title, tradeSlug, citySlug, seoTitle, seoDescription, heroTitle
+      }`;
+      const allZugravi = await sanityClient.fetch(allZugraviQuery);
+      console.log('  All zugravi pages:', allZugravi);
     }
   }
   
@@ -184,22 +195,27 @@ async function fetchGeneralServicePage(normalizedTradeSlug: string) {
 export async function getServicePage(tradeSlug: string): Promise<ServicePage | null> {
   const normalizedTradeSlug = tradeSlug.toLowerCase();
   
+  if (import.meta.env.DEV) {
+    console.log('🔍 getServicePage Debug:');
+    console.log('  tradeSlug:', tradeSlug, '-> normalized:', normalizedTradeSlug);
+  }
+  
   // ONLY look for general pages (without citySlug)
   // Do NOT fallback to city-specific pages to avoid content mixing
   const result = await fetchGeneralServicePage(normalizedTradeSlug);
   
-  if (process.env.NODE_ENV === 'development') {
-    console.log('🔍 Sanity getServicePage (no city):');
-    console.log('  Input tradeSlug:', tradeSlug, '→', normalizedTradeSlug);
-    console.log('  Result:', result ? '✅ Found' : '❌ Not found');
-    if (result) {
-      console.log('  Found title:', result.title);
-      console.log('  Found citySlug:', result.citySlug || 'N/A (general page)');
-      console.log('  Is general page:', !result.citySlug);
-      console.log('  Document type:', (result as any)._type || 'unknown');
-    } else {
-      console.log('  ℹ️ No general service page found - will use fallback content');
-    }
+  if (import.meta.env.DEV) {
+    console.log('  fetchGeneralServicePage result:', result);
+    console.log('  seoTitle in result:', result?.seoTitle);
+    console.log('  seoDescription in result:', result?.seoDescription);
+    
+    // Debug: Check all service pages in Sanity
+    console.log('🔍 Checking all service pages in Sanity...');
+    const allServicePagesQuery = `*[_type == "servicePage" && isPublished == true] {
+      _id, title, tradeSlug, citySlug, seoTitle, seoDescription, heroTitle
+    }`;
+    const allServicePages = await sanityClient.fetch(allServicePagesQuery);
+    console.log('  All service pages:', allServicePages);
   }
   
   return result;

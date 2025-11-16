@@ -6,19 +6,19 @@
 interface FallbackContentParams {
   serviceName: string;
   cityName: string;
-  categoryName: string;
+  category: string;
+  categorySlug: string;
   serviceSlug: string;
   citySlug: string;
-  categorySlug: string;
-  relatedServices: Array<{ name: string; slug: string; categorySlug: string }>;
-  relatedCities: Array<{ name: string; slug: string }>;
+  nearbyCities: string[];
+  similarServices: string[];
 }
 
 interface FallbackContent {
   h1: string;
-  metaTitle: string;
-  metaDescription: string;
-  fallbackHtml: string;
+  title: string;
+  description: string;
+  content: string;
   schema: any;
   canonical: string;
 }
@@ -39,13 +39,12 @@ function generateH1(serviceName: string, cityName: string): string {
 }
 
 /**
- * Generate Meta Title (max 60 characters)
- * Format: {{ServiceName}} {{CityName}} | MeseriasLocal România
+ * Generate Meta Title (optimized for SEO and branding)
+ * Format: {{ServiceName}} {{CityName}} – Profesioniști Verificați, Oferte Rapide
  */
 function generateMetaTitle(serviceName: string, cityName: string): string {
   const capitalizedService = capitalizeFirst(serviceName);
-  const title = `${capitalizedService} ${cityName} | Meserias Local România`;
-  return title.length > 60 ? `${capitalizedService} ${cityName} | Meserias Local` : title;
+  return `${capitalizedService} ${cityName} – Profesioniști Verificați, Oferte Rapide`;
 }
 
 /**
@@ -60,7 +59,7 @@ function generateMetaDescription(serviceName: string, cityName: string): string 
  * Generate natural, SEO-friendly HTML content (3-5 paragraphs, 200-400 words)
  */
 function generateFallbackHtml(params: FallbackContentParams): string {
-  const { serviceName, cityName, categorySlug, serviceSlug, citySlug, relatedServices, relatedCities } = params;
+  const { serviceName, cityName, category, categorySlug, serviceSlug, citySlug, nearbyCities, similarServices } = params;
   
   const serviceLower = serviceName.toLowerCase();
   const serviceLink = `/servicii/${categorySlug}/${serviceSlug}/`;
@@ -121,9 +120,9 @@ export function generateFallbackContent(params: FallbackContentParams): Fallback
   
   return {
     h1: generateH1(serviceName, cityName),
-    metaTitle: generateMetaTitle(serviceName, cityName),
-    metaDescription: generateMetaDescription(serviceName, cityName),
-    fallbackHtml: generateFallbackHtml(params),
+    title: generateMetaTitle(serviceName, cityName),
+    description: generateMetaDescription(serviceName, cityName),
+    content: generateFallbackHtml(params),
     schema: generateSchema(params),
     canonical: `https://www.meseriaslocal.ro/servicii/${categorySlug}/${serviceSlug}/${citySlug}/`
   };
@@ -150,13 +149,13 @@ function generateH2(text: string): string {
  * Generate internal links HTML for related services
  */
 export function generateRelatedServicesHtml(
-  relatedServices: Array<{ name: string; slug: string; categorySlug: string }>,
+  similarServices: Array<{ name: string; slug: string; categorySlug: string }>,
   citySlug: string,
   cityName: string
 ): string {
-  if (relatedServices.length === 0) return '';
+  if (similarServices.length === 0) return '';
   
-  const links = relatedServices
+  const links = similarServices
     .slice(0, 3)
     .map(service => 
       `<li><a href="/servicii/${service.categorySlug}/${service.slug}/${citySlug}/" class="text-blue-600 hover:text-blue-700 underline">${service.name} în ${cityName}</a></li>`
@@ -170,14 +169,14 @@ export function generateRelatedServicesHtml(
  * Generate internal links HTML for related cities
  */
 export function generateRelatedCitiesHtml(
-  relatedCities: Array<{ name: string; slug: string }>,
+  nearbyCities: Array<{ name: string; slug: string }>,
   serviceName: string,
   serviceSlug: string,
   categorySlug: string
 ): string {
-  if (relatedCities.length === 0) return '';
+  if (nearbyCities.length === 0) return '';
   
-  const links = relatedCities
+  const links = nearbyCities
     .slice(0, 3)
     .map(city => 
       `<li><a href="/servicii/${categorySlug}/${serviceSlug}/${city.slug}/" class="text-blue-600 hover:text-blue-700 underline">${serviceName} în ${city.name}</a></li>`

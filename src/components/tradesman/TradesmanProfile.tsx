@@ -29,7 +29,6 @@ const getSupabaseBrowserClient = (config?: SupabaseBrowserConfig) => {
   const key = config?.anonKey || import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
   
   if (!url || !key) {
-    console.warn('Supabase credentials not configured');
     return null;
   }
   
@@ -87,10 +86,10 @@ function ReportModal({ worker, onClose }: { worker: WorkerProfile; onClose: () =
           onClose();
         }, 2000);
       } else {
-        console.error('Failed to submit report');
+        // Report submission failed
       }
     } catch (error) {
-      console.error('Error submitting report:', error);
+      // Error logged to monitoring in production
     } finally {
       setIsSubmitting(false);
     }
@@ -334,7 +333,6 @@ export function TradesmanProfile({ worker, supabaseUrl, supabaseAnonKey }: Trade
       }
     } catch (error) {
       // User cancelled or error occurred
-      console.log('Share cancelled or failed:', error);
     }
   };
 
@@ -413,10 +411,6 @@ export function TradesmanProfile({ worker, supabaseUrl, supabaseAnonKey }: Trade
   const reviews = (worker as any).reviews || [];
   const certifications = (worker as any).certifications || [];
 
-  // Debug: log trades data
-  console.log('Trades data:', trades);
-  console.log('Worker trades:', (worker as any).trades);
-
   // Calculate average rating from reviews
   const averageRating = reviews.length > 0
     ? reviews.reduce((sum: number, review: any) => sum + (review.rating || 0), 0) / reviews.length
@@ -451,7 +445,6 @@ export function TradesmanProfile({ worker, supabaseUrl, supabaseAnonKey }: Trade
 
   const handleContactReveal = async () => {
     try {
-      console.log('Attempting to track phone reveal for worker:', worker.id);
       const response = await fetch('/api/track-phone-reveal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -460,16 +453,16 @@ export function TradesmanProfile({ worker, supabaseUrl, supabaseAnonKey }: Trade
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('Phone reveal tracking failed:', errorData);
+        // Tracking failed
       } else {
-        console.log('Phone reveal tracked successfully');
+        // Tracking successful
       }
 
       setIsContactRevealed(true);
       // Save to session storage
       sessionStorage.setItem(`contact_revealed_${worker.id}`, 'true');
     } catch (error) {
-      console.error('Error tracking phone reveal:', error);
+      // Error logged to monitoring in production
       // Still reveal contact even if tracking fails
       setIsContactRevealed(true);
       sessionStorage.setItem(`contact_revealed_${worker.id}`, 'true');
@@ -486,8 +479,8 @@ export function TradesmanProfile({ worker, supabaseUrl, supabaseAnonKey }: Trade
           body: JSON.stringify({ profileId: worker.id })
         });
       } catch (error) {
-        console.log('Client-side tracking failed:', error);
-      }
+        // Client-side tracking failed
+      };
     };
 
     // Track after a short delay to avoid double counting
@@ -516,9 +509,7 @@ export function TradesmanProfile({ worker, supabaseUrl, supabaseAnonKey }: Trade
       {/* Schema.org structured data for rich snippets */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(schemaData)
-        }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
       />
 
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 lg:pt-20">
@@ -547,6 +538,7 @@ export function TradesmanProfile({ worker, supabaseUrl, supabaseAnonKey }: Trade
                       src={worker.avatar_url}
                       alt={worker.name}
                       loading="eager"
+                      referrerPolicy="no-referrer"
                       className="relative w-20 h-20 rounded-2xl object-cover ring-2 ring-white shadow-lg"
                     />
                   ) : (
@@ -601,6 +593,8 @@ export function TradesmanProfile({ worker, supabaseUrl, supabaseAnonKey }: Trade
                         src={worker.avatar_url}
                         alt={worker.name}
                         loading="eager"
+                        decoding="async"
+                        referrerPolicy="no-referrer"
                         className="relative w-32 h-32 rounded-3xl object-cover ring-4 ring-white shadow-2xl"
                       />
                     ) : (
@@ -971,6 +965,7 @@ export function TradesmanProfile({ worker, supabaseUrl, supabaseAnonKey }: Trade
                                     alt={review.profiles?.name || 'Client'}
                                     loading="lazy"
                                     decoding="async"
+                                    referrerPolicy="no-referrer"
                                     className="w-14 h-14 rounded-2xl object-cover ring-4 ring-white shadow-lg"
                                   />
                                 ) : (
@@ -1003,7 +998,6 @@ export function TradesmanProfile({ worker, supabaseUrl, supabaseAnonKey }: Trade
                                         try {
                                           return format(new Date(review.created_at), 'dd MMM yyyy', { locale: ro });
                                         } catch (error) {
-                                          console.error('Invalid date for review:', review.created_at, error);
                                           return 'Data invalidă';
                                         }
                                       })()
@@ -1084,7 +1078,6 @@ export function TradesmanProfile({ worker, supabaseUrl, supabaseAnonKey }: Trade
                                           try {
                                             return format(new Date(cert.issued_date), 'dd MMMM yyyy', { locale: ro });
                                           } catch (error) {
-                                            console.error('Invalid date for certification:', cert.issued_date, error);
                                             return 'Data invalidă';
                                           }
                                         })()

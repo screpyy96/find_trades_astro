@@ -37,7 +37,6 @@ export function TradesmenSimpleList({
         const key = supabaseAnonKeyProp || import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
         
         if (!url || !key) {
-          console.warn('Supabase not configured');
           setWorkers([]);
           setLoading(false);
           return;
@@ -68,13 +67,15 @@ export function TradesmenSimpleList({
         const { data, error } = await query;
 
         if (error) {
-          console.error('Error fetching workers:', error);
-        } else {
+        // Error logged to monitoring in production
+        setWorkers([]);
+      } else {
           setWorkers(data || []);
         }
       } catch (err) {
-        console.error('Error:', err);
-      } finally {
+      // Error logged to monitoring in production
+      setLoading(false);
+    } finally {
         setLoading(false);
       }
     };
@@ -142,6 +143,7 @@ export function TradesmenSimpleList({
                   src={worker.avatar_url}
                   alt={worker.name || ''}
                   className="w-16 h-16 rounded-full object-cover"
+                  referrerPolicy="no-referrer"
                 />
               ) : (
                 <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center">

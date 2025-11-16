@@ -96,9 +96,6 @@ async function findJobByShortId(shortId: string) {
     .limit(500);
   
   if (!jobs || jobs.length === 0) {
-    if (import.meta.env.DEV) {
-      console.log('No jobs found in database');
-    }
     return null;
   }
   
@@ -107,11 +104,6 @@ async function findJobByShortId(shortId: string) {
     const cleanId = j.id.replace(/-/g, '');
     return cleanId.startsWith(shortId);
   });
-  
-  if (import.meta.env.DEV && !job) {
-    console.log(`Searched ${jobs.length} jobs, none matched shortId: ${shortId}`);
-    console.log('Sample IDs:', jobs.slice(0, 3).map(j => j.id.replace(/-/g, '').substring(0, 6)));
-  }
   
   return job;
 }
@@ -123,25 +115,15 @@ let job = preloadedJob;
 if (!job && slug && supabase) {
   const shortId = extractJobIdFromSlug(String(slug));
   
-  if (import.meta.env.DEV) {
-    console.log('🔍 Job lookup:', { slug, shortId });
-  }
-  
   if (!shortId) {
-    console.warn('Invalid slug format:', slug);
     return Astro.redirect('/solicitari');
   }
   
   job = await findJobByShortId(shortId);
   
-  if (import.meta.env.DEV) {
-    console.log('Job found:', job ? `✓ ${job.title}` : '✗ Not found');
+  if (!job) {
+    return Astro.redirect('/solicitari');
   }
-}
-
-if (!job) {
-  console.warn('Job not found for slug:', slug);
-  return Astro.redirect('/solicitari');
 }
 
 // Format date

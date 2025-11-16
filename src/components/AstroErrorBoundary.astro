@@ -1,0 +1,31 @@
+---
+interface Props {
+  children: any;
+  fallback?: any;
+}
+
+const { children, fallback } = Astro.props;
+---
+
+<!-- Error Boundary for Astro components -->
+{children}
+
+<script>
+  // Global error handler for unhandled JavaScript errors
+  window.addEventListener('error', (event) => {
+    // Log to monitoring service in production
+    if (!import.meta.env.DEV) {
+      // Send to your monitoring service
+      console.error('Global error caught:', event.error);
+    }
+  });
+
+  // Global error handler for unhandled promise rejections
+  window.addEventListener('unhandledrejection', (event) => {
+    // Log to monitoring service in production
+    if (!import.meta.env.DEV) {
+      // Send to your monitoring service
+      console.error('Unhandled promise rejection:', event.reason);
+    }
+  });
+</script>

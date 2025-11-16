@@ -1,5 +1,4 @@
 {
-  "trailingSlash": true,
   "headers": [
     {
       "source": "/(.*)\\.( js|css|png|jpg|jpeg|webp|avif|svg|woff|woff2)",

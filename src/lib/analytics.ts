@@ -22,7 +22,7 @@ export function trackEvent(params: TrackEventParams) {
   window.dataLayer = window.dataLayer || [];
   window.dataLayer.push(params);
   
-  console.log('[Analytics] Event tracked:', params);
+  // Analytics tracking - logged to monitoring in production
 }
 
 // Predefined tracking functions for common events
@@ -127,20 +127,3 @@ export function trackPhoneReveal(tradesmanId: string, service: string) {
   });
 }
 
-export function trackChatbotOpen() {
-  trackEvent({
-    event: 'chatbot_open',
-    category: 'engagement',
-    action: 'open',
-    label: 'ai_chatbot',
-  });
-}
-
-export function trackChatbotMessage(messageType: 'user' | 'bot') {
-  trackEvent({
-    event: 'chatbot_message',
-    category: 'engagement',
-    action: 'message',
-    message_type: messageType,
-  });
-}

@@ -8,9 +8,6 @@ export const config = { revalidate: 1800 };
 const { categorie } = Astro.params;
 
 if (!supabase) {
-  if (import.meta.env.DEV) {
-    console.warn('Supabase client unavailable when rendering category page');
-  }
   return Astro.redirect('/servicii', 500);
 }
 

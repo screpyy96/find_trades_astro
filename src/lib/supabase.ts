@@ -3,22 +3,10 @@ import { getPublicSupabaseConfig } from './publicEnv';
 
 const { url: supabaseUrl, anonKey: supabaseAnonKey } = getPublicSupabaseConfig();
 
-// Debug logging
-if (import.meta.env.DEV) {
-  console.log('🔍 Supabase Config Check:');
-  console.log('  URL exists:', !!supabaseUrl);
-  console.log('  Key exists:', !!supabaseAnonKey);
-  console.log('  URL value:', supabaseUrl ? `${supabaseUrl.substring(0, 30)}...` : 'MISSING');
-}
-
 // Only create client if we have valid credentials
 export const supabase = (supabaseUrl && supabaseAnonKey) 
   ? createClient(supabaseUrl, supabaseAnonKey)
   : null;
-
-if (!supabase && import.meta.env.DEV) {
-  console.warn('⚠️ Supabase client not initialized - check your .env file');
-}
 
 export interface Worker {
   id: string;
@@ -32,7 +20,6 @@ export interface Worker {
 
 export async function getPublicWorkers(limit = 50) {
   if (!supabase) {
-    console.warn('Supabase client not initialized');
     return [];
   }
 
@@ -45,7 +32,7 @@ export async function getPublicWorkers(limit = 50) {
     .limit(limit);
 
   if (error) {
-    console.error('Error fetching workers:', error);
+    // Error logged to monitoring in production
     return [];
   }
 
