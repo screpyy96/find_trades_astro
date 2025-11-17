@@ -105,7 +105,8 @@ export const trades: Trade[] = [
   { id: 42, name: "iluminat exterior si ambiental", category: "amenajari exterioare & gradina", slug: "iluminat-exterior" },
   { id: 41, name: "foraje puturi si fose septice", category: "amenajari exterioare & gradina", slug: "foraje-puturi-fose" },
   { id: 40, name: "instalare sisteme de irigatii", category: "amenajari exterioare & gradina", slug: "instalare-irigatii" },
+  { id: 82, name: "servicii de mutari si transport", category: "alte servicii", slug: "mutari-transport" },
   { id: 83, name: "evacuare moloz si deseuri", category: "alte servicii", slug: "evacuare-moloz" },
   { id: 84, name: "servicii de sudura", category: "alte servicii", slug: "servicii-sudura" },
-  { id: 82, name: "servicii de mutari si transport", category: "alte servicii", slug: "mutari-transport" },
+  { id: 46, name: "reconditionare cada baie", category: "instalatii & amenajari", slug: "reconditionare-cada-baie", description: "Reparatie cada/baie." },
 ];
