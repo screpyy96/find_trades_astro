@@ -779,7 +779,7 @@ export function TradesmenClientList({
       <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
         {/* Filters sidebar */}
         <aside className={`lg:w-64 xl:w-72 flex-shrink-0 ${showFilters ? 'block' : 'hidden lg:block'}`}>
-          <div className="sticky top-24 bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-6">
+          <div className="sticky top-8 bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-6">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-bold text-slate-900">Filtrează rezultatele</h3>
               {(selectedCity !== activeCity || selectedTrade !== activeTrade || minRating !== activeMinRating || onlyVerified !== activeOnlyVerified || onlyOnline !== activeOnlyOnline) && (
