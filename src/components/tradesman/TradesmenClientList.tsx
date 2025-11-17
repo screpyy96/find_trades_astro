@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Loader2, Filter } from 'lucide-react';
+import { Search, Loader2, Filter, X, ChevronDown } from 'lucide-react';
 import { TradesmanCard } from './TradesmanCard';
 import { TradesmanCardSkeleton } from './TradesmanCardSkeleton';
 import { useInView } from 'react-intersection-observer';
@@ -17,6 +17,7 @@ interface Worker {
   is_online?: boolean;
   phone?: string | null;
   trades?: any[];
+  subscription_plan?: string; // 'pro', 'premium', etc.
 }
 
 interface TradesmenClientListProps {
@@ -48,12 +49,131 @@ export function TradesmenClientList({
   const [onlyVerified, setOnlyVerified] = useState(true);
   const [onlyOnline, setOnlyOnline] = useState(false);
   
+  // Active filters (applied to search)
+  const [activeCity, setActiveCity] = useState('');
+  const [activeTrade, setActiveTrade] = useState('');
+  const [activeMinRating, setActiveMinRating] = useState<number | undefined>(undefined);
+  const [activeOnlyVerified, setActiveOnlyVerified] = useState(true);
+  const [activeOnlyOnline, setActiveOnlyOnline] = useState(false);
+  
+  // Trade autocomplete states
+  const [tradeSearchQuery, setTradeSearchQuery] = useState('');
+  const [showTradeDropdown, setShowTradeDropdown] = useState(false);
+  const [filteredTrades, setFilteredTrades] = useState<any[]>([]);
+  const [allTrades, setAllTrades] = useState<any[]>([]);
+  const [isLoadingTrades, setIsLoadingTrades] = useState(false);
+  const [tradesPage, setTradesPage] = useState(0);
+  const [hasMoreTrades, setHasMoreTrades] = useState(true);
+  
   // Create Supabase client once
   const [supabase, setSupabase] = useState<any>(null);
   
   const { ref, inView } = useInView({ threshold: 0.5 });
   
   const ITEMS_PER_PAGE = 20;
+  const TRADES_PER_PAGE = 50;
+
+  // Function to load trades with pagination
+  const loadTrades = async (reset: boolean = false) => {
+    if (!supabase) return;
+    if (!hasMoreTrades && !reset) return;
+    
+    setIsLoadingTrades(true);
+    
+    try {
+      const currentPage = reset ? 0 : tradesPage;
+      const from = currentPage * TRADES_PER_PAGE;
+      const to = from + TRADES_PER_PAGE - 1;
+      
+      let query = supabase
+        .from('trades')
+        .select('id, name, slug')
+        .order('name', { ascending: true })
+        .range(from, to);
+      
+      // Apply search filter if exists
+      if (tradeSearchQuery) {
+        query = query.ilike('name', `%${tradeSearchQuery}%`);
+      }
+      
+      const { data, error } = await query;
+      
+      if (error) throw error;
+      
+      if (reset) {
+        setAllTrades(data || []);
+        setTradesPage(1);
+      } else {
+        setAllTrades(prev => [...prev, ...(data || [])]);
+        setTradesPage(prev => prev + 1);
+      }
+      
+      setHasMoreTrades(data && data.length === TRADES_PER_PAGE);
+    } catch (err) {
+      console.error('Error loading trades:', err);
+    } finally {
+      setIsLoadingTrades(false);
+    }
+  };
+
+  // Filter trades based on search query
+  useEffect(() => {
+    if (tradeSearchQuery) {
+      const filtered = allTrades.filter(trade => 
+        trade.name.toLowerCase().includes(tradeSearchQuery.toLowerCase())
+      );
+      setFilteredTrades(filtered);
+    } else {
+      setFilteredTrades(allTrades);
+    }
+  }, [tradeSearchQuery, allTrades]);
+
+  // Load initial trades when Supabase is ready
+  useEffect(() => {
+    if (supabase && allTrades.length === 0) {
+      loadTrades(true);
+    }
+  }, [supabase]);
+
+  // Load more trades when search query changes
+  useEffect(() => {
+    if (supabase) {
+      const timeoutId = setTimeout(() => {
+        loadTrades(true);
+      }, 300);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [tradeSearchQuery, supabase]);
+
+  // Initialize filters from URL on component mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      
+      // Set filters from URL
+      const urlCity = params.get('city') || '';
+      const urlTrade = params.get('trade') || '';
+      const urlRating = params.get('rating');
+      const urlVerified = params.get('verified') !== 'false'; // default true
+      const urlOnline = params.get('online') === 'true';
+      const urlSort = params.get('sort') || 'rating';
+      
+      setSelectedCity(urlCity);
+      setSelectedTrade(urlTrade);
+      setMinRating(urlRating ? parseFloat(urlRating) : undefined);
+      setOnlyVerified(urlVerified);
+      setOnlyOnline(urlOnline);
+      setSortMethod(urlSort);
+      
+      // Set active filters immediately
+      setActiveCity(urlCity);
+      setActiveTrade(urlTrade);
+      setActiveMinRating(urlRating ? parseFloat(urlRating) : undefined);
+      setActiveOnlyVerified(urlVerified);
+      setActiveOnlyOnline(urlOnline);
+    }
+  }, []);
 
   // Initialize Supabase client once
   useEffect(() => {
@@ -99,13 +219,13 @@ export function TradesmenClientList({
     setIsLoading(true);
     setError(null);
     
-    console.log('📡 Fetching workers...', { page: pageNum, reset, filters: { searchTerm, selectedCity, selectedTrade, minRating, onlyVerified, onlyOnline } });
+    console.log('📡 Fetching workers...', { page: pageNum, reset, filters: { searchTerm, activeCity, activeTrade, activeMinRating, activeOnlyVerified, activeOnlyOnline } });
     
     try {
       // Check if any filters are applied
-      const hasFilters = searchTerm || selectedCity || selectedTrade || minRating || !onlyVerified || onlyOnline;
+      const hasFilters = searchTerm || activeCity || activeTrade || activeMinRating || !activeOnlyVerified || activeOnlyOnline;
       
-      console.log('🔍 Filter check:', { hasFilters, searchTerm, selectedCity, selectedTrade, minRating, onlyVerified, onlyOnline });
+      console.log('🔍 Filter check:', { hasFilters, searchTerm, activeCity, activeTrade, activeMinRating, activeOnlyVerified, activeOnlyOnline });
       
       let query = supabase
         .from('profiles')
@@ -116,31 +236,47 @@ export function TradesmenClientList({
       if (hasFilters) {
         console.log('🎯 Filters applied - using filtered search');
         
-        // Apply search filter (general search from hero)
-        if (searchTerm) {
-          console.log('🔍 Applying search filter:', searchTerm);
-          query = query.or(`name.ilike.%${searchTerm}%,bio.ilike.%${searchTerm}%,address.ilike.%${searchTerm}%`);
-        }
-
-        // Apply verified filter
-        if (onlyVerified) {
+        // When search term OR trade filter is provided, we need to search in trades too
+        // So we load all verified workers first, then filter client-side
+        if (searchTerm || activeTrade) {
+          console.log('🔍 Applying search/trade filter:', { searchTerm, activeTrade });
+          
+          // Load all verified workers for client-side filtering
           query = query.eq('is_verified', true);
-        }
+          
+          // Apply other filters
+          if (activeOnlyOnline) {
+            query = query.eq('is_online', true);
+          }
+          if (activeMinRating) {
+            query = query.gte('rating', activeMinRating);
+          }
+          if (activeCity) {
+            console.log('🏙️ Applying city filter:', activeCity);
+            query = query.ilike('address', `%${activeCity}%`);
+          }
+        } else {
+          // No search term or trade filter - apply filters normally
+          // Apply verified filter
+          if (activeOnlyVerified) {
+            query = query.eq('is_verified', true);
+          }
 
-        // Apply online filter
-        if (onlyOnline) {
-          query = query.eq('is_online', true);
-        }
+          // Apply online filter
+          if (activeOnlyOnline) {
+            query = query.eq('is_online', true);
+          }
 
-        // Apply rating filter
-        if (minRating) {
-          query = query.gte('rating', minRating);
-        }
+          // Apply rating filter
+          if (activeMinRating) {
+            query = query.gte('rating', activeMinRating);
+          }
 
-        // Apply city filter
-        if (selectedCity) {
-          console.log('🏙️ Applying city filter:', selectedCity);
-          query = query.ilike('address', `%${selectedCity}%`);
+          // Apply city filter
+          if (activeCity) {
+            console.log('🏙️ Applying city filter:', activeCity);
+            query = query.ilike('address', `%${activeCity}%`);
+          }
         }
 
         // When filters are active, load all workers (no pagination) for proper client-side filtering
@@ -192,30 +328,95 @@ export function TradesmenClientList({
             }
           }
 
+          // Fetch user subscriptions for pro users
+          const { data: subscriptionsData, error: subscriptionsError } = await supabase
+            .from('user_subscriptions')
+            .select('user_id, plan_id, status')
+            .in('user_id', workerIds)
+            .eq('status', 'active');
+
+          if (subscriptionsError) {
+            console.error('❌ Error loading subscriptions:', subscriptionsError);
+          }
+
+           
+          
+        
+
           // Create maps for efficient lookup
           const tradeMap = new Map((trades || []).map((t: any) => [t.id, t]));
           const workerTradesMap = new Map(
             workerTradesData?.map((wt: any) => [wt.profile_id, wt.trade_ids]) || []
+          );
+          const subscriptionMap = new Map(
+            subscriptionsData?.map((sub: any) => [sub.user_id, sub.plan_id]) || []
           );
 
           // Map trades to workers
           let workersWithTrades = data.map((worker: any) => {
             const tradeIds = workerTradesMap.get(worker.id) || [];
             const workerTrades = (Array.isArray(tradeIds) ? tradeIds : []).map((id: number) => tradeMap.get(id)).filter(Boolean);
+            const subscriptionPlan = subscriptionMap.get(worker.id) || null;
+            
+            console.log('🔧 Mapping worker:', worker.name, { 
+              workerId: worker.id, 
+              subscriptionPlan 
+            });
             
             return {
               ...worker,
-              trades: workerTrades
+              trades: workerTrades,
+              subscription_plan: subscriptionPlan
             };
           });
 
+          // Client-side search filter (name, bio, address, trades)
+          if (searchTerm) {
+            const searchLower = searchTerm.toLowerCase();
+            const searchTerms = searchLower.split(' ').filter(term => term.length > 0);
+            
+            console.log('🔍 Search Filter Debug:', { 
+              searchTerm, 
+              searchTerms,
+              beforeFilter: workersWithTrades.length 
+            });
+            
+            workersWithTrades = workersWithTrades.filter((worker: any) => {
+              // Check if all search terms match in any field
+              const matchesAllTerms = searchTerms.every(term => {
+                const matchesName = worker.name?.toLowerCase().includes(term);
+                const matchesBio = worker.bio?.toLowerCase().includes(term);
+                const matchesAddress = worker.address?.toLowerCase().includes(term);
+                const matchesTrade = worker.trades?.some((trade: any) => 
+                  trade.name?.toLowerCase().includes(term)
+                );
+                
+                return matchesName || matchesBio || matchesAddress || matchesTrade;
+              });
+              
+              if (matchesAllTerms) {
+                console.log(`✅ Search Match: ${worker.name}`, { 
+                  address: worker.address,
+                  trades: worker.trades?.map((t: any) => t.name),
+                  matchedTerms: searchTerms
+                });
+              }
+              
+              return matchesAllTerms;
+            });
+            
+            console.log('🔍 Search Filter Results:', { 
+              afterFilter: workersWithTrades.length 
+            });
+          }
+
           // Client-side filter by trade name if specified
-          if (selectedTrade) {
-            const tradeLower = selectedTrade.toLowerCase();
+          if (activeTrade) {
+            const tradeLower = activeTrade.toLowerCase();
             console.log('🔧 Trade Filter Debug:', { 
-              selectedTrade, 
+              activeTrade, 
               beforeFilter: workersWithTrades.length,
-              cityFilter: selectedCity 
+              cityFilter: activeCity 
             });
             
             workersWithTrades = workersWithTrades.filter((worker: any) => {
@@ -237,6 +438,19 @@ export function TradesmenClientList({
               afterFilter: workersWithTrades.length 
             });
           }
+
+          // Sort: PRO users first, then by rating
+          workersWithTrades.sort((a: any, b: any) => {
+            const aIsPro = a.subscription_plan === 'pro';
+            const bIsPro = b.subscription_plan === 'pro';
+            
+            // PRO users first
+            if (aIsPro && !bIsPro) return -1;
+            if (!aIsPro && bIsPro) return 1;
+            
+            // Then by rating
+            return (b.rating || 0) - (a.rating || 0);
+          });
 
           // Apply client-side pagination after all filtering
           const from = pageNum * ITEMS_PER_PAGE;
@@ -265,44 +479,137 @@ export function TradesmenClientList({
           setHasMore(false);
         }
       } else {
-        console.log('📊 No filters - using default pagination');
+        console.log('📊 No filters - using default pagination with PRO priority');
         
         // Apply default verified filter for main listing
         query = query.eq('is_verified', true);
 
-        // Apply sorting
-        if (sortMethod === 'rating') {
-          query = query.order('rating', { ascending: false });
-        } else if (sortMethod === 'name') {
-          query = query.order('name', { ascending: true });
-        } else if (sortMethod === 'newest') {
-          query = query.order('created_at', { ascending: false });
-        }
-
-        // Apply pagination
-        const from = pageNum * ITEMS_PER_PAGE;
-        const to = from + ITEMS_PER_PAGE - 1;
-        query = query.range(from, to);
-
-        const { data, error: fetchError } = await query;
+        // Fetch ALL workers to properly sort PRO users first
+        // No limit - we need all workers to sort them correctly
+        const { data: allData, error: fetchError } = await query;
 
         if (fetchError) {
           throw new Error(fetchError.message);
         }
 
         console.log('📊 Default pagination results:', { 
-          totalWorkers: data?.length || 0, 
-          page: pageNum,
-          from, 
-          to 
+          totalWorkers: allData?.length || 0, 
+          page: pageNum
         });
 
-        if (reset) {
-          setWorkers(data as Worker[]);
+        if (allData && allData.length > 0) {
+          // Get worker IDs from fetched data
+          const workerIds = allData.map((w: any) => w.id);
+
+          // Fetch worker_trades for these workers
+          const { data: workerTradesData } = await supabase
+            .from('worker_trades')
+            .select('profile_id, trade_ids')
+            .in('profile_id', workerIds);
+
+          // Collect all unique trade IDs
+          const allTradeIds = new Set<number>();
+          workerTradesData?.forEach((wt: any) => {
+            if (wt.trade_ids && Array.isArray(wt.trade_ids)) {
+              wt.trade_ids.forEach((id: number) => allTradeIds.add(id));
+            }
+          });
+
+          // Fetch trade details with caching
+          let trades: any[] = [];
+          if (allTradeIds.size > 0) {
+            const tradesCacheKey = CacheKeys.trades();
+            let cachedTrades = (window as any).__WORKERS_CACHE?.get(tradesCacheKey);
+            
+            if (!cachedTrades) {
+              const { data: tradeData } = await supabase
+                .from('trades')
+                .select('id, name, slug')
+                .in('id', Array.from(allTradeIds));
+              trades = tradeData || [];
+              
+              // Cache trades data
+              if (!(window as any).__WORKERS_CACHE) {
+                (window as any).__WORKERS_CACHE = new Map();
+              }
+              (window as any).__WORKERS_CACHE.set(tradesCacheKey, trades);
+            } else {
+              trades = cachedTrades;
+            }
+          }
+
+          // Fetch user subscriptions for pro users
+          const { data: subscriptionsData, error: subscriptionsError } = await supabase
+            .from('user_subscriptions')
+            .select('user_id, plan_id, status')
+            .in('user_id', workerIds)
+            .eq('status', 'active');
+
+          if (subscriptionsError) {
+            console.error('❌ Error loading subscriptions:', subscriptionsError);
+          }
+
+          console.log('💳 Subscriptions loaded:', { 
+            workerIds: workerIds.length, 
+            firstFewWorkerIds: workerIds.slice(0, 3),
+            subscriptions: subscriptionsData?.length || 0,
+            data: subscriptionsData,
+            firstSubscription: subscriptionsData?.[0] || null,
+            error: subscriptionsError
+          });
+
+          // Create maps for efficient lookup
+          const tradeMap = new Map((trades || []).map((t: any) => [t.id, t]));
+          const workerTradesMap = new Map(
+            workerTradesData?.map((wt: any) => [wt.profile_id, wt.trade_ids]) || []
+          );
+          const subscriptionMap = new Map(
+            subscriptionsData?.map((sub: any) => [sub.user_id, sub.plan_id]) || []
+          );
+
+          // Map trades to workers
+          let workersWithTrades = allData.map((worker: any) => {
+            const tradeIds = workerTradesMap.get(worker.id) || [];
+            const workerTrades = (Array.isArray(tradeIds) ? tradeIds : []).map((id: number) => tradeMap.get(id)).filter(Boolean);
+            
+            return {
+              ...worker,
+              trades: workerTrades,
+              subscription_plan: subscriptionMap.get(worker.id) || null
+            };
+          });
+
+          // Sort: PRO users first, then by rating
+          workersWithTrades.sort((a: any, b: any) => {
+            const aIsPro = a.subscription_plan === 'pro';
+            const bIsPro = b.subscription_plan === 'pro';
+            
+            // PRO users first
+            if (aIsPro && !bIsPro) return -1;
+            if (!aIsPro && bIsPro) return 1;
+            
+            // Then by rating
+            return (b.rating || 0) - (a.rating || 0);
+          });
+
+          // Apply pagination after sorting
+          const from = pageNum * ITEMS_PER_PAGE;
+          const to = from + ITEMS_PER_PAGE;
+          const paginatedWorkers = workersWithTrades.slice(from, to);
+
+          if (reset) {
+            setWorkers(paginatedWorkers as Worker[]);
+          } else {
+            setWorkers((prev: Worker[]) => [...prev, ...(paginatedWorkers as Worker[])]);
+          }
+          setHasMore(workersWithTrades.length > to);
         } else {
-          setWorkers((prev: Worker[]) => [...prev, ...(data as Worker[])]);
+          console.log('📊 No workers found in default pagination');
+          if (reset) {
+            setWorkers([]);
+          }
+          setHasMore(false);
         }
-        setHasMore(data && data.length === ITEMS_PER_PAGE);
       }
     } catch (err) {
       console.error('❌ Error fetching workers:', err);
@@ -315,14 +622,95 @@ export function TradesmenClientList({
     }
   };
 
-  // Initial load - reset when filters change
+  // Function to apply filters
+  const applyFilters = () => {
+    setActiveCity(selectedCity);
+    setActiveTrade(selectedTrade);
+    setActiveMinRating(minRating);
+    setActiveOnlyVerified(onlyVerified);
+    setActiveOnlyOnline(onlyOnline);
+    
+    // Update URL with all filters
+    const params = new URLSearchParams();
+    
+    // Add search term if exists
+    if (searchTerm) {
+      params.set('q', searchTerm);
+    }
+    
+    // Add city filter
+    if (selectedCity) {
+      params.set('city', selectedCity);
+    }
+    
+    // Add trade filter
+    if (selectedTrade) {
+      params.set('trade', selectedTrade);
+    }
+    
+    // Add rating filter
+    if (minRating !== undefined) {
+      params.set('rating', minRating.toString());
+    }
+    
+    // Add verified filter (only if false, since true is default)
+    if (!onlyVerified) {
+      params.set('verified', 'false');
+    }
+    
+    // Add online filter
+    if (onlyOnline) {
+      params.set('online', 'true');
+    }
+    
+    // Add sort method
+    if (sortMethod !== 'rating') {
+      params.set('sort', sortMethod);
+    }
+    
+    // Update URL without page reload
+    const newUrl = `${window.location.pathname}${params.toString() ? '?' + params.toString() : ''}`;
+    window.history.replaceState({}, '', newUrl);
+    
+    setShowFilters(false); // Close filters on mobile after applying
+  };
+
+  // Function to reset filters
+  const resetFilters = () => {
+    setSelectedCity('');
+    setSelectedTrade('');
+    setMinRating(undefined);
+    setOnlyVerified(true);
+    setOnlyOnline(false);
+    setActiveCity('');
+    setActiveTrade('');
+    setActiveMinRating(undefined);
+    setActiveOnlyVerified(true);
+    setActiveOnlyOnline(false);
+    
+    // Reset URL to only have search term and sort
+    const params = new URLSearchParams();
+    
+    if (searchTerm) {
+      params.set('q', searchTerm);
+    }
+    
+    if (sortMethod !== 'rating') {
+      params.set('sort', sortMethod);
+    }
+    
+    const newUrl = `${window.location.pathname}${params.toString() ? '?' + params.toString() : ''}`;
+    window.history.replaceState({}, '', newUrl);
+  };
+
+  // Initial load - reset when active filters change
   useEffect(() => {
     if (!supabase) return; // Wait for Supabase to initialize
     
     setPage(0);
     setHasMore(true);
     fetchWorkers(0, true);
-  }, [supabase, searchTerm, sortMethod, selectedCity, selectedTrade, minRating, onlyVerified, onlyOnline]);
+  }, [supabase, searchTerm, sortMethod, activeCity, activeTrade, activeMinRating, activeOnlyVerified, activeOnlyOnline]);
 
   // Load more when in view
   useEffect(() => {
@@ -346,6 +734,24 @@ export function TradesmenClientList({
     }
   }, []);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (!target.closest('.trade-autocomplete')) {
+        setShowTradeDropdown(false);
+      }
+    };
+
+    if (showTradeDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showTradeDropdown]);
+
   useEffect(() => {
     const handlePageHide = () => {
       if (typeof window !== 'undefined') {
@@ -357,7 +763,7 @@ export function TradesmenClientList({
   }, []);
 
   return (
-    <div className="relative max-w-7xl mx-auto px-4 py-8 pb-16 sm:px-6 lg:px-8">
+    <div className="relative max-w-screen-2xl mx-auto px-4 py-8 pb-16 sm:px-6 lg:px-8 xl:px-12">
       {/* Mobile filter toggle */}
       <div className="lg:hidden mb-4">
         <button
@@ -372,9 +778,16 @@ export function TradesmenClientList({
       {/* Layout with sidebar */}
       <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
         {/* Filters sidebar */}
-        <aside className={`lg:w-72 xl:w-80 flex-shrink-0 ${showFilters ? 'block' : 'hidden lg:block'}`}>
+        <aside className={`lg:w-64 xl:w-72 flex-shrink-0 ${showFilters ? 'block' : 'hidden lg:block'}`}>
           <div className="sticky top-24 bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-6">
-            <h3 className="text-lg font-bold text-slate-900">Filtrează rezultatele</h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold text-slate-900">Filtrează rezultatele</h3>
+              {(selectedCity !== activeCity || selectedTrade !== activeTrade || minRating !== activeMinRating || onlyVerified !== activeOnlyVerified || onlyOnline !== activeOnlyOnline) && (
+                <span className="px-2 py-1 bg-amber-100 text-amber-700 text-xs font-semibold rounded-full">
+                  Modificat
+                </span>
+              )}
+            </div>
             
             {/* City filter */}
             <div>
@@ -391,24 +804,103 @@ export function TradesmenClientList({
               />
             </div>
 
-            {/* Trade filter */}
-            <div>
+            {/* Trade filter with autocomplete */}
+            <div className="trade-autocomplete">
               <label htmlFor="trade" className="block text-sm font-semibold text-slate-700 mb-2">
                 Meserie
               </label>
-              <select
-                id="trade"
-                value={selectedTrade}
-                onChange={(e) => setSelectedTrade(e.target.value)}
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-              >
-                <option value="">Orice meserie</option>
-                {(trades || []).map((trade: any) => (
-                  <option key={trade.id} value={trade.name}>
-                    {trade.name}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                {/* Input field */}
+                <div className="relative">
+                  <input
+                    id="trade"
+                    type="text"
+                    value={selectedTrade || tradeSearchQuery}
+                    onChange={(e) => {
+                      setTradeSearchQuery(e.target.value);
+                      setSelectedTrade('');
+                      setShowTradeDropdown(true);
+                    }}
+                    onFocus={() => setShowTradeDropdown(true)}
+                    placeholder="Caută meserie..."
+                    className="w-full px-4 py-2 pr-10 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  />
+                  {selectedTrade && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedTrade('');
+                        setTradeSearchQuery('');
+                      }}
+                      className="absolute right-8 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setShowTradeDropdown(!showTradeDropdown)}
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  >
+                    <ChevronDown className={`w-4 h-4 transition-transform ${showTradeDropdown ? 'rotate-180' : ''}`} />
+                  </button>
+                </div>
+
+                {/* Dropdown */}
+                {showTradeDropdown && (
+                  <div className="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-60 overflow-hidden">
+                    {/* Loading indicator */}
+                    {isLoadingTrades && filteredTrades.length === 0 && (
+                      <div className="flex items-center justify-center py-4">
+                        <Loader2 className="w-4 h-4 animate-spin text-blue-500 mr-2" />
+                        <span className="text-sm text-slate-500">Se încarcă...</span>
+                      </div>
+                    )}
+
+                    {/* Trade list */}
+                    <div className="max-h-60 overflow-y-auto">
+                      {filteredTrades.slice(0, 50).map((trade: any) => (
+                        <button
+                          key={trade.id}
+                          type="button"
+                          onClick={() => {
+                            setSelectedTrade(trade.name);
+                            setTradeSearchQuery('');
+                            setShowTradeDropdown(false);
+                          }}
+                          className="w-full px-4 py-2 text-left text-sm hover:bg-blue-50 focus:bg-blue-50 focus:outline-none transition-colors"
+                        >
+                          {trade.name}
+                        </button>
+                      ))}
+                      
+                      {/* Load more indicator */}
+                      {hasMoreTrades && filteredTrades.length > 0 && (
+                        <div className="flex items-center justify-center py-2 border-t border-slate-100">
+                          <button
+                            type="button"
+                            onClick={() => loadTrades(false)}
+                            className="text-xs text-blue-600 hover:text-blue-700 flex items-center"
+                          >
+                            {isLoadingTrades ? (
+                              <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                            ) : (
+                              'Încarcă mai multe...'
+                            )}
+                          </button>
+                        </div>
+                      )}
+
+                      {/* No results */}
+                      {!isLoadingTrades && filteredTrades.length === 0 && tradeSearchQuery && (
+                        <div className="px-4 py-3 text-sm text-slate-500 text-center">
+                          Nu am găsit nicio meserie pentru "{tradeSearchQuery}"
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Quick filters */}
@@ -483,21 +975,38 @@ export function TradesmenClientList({
               </select>
             </div>
 
-            {/* Reset filters */}
-            {(selectedCity || selectedTrade || minRating || !onlyVerified || onlyOnline) && (
+            {/* Action buttons */}
+            <div className="space-y-3 pt-4 border-t border-slate-200">
               <button
-                onClick={() => {
-                  setSelectedCity('');
-                  setSelectedTrade('');
-                  setMinRating(undefined);
-                  setOnlyVerified(true);
-                  setOnlyOnline(false);
-                  setSortMethod('rating');
-                }}
-                className="w-full px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors border border-slate-200"
+                onClick={applyFilters}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors shadow-sm"
               >
-                Resetează filtrele
+                <Search className="w-4 h-4" />
+                Aplică filtrele
               </button>
+              
+              {(selectedCity || selectedTrade || minRating || !onlyVerified || onlyOnline) && (
+                <button
+                  onClick={resetFilters}
+                  className="w-full px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors border border-slate-200"
+                >
+                  Resetează filtrele
+                </button>
+              )}
+            </div>
+
+            {/* Active filters display */}
+            {(activeCity || activeTrade || activeMinRating || !activeOnlyVerified || activeOnlyOnline) && (
+              <div className="pt-4 border-t border-slate-200">
+                <p className="text-sm font-semibold text-slate-700 mb-2">Filtre active:</p>
+                <div className="space-y-1 text-xs text-slate-600">
+                  {activeCity && <div>📍 Oraș: {activeCity}</div>}
+                  {activeTrade && <div>🔧 Meserie: {activeTrade}</div>}
+                  {activeMinRating && <div>⭐ Rating minim: {activeMinRating}+</div>}
+                  {activeOnlyVerified && <div>✅ Doar verificați</div>}
+                  {activeOnlyOnline && <div>🟢 Doar online</div>}
+                </div>
+              </div>
             )}
 
             {/* Results count */}
@@ -534,7 +1043,7 @@ export function TradesmenClientList({
 
           {/* Loading Skeleton */}
           {isLoading && workers.length === 0 && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 lg:gap-6 animate-fade-in">
               {Array.from({ length: 6 }).map((_, index) => (
                 <TradesmanCardSkeleton key={index} />
               ))}
@@ -543,7 +1052,7 @@ export function TradesmenClientList({
 
           {/* Results */}
           {!error && workers.length > 0 ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 lg:gap-6 animate-fade-in">
               {workers.map((worker: Worker) => (
                 <TradesmanCard
                   key={`${worker.id}-${worker.name}`}

@@ -1,4 +1,4 @@
-import { MapPin, Star, CheckCircle, Phone, GraduationCap } from 'lucide-react';
+import { MapPin, Star, CheckCircle, Phone, GraduationCap, Crown } from 'lucide-react';
 import { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import { getWorkerProfileUrl } from '../../utils/seo-urls';
 
@@ -21,45 +21,10 @@ interface WorkerProfile {
   is_online?: boolean;
   phone?: string | null;
   trades?: any[];
+  subscription_plan?: string; // 'pro', 'premium', etc.
 }
 
 // Memoized sub-components
-const TradesDisplay = memo(({ trades, workerName }: { trades: any[], workerName: string }) => {
-  if (trades.length === 0) {
-    return null;
-  }
-  
-  const validTrades = trades.filter((trade: any) => {
-    if (typeof trade === 'string') return true;
-    if (trade && typeof trade === 'object' && trade.name) return true;
-    return false;
-  });
-  
-  return (
-    <div className="mb-6">
-      <div className="flex flex-wrap gap-2">
-        {validTrades.slice(0, 3).map((trade: any, index: number) => {
-          const tradeName = typeof trade === 'string' ? trade : (trade?.name || 'Unknown Trade');
-          return (
-            <span
-              key={`${workerName}-${index}-${tradeName}`}
-              className="inline-flex items-center px-3 py-1.5 rounded-full bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 text-xs font-semibold text-blue-700 shadow-sm hover:from-blue-100 hover:to-indigo-100 hover:border-blue-300 hover:shadow-md hover:scale-105 transition-all duration-300 cursor-default"
-            >
-              {tradeName}
-            </span>
-          );
-        })}
-        {validTrades.length > 3 && (
-          <span className="inline-flex items-center px-3 py-1.5 rounded-full bg-gradient-to-r from-slate-50 to-gray-50 border border-slate-300 text-xs font-semibold text-slate-600 shadow-sm hover:from-slate-100 hover:to-gray-100 hover:border-slate-400 hover:shadow-md hover:scale-105 transition-all duration-300 cursor-default">
-            +{validTrades.length - 3} mai multe
-          </span>
-        )}
-      </div>
-    </div>
-  );
-});
-TradesDisplay.displayName = 'TradesDisplay';
-
 const WorkerAvatar = memo(({ worker, profileUrl, avatarFallbackUrl }: { 
   worker: WorkerProfile, 
   profileUrl: string, 
@@ -95,6 +60,19 @@ WorkerAvatar.displayName = 'WorkerAvatar';
 export const TradesmanCard = memo(({ worker }: { worker: WorkerProfile }) => {
   const trades = useMemo(() => worker.trades || [], [worker.trades]);
   const [isPhoneRevealed, setIsPhoneRevealed] = useState(false);
+  
+  // Check if worker has pro subscription
+  const isPro = worker.subscription_plan && (
+    worker.subscription_plan.toLowerCase().includes('pro') || 
+    worker.subscription_plan.toLowerCase().includes('premium')
+  );
+  
+  // Debug: log subscription info
+  console.log('👑 Worker subscription:', worker.name, { 
+    subscription_plan: worker.subscription_plan,
+    subscription_plan_type: typeof worker.subscription_plan,
+    isPro 
+  });
   
   // Generate profile URL with SEO-friendly slug
   const profileUrl = useMemo(() => {
@@ -151,12 +129,33 @@ export const TradesmanCard = memo(({ worker }: { worker: WorkerProfile }) => {
   }, [worker.id]);
   
   return (
-    <div className="group relative bg-white rounded-3xl border border-slate-200/60 shadow-lg overflow-hidden animate-fade-in backdrop-blur-sm hover:shadow-2xl hover:shadow-slate-900/10 transition-all duration-500 hover:-translate-y-1">
-      {/* Premium gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-white via-slate-50/50 to-blue-50/30 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+    <div className={`group relative rounded-3xl border shadow-lg overflow-hidden animate-fade-in backdrop-blur-sm transition-all duration-500 hover:-translate-y-1 ${
+      isPro 
+        ? 'bg-gradient-to-br from-slate-50 via-white to-blue-50/30 border-blue-200/40 hover:shadow-2xl hover:shadow-blue-500/10 ring-2 ring-blue-400/20' 
+        : 'bg-white border-slate-200/60 hover:shadow-2xl hover:shadow-slate-900/10'
+    }`}>
+      {/* Premium gradient overlay for pro users */}
+      {isPro && (
+        <>
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-indigo-500/5 to-purple-500/5 pointer-events-none" />
+          <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-blue-400/10 via-indigo-300/5 to-transparent rounded-bl-full opacity-50"></div>
+        </>
+      )}
       
-      {/* Animated corner accent */}
-      <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+      {/* Regular gradient overlay for non-pro */}
+      {!isPro && (
+        <div className="absolute inset-0 bg-gradient-to-br from-white via-slate-50/50 to-blue-50/30 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      )}
+      
+      {/* PRO Badge */}
+      {isPro && (
+        <div className="absolute top-3 right-3 z-20">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full shadow-lg border border-blue-400/30">
+            <Crown className="w-3.5 h-3.5 text-yellow-300 fill-current drop-shadow-sm" />
+            <span className="text-xs font-bold text-white tracking-wide">PRO</span>
+          </div>
+        </div>
+      )}
 
       <div className="relative z-10 p-7">
         {/* Header Section */}
@@ -173,29 +172,43 @@ export const TradesmanCard = memo(({ worker }: { worker: WorkerProfile }) => {
             {/* Name Row */}
             <div className="mb-3">
               <a href={profileUrl} className="group/name">
-                <h3 className="text-xl font-bold text-slate-900 leading-tight group-hover/name:text-blue-600 transition-colors duration-300">
+                <h3 className={`text-xl font-bold leading-tight transition-colors duration-300 ${
+                  isPro 
+                    ? 'text-slate-900 group-hover/name:text-blue-600' 
+                    : 'text-slate-900 group-hover/name:text-blue-600'
+                }`}>
                   {worker.name}
                 </h3>
               </a>
             </div>
             
             {/* Badges Row */}
-            <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
               {worker.is_verified && (
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-300 shadow-sm hover:from-emerald-100 hover:to-green-100 transition-colors duration-300">
-                  <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
-                  <span className="text-xs font-bold text-emerald-700 tracking-wide">VERIFICAT</span>
+                <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full shadow-sm transition-colors duration-300 ${
+                  isPro
+                    ? 'bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-300 hover:from-blue-100 hover:to-indigo-100'
+                    : 'bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-300 hover:from-emerald-100 hover:to-green-100'
+                }`}>
+                  <CheckCircle className={`w-3.5 h-3.5 ${
+                    isPro ? 'text-blue-600' : 'text-emerald-600'
+                  }`} />
+                  <span className={`text-xs font-bold tracking-wide ${
+                    isPro ? 'text-blue-700' : 'text-emerald-700'
+                  }`}>VERIFICAT</span>
                 </div>
               )}
               
-              <div className="flex flex-wrap gap-2">
-                {worker.rating > 0 && (
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-300 shadow-sm hover:from-amber-100 hover:to-yellow-100 transition-colors duration-300">
-                    <Star className="w-3.5 h-3.5 text-amber-500 fill-current" />
-                    <span className="text-xs font-bold text-amber-700">{worker.rating.toFixed(1)} ★</span>
-                  </div>
-                )}
-              </div>
+              {worker.rating > 0 && (
+                <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full shadow-sm transition-colors duration-300 ${
+                  isPro
+                    ? 'bg-gradient-to-r from-amber-100 to-yellow-100 border border-amber-300 hover:from-amber-200 hover:to-yellow-200'
+                    : 'bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-300 hover:from-amber-100 hover:to-yellow-100'
+                }`}>
+                  <Star className="w-3.5 h-3.5 text-amber-500 fill-current" />
+                  <span className="text-xs font-bold text-amber-700">{worker.rating.toFixed(1)} ★</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -203,32 +216,84 @@ export const TradesmanCard = memo(({ worker }: { worker: WorkerProfile }) => {
         {/* Location */}
         {worker.address && (
           <div className="flex items-center gap-2 mb-5">
-            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 shadow-sm hover:bg-slate-100 transition-colors duration-300">
-              <MapPin className="w-4 h-4 text-slate-500 group-hover:text-blue-500 transition-colors duration-300" />
-              <span className="text-sm font-medium text-slate-700 truncate group-hover:text-slate-900 transition-colors duration-300">
+            <div className={`flex items-center gap-2 px-3 py-2 rounded-xl shadow-sm transition-colors duration-300 ${
+              isPro
+                ? 'bg-blue-50/80 border border-blue-200 hover:bg-blue-100/80'
+                : 'bg-slate-50 border border-slate-200 hover:bg-slate-100'
+            }`}>
+              <MapPin className={`w-4 h-4 transition-colors duration-300 ${
+                isPro ? 'text-blue-600 group-hover:text-blue-700' : 'text-slate-500 group-hover:text-blue-500'
+              }`} />
+              <span className={`text-sm font-medium truncate transition-colors duration-300 ${
+                isPro ? 'text-blue-900 group-hover:text-blue-950' : 'text-slate-700 group-hover:text-slate-900'
+              }`}>
                 {worker.address}
               </span>
             </div>
           </div>
         )}
         
+        {/* Trades */}
+        {trades.length > 0 && (
+          <div className="mb-5">
+            <div className="flex flex-wrap gap-2">
+              {trades.slice(0, 3).map((trade: TradeObject, index: number) => {
+                const gradients = isPro ? [
+                  'from-blue-600 via-indigo-600 to-purple-600',
+                  'from-purple-600 via-pink-600 to-rose-600',
+                  'from-emerald-600 via-teal-600 to-cyan-600'
+                ] : [
+                  'from-blue-500 to-cyan-500',
+                  'from-purple-500 to-pink-500',
+                  'from-emerald-500 to-teal-500'
+                ];
+                return (
+                  <div key={trade.id || index} className="relative group/trade">
+                    {isPro && (
+                      <div className={`absolute -inset-0.5 bg-gradient-to-r ${gradients[index % gradients.length]} rounded-lg blur-sm opacity-50 group-hover/trade:opacity-75 transition-opacity`}></div>
+                    )}
+                    <span className={`relative inline-flex items-center px-3 py-1.5 rounded-lg bg-gradient-to-r ${gradients[index % gradients.length]} text-white text-xs font-bold shadow-md ${isPro ? 'ring-1 ring-white/40' : ''}`}>
+                      {trade.name}
+                    </span>
+                  </div>
+                );
+              })}
+              {trades.length > 3 && (
+                <div className="relative">
+                  {isPro && (
+                    <div className="absolute -inset-0.5 bg-gradient-to-r from-slate-700 to-slate-900 rounded-lg blur-sm opacity-50"></div>
+                  )}
+                  <span className={`relative inline-flex items-center px-3 py-1.5 rounded-lg bg-gradient-to-r from-slate-600 to-slate-800 text-white text-xs font-bold shadow-md ${isPro ? 'ring-1 ring-white/40' : ''}`}>
+                    +{trades.length - 3}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Bio */}
         {worker.bio && (
-          <div className="mb-6 p-4 bg-gradient-to-r from-slate-50 to-gray-50 rounded-2xl border border-slate-200 shadow-sm hover:from-slate-100 hover:to-gray-100 transition-colors duration-300">
-            <p className="text-sm text-slate-700 leading-relaxed line-clamp-3 font-medium">
+          <div className="mb-6 p-4 rounded-2xl border shadow-sm transition-colors duration-300">
+            <p className={`text-sm leading-relaxed line-clamp-3 font-medium ${
+              isPro
+                ? 'text-slate-700 bg-gradient-to-r from-blue-50/50 to-indigo-50/50 border-blue-200 hover:from-blue-50 hover:to-indigo-50'
+                : 'text-slate-700 bg-gradient-to-r from-slate-50 to-gray-50 border-slate-200 hover:from-slate-100 hover:to-gray-100'
+            }`}>
               {worker.bio}
             </p>
           </div>
         )}
         
-        {/* Trades */}
-        <TradesDisplay trades={trades} workerName={worker.name} />
-        
         {/* Action Buttons */}
         <div className="flex flex-col gap-3 mt-6">
           <a
             href={profileUrl}
-            className="w-full flex items-center justify-center gap-2 px-6 py-3.5 text-sm font-bold text-white bg-gradient-to-r from-slate-800 to-slate-900 hover:from-blue-600 hover:to-blue-700 rounded-2xl shadow-lg hover:shadow-xl hover:shadow-blue-500/25 transition-all duration-300 hover:-translate-y-0.5 group/btn"
+            className={`w-full flex items-center justify-center gap-2 px-6 py-3.5 text-sm font-bold text-white rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 group/btn transition-all duration-300 ${
+              isPro
+                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 hover:shadow-blue-500/25'
+                : 'bg-gradient-to-r from-slate-800 to-slate-900 hover:from-blue-600 hover:to-blue-700 hover:shadow-blue-500/25'
+            }`}
           >
             <svg className="w-4 h-4 group-hover/btn:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -238,7 +303,11 @@ export const TradesmanCard = memo(({ worker }: { worker: WorkerProfile }) => {
           {worker.phone && (
             <button
               onClick={handlePhoneReveal}
-              className="w-full flex items-center justify-center gap-2 px-6 py-3.5 text-sm font-bold text-white bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 rounded-2xl shadow-lg hover:shadow-xl hover:shadow-emerald-500/25 transition-all duration-300 hover:-translate-y-0.5 group/btn"
+              className={`w-full flex items-center justify-center gap-2 px-6 py-3.5 text-sm font-bold text-white rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 group/btn transition-all duration-300 ${
+                isPro
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 hover:shadow-emerald-500/25'
+                  : 'bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 hover:shadow-emerald-500/25'
+              }`}
               title={isPhoneRevealed ? `Sună ${worker.phone}` : 'Afișează numărul și sună'}
             >
               <Phone className="w-5 h-5 group-hover/btn:animate-pulse" />
@@ -260,6 +329,7 @@ export const TradesmanCard = memo(({ worker }: { worker: WorkerProfile }) => {
     prevProps.worker.is_online === nextProps.worker.is_online &&
     prevProps.worker.avatar_url === nextProps.worker.avatar_url &&
     prevProps.worker.phone === nextProps.worker.phone &&
+    prevProps.worker.subscription_plan === nextProps.worker.subscription_plan &&
     JSON.stringify(prevProps.worker.trades) === JSON.stringify(nextProps.worker.trades)
   );
 });

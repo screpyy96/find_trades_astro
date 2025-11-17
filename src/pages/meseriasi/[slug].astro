@@ -110,7 +110,8 @@ const [
   workerTradesResult,
   portfolioResult,
   reviewsResult,
-  certificationsResult
+  certificationsResult,
+  subscriptionResult
 ] = await Promise.all([
   // Worker data
   supabase
@@ -153,7 +154,15 @@ const [
     .from('certifications')
     .select('*')
     .eq('profile_id', workerId)
-    .order('issue_date', { ascending: false })
+    .order('issue_date', { ascending: false }),
+  
+  // User subscription
+  supabase
+    .from('user_subscriptions')
+    .select('plan_id, status')
+    .eq('user_id', workerId)
+    .eq('status', 'active')
+    .single()
 ]);
 
 const { data: worker, error } = workerResult;
@@ -176,6 +185,7 @@ if (tradeIds.length > 0) {
 const portfolioItems = portfolioResult.data;
 const reviews = reviewsResult.data;
 const certifications = certificationsResult.data;
+const subscriptionPlan = subscriptionResult.data?.plan_id || null;
 
 // Generate SEO data
 const tradeNames = trades.map((trade: any) =>
@@ -297,7 +307,8 @@ const canonicalUrl = `https://www.meseriaslocal.ro/meseriasi/${slug}`;
       trades,
       portfolio_items: portfolioItems,
       reviews,
-      certifications
+      certifications,
+      subscription_plan: subscriptionPlan
     }}
     supabaseUrl={supabaseUrl}
     supabaseAnonKey={supabaseAnonKey}

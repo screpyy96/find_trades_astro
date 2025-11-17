@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Star, MapPin, Phone, Award, CheckCircle, Camera, Grid3X3, TrendingUp, BarChart3, ExternalLink, Badge, X, CalendarDays, Shield, Zap, Users, Share2, Flag, Send, Briefcase } from 'lucide-react';
+import { Star, MapPin, Phone, Award, CheckCircle, Camera, Grid3X3, TrendingUp, BarChart3, ExternalLink, Badge, X, CalendarDays, Shield, Zap, Users, Share2, Flag, Send, Briefcase, Crown } from 'lucide-react';
 import { format } from 'date-fns';
 import ro from 'date-fns/locale/ro';
 import { createClient } from '@supabase/supabase-js';
+import { AvatarModal } from './AvatarModal';
 
 interface WorkerProfile {
   id: string;
@@ -16,6 +17,7 @@ interface WorkerProfile {
   is_online?: boolean;
   phone?: string | null;
   coordinates?: { lat: number; lng: number } | null;
+  subscription_plan?: string | null;
   [key: string]: any;
 }
 
@@ -300,7 +302,6 @@ function PortfolioModal({ item, onClose }: { item: any; onClose: () => void }) {
   );
 }
 
-
 interface TradesmanProfileProps {
   worker: WorkerProfile;
   supabaseUrl?: string;
@@ -313,6 +314,7 @@ export function TradesmanProfile({ worker, supabaseUrl, supabaseAnonKey }: Trade
   const [selectedPortfolioItem, setSelectedPortfolioItem] = useState<any | null>(null);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
+  const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
 
   // Handle share functionality
   const handleShare = async () => {
@@ -463,9 +465,25 @@ export function TradesmanProfile({ worker, supabaseUrl, supabaseAnonKey }: Trade
       sessionStorage.setItem(`contact_revealed_${worker.id}`, 'true');
     } catch (error) {
       // Error logged to monitoring in production
-      // Still reveal contact even if tracking fails
       setIsContactRevealed(true);
+      // Save to session storage
       sessionStorage.setItem(`contact_revealed_${worker.id}`, 'true');
+    }
+  };
+
+  const handlePhoneCall = () => {
+    if (worker.phone) {
+      // If contact already revealed, make the call
+      if (isContactRevealed) {
+        window.location.href = `tel:${worker.phone}`;
+      } else {
+        // First reveal the contact, then make the call
+        handleContactReveal().then(() => {
+          setTimeout(() => {
+            window.location.href = `tel:${worker.phone}`;
+          }, 100);
+        });
+      }
     }
   };
 
@@ -504,6 +522,8 @@ export function TradesmanProfile({ worker, supabaseUrl, supabaseAnonKey }: Trade
     };
   }, [worker.id, isContactRevealed]);
 
+  const isPro = worker.subscription_plan === 'pro';
+
   return (
     <>
       {/* Schema.org structured data for rich snippets */}
@@ -512,13 +532,27 @@ export function TradesmanProfile({ worker, supabaseUrl, supabaseAnonKey }: Trade
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
       />
 
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 lg:pt-20">
+      <div className={`min-h-screen ${
+        isPro 
+          ? 'bg-gradient-to-br from-blue-50 via-white to-indigo-50/40' 
+          : 'bg-gradient-to-br from-slate-50 via-white to-blue-50/30'
+      }`}>
         {/* Premium Hero Section with Enhanced Background */}
         <div className="relative overflow-hidden">
-          {/* Enhanced Background Effects */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(59,130,246,0.08),transparent_50%)] pointer-events-none" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(168,85,247,0.08),transparent_50%)] pointer-events-none" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.04),transparent_70%)] pointer-events-none" />
+          {/* Enhanced Background Effects for PRO */}
+          {isPro ? (
+            <>
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(59,130,246,0.12),transparent_50%)] pointer-events-none" />
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(99,102,241,0.12),transparent_50%)] pointer-events-none" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.06),transparent_70%)] pointer-events-none" />
+            </>
+          ) : (
+            <>
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(59,130,246,0.08),transparent_50%)] pointer-events-none" />
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(168,85,247,0.08),transparent_50%)] pointer-events-none" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.04),transparent_70%)] pointer-events-none" />
+            </>
+          )}
 
           {/* Floating Elements */}
           <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-blue-400/10 to-purple-400/10 rounded-full blur-xl animate-pulse" />
@@ -526,28 +560,48 @@ export function TradesmanProfile({ worker, supabaseUrl, supabaseAnonKey }: Trade
 
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
             {/* Premium Header Card */}
-            <div className="bg-white/80 backdrop-blur-sm rounded-3xl border border-slate-200/60 p-4 sm:p-8 mb-4 sm:mb-6 shadow-xl shadow-slate-900/5 relative overflow-hidden">
+            <div className={`bg-white/80 backdrop-blur-sm rounded-3xl p-4 sm:p-8 mb-4 sm:mb-6 shadow-xl relative overflow-hidden ${
+              isPro 
+                ? 'border-2 border-blue-200/60 shadow-blue-500/10' 
+                : 'border border-slate-200/60 shadow-slate-900/5'
+            }`}>
+              {/* Animated gradient border for PRO */}
+              {isPro && (
+                <div className="absolute inset-0 rounded-3xl p-[2px] bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 opacity-40 pointer-events-none">
+                  <div className="absolute inset-[2px] rounded-3xl bg-white/80 backdrop-blur-sm" />
+                </div>
+              )}
               {/* Subtle gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-br from-white/50 via-transparent to-slate-50/30 pointer-events-none" />
+              <div className={`absolute inset-0 bg-gradient-to-br pointer-events-none ${
+                isPro 
+                  ? 'from-blue-50/50 via-transparent to-indigo-50/30' 
+                  : 'from-white/50 via-transparent to-slate-50/30'
+              }`} />
               {/* Mobile compact layout */}
               <div className="flex sm:hidden items-start gap-4 mb-6 relative z-10">
                 <div className="relative flex-shrink-0">
                   <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl blur opacity-30"></div>
-                  {worker.avatar_url ? (
-                    <img
-                      src={worker.avatar_url}
-                      alt={worker.name}
-                      loading="eager"
-                      referrerPolicy="no-referrer"
-                      className="relative w-20 h-20 rounded-2xl object-cover ring-2 ring-white shadow-lg"
-                    />
-                  ) : (
-                    <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center ring-2 ring-white shadow-lg">
-                      <span className="text-white font-bold text-2xl">
-                        {(worker.name || 'M').charAt(0).toUpperCase()}
-                      </span>
-                    </div>
-                  )}
+                  <button 
+                    onClick={() => setIsAvatarModalOpen(true)}
+                    className="relative group cursor-pointer"
+                    title="Vezi poza în fullscreen"
+                  >
+                    {worker.avatar_url ? (
+                      <img
+                        src={worker.avatar_url}
+                        alt={worker.name}
+                        loading="eager"
+                        referrerPolicy="no-referrer"
+                        className="relative w-20 h-20 rounded-2xl object-cover ring-2 ring-white shadow-lg group-hover:ring-4 group-hover:ring-blue-200 group-hover:scale-105 transition-all duration-300"
+                      />
+                    ) : (
+                      <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center ring-2 ring-white shadow-lg group-hover:ring-4 group-hover:ring-blue-200 group-hover:scale-105 transition-all duration-300">
+                        <span className="text-white font-bold text-2xl">
+                          {(worker.name || 'M').charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                    )}
+                  </button>
                   {worker.is_verified && (
                     <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-emerald-500 rounded-full flex items-center justify-center ring-2 ring-white">
                       <CheckCircle className="w-4 h-4 text-white" />
@@ -557,13 +611,12 @@ export function TradesmanProfile({ worker, supabaseUrl, supabaseAnonKey }: Trade
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-2">
                     <h1 className="text-xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent truncate">{worker.name}</h1>
-                  </div>
-                  <div className="flex items-center gap-2 mb-2">
-                  
-                    <div className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-sm">
-                      <Shield className="w-3 h-3 text-white" />
-                      <span className="text-xs font-bold">Verificat</span>
-                    </div>
+                    {worker.subscription_plan === 'pro' && (
+                      <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg animate-pulse">
+                        <Crown className="w-3 h-3 text-yellow-300 fill-current" />
+                        <span className="text-xs font-bold text-white">PRO</span>
+                      </div>
+                    )}
                   </div>
                   <div className="flex flex-col gap-1 text-sm text-slate-700">
                     <div className="flex items-center gap-2">
@@ -588,22 +641,28 @@ export function TradesmanProfile({ worker, supabaseUrl, supabaseAnonKey }: Trade
                   <div className="relative group">
                     {/* Animated gradient ring */}
                     <div className="absolute -inset-2 bg-gradient-to-r from-blue-500 via-purple-500 to-emerald-500 rounded-3xl blur opacity-40 group-hover:opacity-60 transition-opacity animate-pulse"></div>
-                    {worker.avatar_url ? (
-                      <img
-                        src={worker.avatar_url}
-                        alt={worker.name}
-                        loading="eager"
-                        decoding="async"
-                        referrerPolicy="no-referrer"
-                        className="relative w-32 h-32 rounded-3xl object-cover ring-4 ring-white shadow-2xl"
-                      />
-                    ) : (
-                      <div className="relative w-32 h-32 rounded-3xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center ring-4 ring-white shadow-2xl">
-                        <span className="text-white font-bold text-4xl">
-                          {(worker.name || 'M').charAt(0).toUpperCase()}
-                        </span>
-                      </div>
-                    )}
+                    <button 
+                      onClick={() => setIsAvatarModalOpen(true)}
+                      className="relative group cursor-pointer"
+                      title="Vezi poza în fullscreen"
+                    >
+                      {worker.avatar_url ? (
+                        <img
+                          src={worker.avatar_url}
+                          alt={worker.name}
+                          loading="eager"
+                          decoding="async"
+                          referrerPolicy="no-referrer"
+                          className="relative w-32 h-32 rounded-3xl object-cover ring-4 ring-white shadow-2xl group-hover:ring-6 group-hover:ring-blue-200 group-hover:scale-105 transition-all duration-300"
+                        />
+                      ) : (
+                        <div className="relative w-32 h-32 rounded-3xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center ring-4 ring-white shadow-2xl group-hover:ring-6 group-hover:ring-blue-200 group-hover:scale-105 transition-all duration-300">
+                          <span className="text-white font-bold text-4xl">
+                            {(worker.name || 'M').charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                      )}
+                    </button>
                     {worker.is_verified && (
                       <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full flex items-center justify-center ring-4 ring-white shadow-lg">
                         <CheckCircle className="w-5 h-5 text-white" />
@@ -615,11 +674,15 @@ export function TradesmanProfile({ worker, supabaseUrl, supabaseAnonKey }: Trade
                     <div className="flex items-center gap-4 mb-3">
                       <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 bg-clip-text text-transparent">{worker.name}</h1>
                       <div className="flex items-center gap-2">
-                       
-                        <div className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg">
-                          <Shield className="w-4 h-4 text-white" />
-                          <span className="text-sm font-bold">Verificat</span>
-                        </div>
+                        {worker.subscription_plan === 'pro' && (
+                          <div className="relative">
+                            <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full blur-md opacity-50"></div>
+                            <div className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 shadow-lg border border-blue-400/30 animate-pulse">
+                              <Crown className="w-4 h-4 text-yellow-300 fill-current" />
+                              <span className="text-sm font-bold text-white tracking-wider">PRO</span>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -645,23 +708,38 @@ export function TradesmanProfile({ worker, supabaseUrl, supabaseAnonKey }: Trade
                     {trades.length > 0 && (
                       <div className="flex flex-wrap gap-3">
                         {trades.slice(0, 4).map((trade: any, index: number) => {
-                          const gradients = [
+                          const gradients = isPro ? [
+                            'from-blue-600 via-indigo-600 to-purple-600',
+                            'from-purple-600 via-pink-600 to-rose-600',
+                            'from-emerald-600 via-teal-600 to-cyan-600',
+                            'from-orange-600 via-red-600 to-pink-600'
+                          ] : [
                             'from-blue-500 to-cyan-500',
                             'from-purple-500 to-pink-500',
                             'from-emerald-500 to-teal-500',
                             'from-orange-500 to-red-500'
                           ];
                           return (
-                            <span key={index} className={`inline-flex items-center px-4 py-2 rounded-xl bg-gradient-to-r ${gradients[index % gradients.length]} text-white text-sm font-semibold shadow-lg hover:shadow-xl transition-shadow`}>
-                              <Zap className="w-3 h-3 mr-1.5" />
-                              {trade.name}
-                            </span>
+                            <div key={index} className="relative group">
+                              {isPro && (
+                                <div className={`absolute -inset-0.5 bg-gradient-to-r ${gradients[index % gradients.length]} rounded-xl blur opacity-60 group-hover:opacity-100 transition-opacity`}></div>
+                              )}
+                              <span className={`relative inline-flex items-center px-4 py-2 rounded-xl bg-gradient-to-r ${gradients[index % gradients.length]} text-white text-sm font-semibold shadow-lg hover:shadow-xl transition-all ${isPro ? 'ring-2 ring-white/50' : ''}`}>
+                                <Zap className="w-3 h-3 mr-1.5" />
+                                {trade.name}
+                              </span>
+                            </div>
                           );
                         })}
                         {trades.length > 4 && (
-                          <span className="inline-flex items-center px-4 py-2 rounded-xl bg-gradient-to-r from-slate-600 to-slate-700 text-white text-sm font-semibold shadow-lg">
-                            +{trades.length - 4} mai multe
-                          </span>
+                          <div className="relative group">
+                            {isPro && (
+                              <div className="absolute -inset-0.5 bg-gradient-to-r from-slate-700 to-slate-900 rounded-xl blur opacity-60 group-hover:opacity-100 transition-opacity"></div>
+                            )}
+                            <span className={`relative inline-flex items-center px-4 py-2 rounded-xl bg-gradient-to-r from-slate-600 to-slate-700 text-white text-sm font-semibold shadow-lg ${isPro ? 'ring-2 ring-white/50' : ''}`}>
+                              +{trades.length - 4} mai multe
+                            </span>
+                          </div>
                         )}
                       </div>
                     )}
@@ -674,8 +752,8 @@ export function TradesmanProfile({ worker, supabaseUrl, supabaseAnonKey }: Trade
                   <div className="space-y-3">
                     {worker.phone && (
                       <button
-                        onClick={handleContactReveal}
-                        className="w-full flex items-center justify-center gap-3 px-6 py-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 group"
+                        onClick={handlePhoneCall}
+                        className="w-full flex items-center justify-center gap-3 px-6 py-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-xl hover:shadow-2xl hover:from-emerald-700 hover:to-teal-700 hover:scale-105 transition-all duration-300 group"
                       >
                         <Phone className="w-5 h-5 text-white group-hover:animate-pulse" />
                         <span className="font-bold text-lg">
@@ -689,17 +767,17 @@ export function TradesmanProfile({ worker, supabaseUrl, supabaseAnonKey }: Trade
                   <div className="flex gap-2">
                     <button 
                       onClick={handleShare}
-                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-white border-2 border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50 transition-all group"
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-white border-2 border-slate-200 text-black hover:border-slate-300 hover:bg-slate-50 transition-all group"
                     >
-                      <Share2 className="w-4 h-4 group-hover:text-blue-500 transition-colors" />
-                      <span className="font-medium">Distribuie</span>
+                      <Share2 className="w-4 h-4 text-black group-hover:text-blue-500 transition-colors" />
+                      <span className="font-bold">Distribuie</span>
                     </button>
                     <button
                       onClick={() => setIsReportModalOpen(true)}
-                      className="flex items-center justify-center px-3 py-3 rounded-xl bg-white border-2 border-slate-200 text-slate-500 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-600 transition-all"
+                      className="flex items-center justify-center px-3 py-3 rounded-xl bg-white border-2 border-slate-200 text-black hover:border-slate-300 hover:bg-slate-50 hover:text-slate-600 transition-all"
                       title="Raportează profil"
                     >
-                      <Flag className="w-4 h-4" />
+                      <Flag className="w-4 h-4 text-black" />
                     </button>
                   </div>
 
@@ -709,16 +787,39 @@ export function TradesmanProfile({ worker, supabaseUrl, supabaseAnonKey }: Trade
 
               {/* Mobile Trades */}
               {trades.length > 0 && (
-                <div className="sm:hidden flex flex-wrap gap-1.5 mb-4">
-                  {trades.slice(0, 4).map((trade: any, index: number) => (
-                    <span key={index} className="inline-flex items-center px-2 py-1 rounded-md bg-blue-50 border border-blue-100 text-xs font-medium text-blue-600">
-                      {trade.name}
-                    </span>
-                  ))}
+                <div className="sm:hidden flex flex-wrap gap-2 mb-4">
+                  {trades.slice(0, 4).map((trade: any, index: number) => {
+                    const gradients = isPro ? [
+                      'from-blue-600 via-indigo-600 to-purple-600',
+                      'from-purple-600 via-pink-600 to-rose-600',
+                      'from-emerald-600 via-teal-600 to-cyan-600',
+                      'from-orange-600 via-red-600 to-pink-600'
+                    ] : [
+                      'from-blue-500 to-cyan-500',
+                      'from-purple-500 to-pink-500',
+                      'from-emerald-500 to-teal-500',
+                      'from-orange-500 to-red-500'
+                    ];
+                    return (
+                      <div key={index} className="relative">
+                        {isPro && (
+                          <div className={`absolute -inset-0.5 bg-gradient-to-r ${gradients[index % gradients.length]} rounded-lg blur-sm opacity-50`}></div>
+                        )}
+                        <span className={`relative inline-flex items-center px-3 py-1.5 rounded-lg bg-gradient-to-r ${gradients[index % gradients.length]} text-white text-xs font-bold shadow-md ${isPro ? 'ring-1 ring-white/40' : ''}`}>
+                          {trade.name}
+                        </span>
+                      </div>
+                    );
+                  })}
                   {trades.length > 4 && (
-                    <span className="inline-flex items-center px-2 py-1 rounded-md bg-slate-50 border border-slate-200 text-xs font-medium text-slate-600">
-                      +{trades.length - 4}
-                    </span>
+                    <div className="relative">
+                      {isPro && (
+                        <div className="absolute -inset-0.5 bg-gradient-to-r from-slate-700 to-slate-900 rounded-lg blur-sm opacity-50"></div>
+                      )}
+                      <span className={`relative inline-flex items-center px-3 py-1.5 rounded-lg bg-gradient-to-r from-slate-600 to-slate-800 text-white text-xs font-bold shadow-md ${isPro ? 'ring-1 ring-white/40' : ''}`}>
+                        +{trades.length - 4}
+                      </span>
+                    </div>
                   )}
                 </div>
               )}
@@ -728,29 +829,29 @@ export function TradesmanProfile({ worker, supabaseUrl, supabaseAnonKey }: Trade
                 <div className="flex gap-3">
                   {worker.phone && (
                     <button
-                      onClick={handleContactReveal}
-                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:shadow-lg transition-all duration-300 shadow-md"
+                      onClick={handlePhoneCall}
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-2xl !bg-emerald-500 !text-white shadow-xl transition-all duration-300 relative z-20"
                     >
-                      <Phone className="w-4 h-4 text-white" />
-                      <span className="font-bold text-sm">
+                      <Phone className="w-5 h-5 text-white drop-shadow-sm" />
+                      <span className="font-black text-lg text-white drop-shadow-sm">
                         {isContactRevealed ? worker.phone : 'Apelează'}
                       </span>
                     </button>
                   )}
                   <button
                     onClick={() => setIsReportModalOpen(true)}
-                    className="flex items-center justify-center p-2.5 rounded-xl bg-slate-100 text-slate-500 border border-slate-200 hover:bg-slate-200 hover:text-slate-600 transition-all duration-200"
+                    className="flex items-center justify-center p-2.5 rounded-xl bg-slate-100 text-black border border-slate-200 hover:bg-slate-200 hover:text-slate-600 transition-all duration-200"
                   >
-                    <Flag className="w-4 h-4" />
+                    <Flag className="w-4 h-4 text-black" />
                   </button>
                 </div>
                 <div className="flex gap-2">
                   <button 
                     onClick={handleShare}
-                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-white border-2 border-slate-200 text-slate-700 hover:border-slate-300 transition-all"
+                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-white border-2 border-slate-200 text-black hover:border-slate-300 transition-all"
                   >
-                    <Share2 className="w-3 h-3" />
-                    <span className="font-medium text-xs">Distribuie</span>
+                    <Share2 className="w-3 h-3 text-black" />
+                    <span className="font-bold text-xs">Distribuie</span>
                   </button>
                 </div>
               </div>
@@ -774,7 +875,7 @@ export function TradesmanProfile({ worker, supabaseUrl, supabaseAnonKey }: Trade
                       onClick={() => setActiveTab(tab.id as 'overview' | 'portfolio' | 'reviews' | 'certifications')}
                       className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl font-bold transition-all duration-300 whitespace-nowrap text-sm shadow-lg ${activeTab === tab.id
                           ? `bg-gradient-to-r ${tab.gradient} text-white shadow-xl scale-105`
-                          : 'bg-white text-slate-700 hover:bg-slate-50 hover:shadow-md border border-slate-200'
+                          : 'bg-white text-black hover:bg-slate-50 hover:shadow-md border border-slate-200'
                         }`}
                     >
                       <Icon className="w-4 h-4" />
@@ -799,7 +900,7 @@ export function TradesmanProfile({ worker, supabaseUrl, supabaseAnonKey }: Trade
                       onClick={() => setActiveTab(tab.id as 'overview' | 'portfolio' | 'reviews' | 'certifications')}
                       className={`flex items-center gap-3 px-6 py-3 rounded-2xl font-bold transition-all duration-300 whitespace-nowrap shadow-lg ${activeTab === tab.id
                           ? `bg-gradient-to-r ${tab.gradient} text-white shadow-xl scale-105`
-                          : 'bg-white text-slate-700 hover:bg-slate-50 hover:shadow-xl border border-slate-200'
+                          : 'bg-white text-black hover:bg-slate-50 hover:shadow-xl border border-slate-200'
                         }`}
                     >
                       <Icon className="w-5 h-5" />
@@ -835,58 +936,6 @@ export function TradesmanProfile({ worker, supabaseUrl, supabaseAnonKey }: Trade
                       </div>
                     )}
 
-                    {trades.length > 0 && (
-                      <div className="bg-gradient-to-br from-white to-slate-50 rounded-xl sm:rounded-2xl border border-slate-200 p-4 sm:p-6 shadow-lg">
-                        <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
-                          <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 flex-shrink-0">
-                            <Zap className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
-                          </div>
-                          <div className="min-w-0">
-                            <h4 className="text-base sm:text-xl font-bold text-slate-900">Specializări & Servicii</h4>
-                            <p className="text-slate-600 text-xs sm:text-base hidden sm:block">Domeniile de expertiză ale meseriașului</p>
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-                          {trades.slice(0, 8).map((trade: any, index: number) => {
-                            const gradients = [
-                              'from-blue-500 to-cyan-500',
-                              'from-emerald-500 to-teal-500',
-                              'from-purple-500 to-pink-500',
-                              'from-amber-500 to-orange-500',
-                              'from-rose-500 to-pink-500',
-                              'from-indigo-500 to-purple-500',
-                              'from-teal-500 to-cyan-500',
-                              'from-orange-500 to-red-500'
-                            ];
-                            const gradient = gradients[index % gradients.length];
-                            return (
-                              <div key={index} className="group relative overflow-hidden rounded-xl sm:rounded-2xl bg-white border border-slate-200 p-3 sm:p-4 hover:shadow-lg transition-all duration-300">
-                                <div className={`absolute inset-0 bg-gradient-to-r ${gradient} opacity-5 group-hover:opacity-10 transition-opacity`}></div>
-                                <div className="relative flex items-center gap-3 sm:gap-4">
-                                  <div className={`p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-r ${gradient} shadow-lg flex-shrink-0`}>
-                                    <Badge className="w-3 h-3 sm:w-5 sm:h-5 text-white" />
-                                  </div>
-                                  <div className="min-w-0">
-                                    <span className="text-slate-900 font-bold text-sm sm:text-lg block truncate">{trade.name}</span>
-                                    <p className="text-slate-600 text-xs sm:text-sm hidden sm:block">Servicii profesionale</p>
-                                  </div>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-
-                        {trades.length > 8 && (
-                          <div className="mt-6 text-center">
-                            <span className="inline-flex items-center px-6 py-3 rounded-2xl bg-gradient-to-r from-slate-600 to-slate-700 text-white font-bold shadow-lg">
-                              <Zap className="w-4 h-4 mr-2" />
-                              +{trades.length - 8} specializări suplimentare
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    )}
                   </div>
                 )}
 
@@ -1111,6 +1160,9 @@ export function TradesmanProfile({ worker, supabaseUrl, supabaseAnonKey }: Trade
       <PortfolioModal item={selectedPortfolioItem} onClose={() => setSelectedPortfolioItem(null)} />
       {isReportModalOpen && (
         <ReportModal worker={worker} onClose={() => setIsReportModalOpen(false)} />
+      )}
+      {isAvatarModalOpen && (
+        <AvatarModal worker={worker} onClose={() => setIsAvatarModalOpen(false)} />
       )}
     </>
   );

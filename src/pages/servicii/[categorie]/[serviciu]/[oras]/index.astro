@@ -83,6 +83,12 @@ if (import.meta.env.DEV) {
   console.log('    seoTitle:', sanityContent?.seoTitle);
   console.log('    seoDescription:', sanityContent?.seoDescription);
   console.log('    heroTitle:', sanityContent?.heroTitle);
+  console.log('    content exists:', !!sanityContent?.content);
+  console.log('    content blocks:', sanityContent?.content?.length || 0);
+  if (sanityContent?.content && sanityContent.content.length > 0) {
+    console.log('    first block:', sanityContent.content[0]);
+    console.log('    first block text:', sanityContent.content[0]?.children?.[0]?.text);
+  }
   console.log('  Expected title: "Zugravi București – Profesioniști Verificați, Oferte Rapide"');
 }
 
@@ -130,9 +136,13 @@ const fallbackContent = generateFallbackContent({
   similarServices: similarServices.map(s => s.name)
 });
 
-// Helper to render portable text with support for links and marks
+// Helper to render portable text with support for links, marks, and internal city linking
 function renderPortableText(blocks: any[]) {
   if (!blocks) return '';
+  
+  if (import.meta.env.DEV) {
+    console.log('🔍 renderPortableText called with blocks:', blocks?.length || 0);
+  }
   
   let html = '';
   let inList = false;
@@ -140,6 +150,10 @@ function renderPortableText(blocks: any[]) {
 
   for (const block of blocks) {
     if (block._type !== 'block') continue;
+    
+    if (import.meta.env.DEV) {
+      console.log('🔍 Processing block style:', block.style);
+    }
     
     // Close any open list before starting a new block
     if (inList && block.style !== 'normal') {
@@ -150,31 +164,83 @@ function renderPortableText(blocks: any[]) {
     
     if (block.style === 'h1') {
       html += `<h1 class="text-3xl font-bold text-slate-900 mb-4">${block.children?.map((child: any) => {
+        let processedText = child.text;
+        
+        // Handle marks and annotations (including links)
         if (child.marks?.length) {
-          return `<strong>${child.text}</strong>`;
+          child.marks.forEach((markKey: string) => {
+            if (markKey === 'strong') {
+              processedText = `<strong>${processedText}</strong>`;
+            }
+            const markDef = block.markDefs?.find((mark: any) => mark._key === markKey);
+            if (markDef && markDef._type === 'link') {
+              const targetAttr = markDef.blank ? ' target="_blank" rel="noopener noreferrer"' : '';
+              processedText = `<a href="${markDef.href}" class="text-emerald-600 hover:text-emerald-700 underline"${targetAttr}>${processedText}</a>`;
+            }
+          });
         }
-        return child.text;
+        
+        return processedText;
       }).join('') || ''}</h1>`;
     } else if (block.style === 'h2') {
       html += `<h2 class="text-2xl font-bold text-slate-900 mb-3">${block.children?.map((child: any) => {
+        let processedText = child.text;
+        
+        // Handle marks and annotations (including links)
         if (child.marks?.length) {
-          return `<strong>${child.text}</strong>`;
+          child.marks.forEach((markKey: string) => {
+            if (markKey === 'strong') {
+              processedText = `<strong>${processedText}</strong>`;
+            }
+            const markDef = block.markDefs?.find((mark: any) => mark._key === markKey);
+            if (markDef && markDef._type === 'link') {
+              const targetAttr = markDef.blank ? ' target="_blank" rel="noopener noreferrer"' : '';
+              processedText = `<a href="${markDef.href}" class="text-emerald-600 hover:text-emerald-700 underline"${targetAttr}>${processedText}</a>`;
+            }
+          });
         }
-        return child.text;
+        
+        return processedText;
       }).join('') || ''}</h2>`;
     } else if (block.style === 'h3') {
       html += `<h3 class="text-xl font-semibold text-slate-900 mb-2">${block.children?.map((child: any) => {
+        let processedText = child.text;
+        
+        // Handle marks and annotations (including links)
         if (child.marks?.length) {
-          return `<strong>${child.text}</strong>`;
+          child.marks.forEach((markKey: string) => {
+            if (markKey === 'strong') {
+              processedText = `<strong>${processedText}</strong>`;
+            }
+            const markDef = block.markDefs?.find((mark: any) => mark._key === markKey);
+            if (markDef && markDef._type === 'link') {
+              const targetAttr = markDef.blank ? ' target="_blank" rel="noopener noreferrer"' : '';
+              processedText = `<a href="${markDef.href}" class="text-emerald-600 hover:text-emerald-700 underline"${targetAttr}>${processedText}</a>`;
+            }
+          });
         }
-        return child.text;
+        
+        return processedText;
       }).join('') || ''}</h3>`;
     } else if (block.style === 'h4') {
       html += `<h4 class="text-lg font-semibold text-slate-900 mb-2">${block.children?.map((child: any) => {
+        let processedText = child.text;
+        
+        // Handle marks and annotations (including links)
         if (child.marks?.length) {
-          return `<strong>${child.text}</strong>`;
+          child.marks.forEach((markKey: string) => {
+            if (markKey === 'strong') {
+              processedText = `<strong>${processedText}</strong>`;
+            }
+            const markDef = block.markDefs?.find((mark: any) => mark._key === markKey);
+            if (markDef && markDef._type === 'link') {
+              const targetAttr = markDef.blank ? ' target="_blank" rel="noopener noreferrer"' : '';
+              processedText = `<a href="${markDef.href}" class="text-emerald-600 hover:text-emerald-700 underline"${targetAttr}>${processedText}</a>`;
+            }
+          });
         }
-        return child.text;
+        
+        return processedText;
       }).join('') || ''}</h4>`;
     } else if (block.listItem) {
       const listTag = block.level === 1 ? 'ul' : 'ol';
@@ -187,10 +253,13 @@ function renderPortableText(blocks: any[]) {
       }
       
       html += `<li class="text-slate-700">${block.children?.map((child: any) => {
+        let processedText = child.text;
         if (child.marks?.length) {
-          return `<strong>${child.text}</strong>`;
+          if (child.marks.includes('strong')) {
+            processedText = `<strong>${processedText}</strong>`;
+          }
         }
-        return child.text;
+        return processedText;
       }).join('') || ''}</li>`;
     } else {
       // Regular paragraph
@@ -201,19 +270,63 @@ function renderPortableText(blocks: any[]) {
       }
       
       const text = block.children?.map((child: any) => {
+        let processedText = child.text;
+        
+        // Handle marks and annotations (including links)
         if (child.marks?.length) {
-          if (child.marks.includes('strong')) {
-            return `<strong>${child.text}</strong>`;
-          }
-          if (child.marks.includes('em')) {
-            return `<em>${child.text}</em>`;
-          }
+          child.marks.forEach((markKey: string) => {
+            // Check if it's a decorator (strong, em)
+            if (markKey === 'strong') {
+              processedText = `<strong>${processedText}</strong>`;
+            } else if (markKey === 'em') {
+              processedText = `<em>${processedText}</em>`;
+            }
+            
+            // Check if it's an annotation (link)
+            const markDef = block.markDefs?.find((mark: any) => mark._key === markKey);
+            if (markDef && markDef._type === 'link') {
+              const targetAttr = markDef.blank ? ' target="_blank" rel="noopener noreferrer"' : '';
+              processedText = `<a href="${markDef.href}" class="text-emerald-600 hover:text-emerald-700 underline"${targetAttr}>${processedText}</a>`;
+            }
+          });
         }
-        return child.text;
+        
+        return processedText;
       }).join('') || '';
       
-      if (text.trim()) {
-        html += `<p class="text-slate-700 mb-4 leading-relaxed">${text}</p>`;
+      if (import.meta.env.DEV) {
+        console.log('🔍 Original text before linking:', text);
+      }
+      
+      // Auto-link city names for internal linking
+      const cityNames = ['București', 'Cluj-Napoca', 'Timișoara', 'Iași', 'Constanța', 'Craiova', 'Brașov', 'Galați', 'Ploiești', 'Oradea'];
+      let finalText = text;
+      
+      cityNames.forEach(city => {
+        const citySlug = city.toLowerCase()
+          .replace(/ș/g, 's')
+          .replace(/ț/g, 't')
+          .replace(/ă/g, 'a')
+          .replace(/î/g, 'i')
+          .replace(/â/g, 'a')
+          .replace(/ /g, '-');
+        
+        // Create regex for whole word matching
+        const regex = new RegExp(`\\b${city}\\b`, 'gi');
+        if (regex.test(text)) {
+          if (import.meta.env.DEV) {
+            console.log(`🔍 Found city "${city}" in text, adding link`);
+          }
+        }
+        finalText = finalText.replace(regex, `<a href="/servicii/${categorie}/${serviciu}/${citySlug}/" class="text-emerald-600 hover:text-emerald-700 underline font-medium">${city}</a>`);
+      });
+      
+      if (import.meta.env.DEV) {
+        console.log('🔍 Final text after linking:', finalText);
+      }
+      
+      if (finalText.trim()) {
+        html += `<p class="text-slate-700 mb-4 leading-relaxed">${finalText}</p>`;
       }
     }
   }
@@ -265,28 +378,58 @@ function createLocalBusinessSchema(params: { serviceName: string; cityName: stri
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
     name: `${params.serviceName} ${params.cityName} | Meserias Local`,
-    description: `Servicii ${params.serviceName.toLowerCase()} în ${params.cityName} prin Meserias Local`,
+    description: `Servicii ${params.serviceName.toLowerCase()} în ${params.cityName} prin Meserias Local. Profesioniști verificați, oferte gratuite, răspuns rapid.`,
     url: params.canonical,
+    telephone: '+40-XX-XXXX-XXXX',
+    email: 'contact@meseriaslocal.ro',
     areaServed: {
       '@type': 'AdministrativeArea',
-      name: params.cityName
+      name: params.cityName,
+      addressCountry: 'RO'
     },
     address: {
       '@type': 'PostalAddress',
       addressLocality: params.cityName,
-      addressCountry: 'RO'
+      addressCountry: 'RO',
+      addressRegion: params.cityName
+    },
+    serviceType: params.serviceName,
+    category: params.serviceName,
+    priceRange: '€€',
+    languagesSpoken: 'Romanian',
+    paymentAccepted: 'Cash, Card, Bank Transfer',
+    hoursAvailable: 'Mo-Su 00:00-23:59',
+    offers: {
+      '@type': 'Offer',
+      itemOffered: {
+        '@type': 'Service',
+        name: params.serviceName,
+        description: `Servicii profesionale ${params.serviceName.toLowerCase()} în ${params.cityName}`
+      },
+      priceCurrency: 'RON',
+      availability: 'https://schema.org/InStock'
     }
   };
 
   if (params.metrics.workerCount > 0) {
-    schema.employeeCount = params.metrics.workerCount;
+    schema.numberOfEmployees = params.metrics.workerCount;
   }
   
   if (params.metrics.avgRating > 0) {
     schema.aggregateRating = {
       '@type': 'AggregateRating',
       ratingValue: params.metrics.avgRating.toFixed(1),
-      reviewCount: params.metrics.workerCount
+      reviewCount: params.metrics.verifiedCount || params.metrics.workerCount,
+      bestRating: '5',
+      worstRating: '1'
+    };
+  }
+
+  if (params.metrics.jobsLast30Days > 0) {
+    schema.hasOfferCatalog = {
+      '@type': 'OfferCatalog',
+      name: `${params.serviceName} Services in ${params.cityName}`,
+      numberOfItems: params.metrics.jobsLast30Days
     };
   }
 

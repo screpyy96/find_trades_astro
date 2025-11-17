@@ -50,7 +50,7 @@ if (import.meta.env.DEV) {
   console.log('  seoDescription:', sanityContent?.seoDescription);
 }
 
-// Helper to render portable text
+// Helper to render portable text with support for links, marks, and internal city linking
 function renderPortableText(blocks: any[]) {
   if (!blocks) return '';
   
@@ -60,24 +60,54 @@ function renderPortableText(blocks: any[]) {
     if (block._type !== 'block') continue;
     
     const text = block.children?.map((child: any) => {
+      let processedText = child.text;
+      
+      // Handle marks
       if (child.marks?.length) {
         if (child.marks.includes('strong')) {
-          return `<strong>${child.text}</strong>`;
+          processedText = `<strong>${processedText}</strong>`;
         }
         if (child.marks.includes('em')) {
-          return `<em>${child.text}</em>`;
+          processedText = `<em>${processedText}</em>`;
         }
       }
-      return child.text;
+      
+      // Handle internal links
+      if (child._type === 'span' && child.marks?.includes('link')) {
+        const linkMark = block.markDefs?.find((mark: any) => mark._type === 'link' && child.marks.includes(mark._key));
+        if (linkMark) {
+          processedText = `<a href="${linkMark.href}" class="text-emerald-600 hover:text-emerald-700 underline">${processedText}</a>`;
+        }
+      }
+      
+      return processedText;
     }).join('') || '';
     
-    if (text.trim()) {
+    // Auto-link city names for internal linking
+    const cityNames = ['București', 'Cluj-Napoca', 'Timișoara', 'Iași', 'Constanța', 'Craiova', 'Brașov', 'Galați', 'Ploiești', 'Oradea'];
+    let finalText = text;
+    
+    cityNames.forEach(city => {
+      const citySlug = city.toLowerCase()
+        .replace(/ș/g, 's')
+        .replace(/ț/g, 't')
+        .replace(/ă/g, 'a')
+        .replace(/î/g, 'i')
+        .replace(/â/g, 'a')
+        .replace(/ /g, '-');
+      
+      // Create regex for whole word matching
+      const regex = new RegExp(`\\b${city}\\b`, 'gi');
+      finalText = finalText.replace(regex, `<a href="/servicii/${categorie}/${serviciu}/${citySlug}/" class="text-emerald-600 hover:text-emerald-700 underline font-medium">${city}</a>`);
+    });
+    
+    if (finalText.trim()) {
       if (block.style === 'h2') {
-        html += `<h2 class="text-2xl font-bold text-slate-900 mb-4">${text}</h2>`;
+        html += `<h2 class="text-2xl font-bold text-slate-900 mb-4">${finalText}</h2>`;
       } else if (block.style === 'h3') {
-        html += `<h3 class="text-xl font-semibold text-slate-900 mb-3">${text}</h3>`;
+        html += `<h3 class="text-xl font-semibold text-slate-900 mb-3">${finalText}</h3>`;
       } else {
-        html += `<p class="text-slate-700 mb-4 leading-relaxed">${text}</p>`;
+        html += `<p class="text-slate-700 mb-4 leading-relaxed">${finalText}</p>`;
       }
     }
   }
@@ -91,10 +121,27 @@ const title = sanityContent?.seoTitle || `${service.name} – Profesioniști Ver
 const description = sanityContent?.seoDescription || `Găsește ${service.name.toLowerCase()} verificați în România. Peste 150+ meseriași certificați în 42 orașe. Oferte gratuite în 24h, recenzii reale, garanție satisfacție.`;
 const keywords = `${service.name.toLowerCase()}, ${service.name.toLowerCase()} profesionist, ${service.name.toLowerCase()} verificat, preț ${service.name.toLowerCase()}, ${service.name.toLowerCase()} România, meseriași ${service.name.toLowerCase()}`;
 
+// Top 10 major cities in Romania
+const topCities = [
+  { name: 'București', slug: 'bucuresti' },
+  { name: 'Cluj-Napoca', slug: 'cluj-napoca' },
+  { name: 'Timișoara', slug: 'timisoara' },
+  { name: 'Iași', slug: 'iasi' },
+  { name: 'Constanța', slug: 'constanta' },
+  { name: 'Craiova', slug: 'craiova' },
+  { name: 'Brașov', slug: 'brasov' },
+  { name: 'Galați', slug: 'galati' },
+  { name: 'Ploiești', slug: 'ploiesti' },
+  { name: 'Oradea', slug: 'oradea' }
+];
+
 // Content from Sanity or fallback
 const content = sanityContent?.content ? renderPortableText(sanityContent.content) : `
   <h2 class="text-2xl font-bold text-slate-900 mb-4">Găsește ${service.name.toLowerCase()} verificați în România</h2>
-  <p class="text-slate-700 mb-4 leading-relaxed">Platforma Meserias Local conectează clienții cu peste 150+ meseriași certificați pentru servicii de ${service.name.toLowerCase()} în 42+ orașe din România. Toți profesioniștii sunt verificați, cu experiență dovedită și recenzii reale.</p>
+  <p class="text-slate-700 mb-4 leading-relaxed">Platforma Meserias Local conectează clienții cu peste 150+ meseriași certificați pentru servicii de ${service.name.toLowerCase()} în toate orașele importante din România. Toți profesioniștii sunt verificați, cu experiență dovedită și recenzii reale.</p>
+  
+  <h3 class="text-xl font-semibold text-slate-900 mb-3">Acoperire națională completă</h3>
+  <p class="text-slate-700 mb-4 leading-relaxed">Meserias Local acoperă întreaga Română, de la București la Cluj-Napoca, de la Timișoara la Iași și până în Constanța, Craiova, Brașov, Galați, Ploiești și Oradea. Indiferent de locația ta, vei găsi profesioniști ${service.name.toLowerCase()} verificați pregătiți să te ajute.</p>
   
   <h3 class="text-xl font-semibold text-slate-900 mb-3">De ce să alegi Meserias Local?</h3>
   <p class="text-slate-700 mb-4 leading-relaxed">Primești oferte multiple în 2-4 ore, poți compara prețuri și recenzii, și alegi cel mai bun profesionist pentru proiectul tău. Serviciul este 100% gratuit pentru clienți, fără comisioane ascunse.</p>
@@ -123,12 +170,16 @@ const serviceSchema = {
   '@context': 'https://schema.org',
   '@type': 'Service',
   name: service.name,
-  description: description,
+  description: `Servicii profesionale ${service.name.toLowerCase()} în România. Meseriași verificați în București, Cluj-Napoca, Timișoara, Iași, Constanța, Craiova, Brașov, Galați, Ploiești, Oradea și în toată țara.`,
   url: canonical,
   provider: {
     '@type': 'Organization',
     name: 'Meserias Local',
-    url: 'https://www.meseriaslocal.ro'
+    url: 'https://www.meseriaslocal.ro',
+    address: {
+      '@type': 'PostalAddress',
+      addressCountry: 'RO'
+    }
   },
   areaServed: {
     '@type': 'Country',
@@ -136,7 +187,30 @@ const serviceSchema = {
   },
   availableChannel: {
     '@type': 'ServiceChannel',
-    serviceUrl: canonical
+    serviceUrl: canonical,
+    servicePhone: '+40-XX-XXXX-XXXX',
+    serviceEmail: 'contact@meseriaslocal.ro'
+  },
+  serviceType: service.name,
+  category: service.category,
+  offers: {
+    '@type': 'Offer',
+    itemOffered: {
+      '@type': 'Service',
+      name: service.name,
+      description: `Servicii ${service.name.toLowerCase()} verificate în România`
+    },
+    priceCurrency: 'RON',
+    availability: 'https://schema.org/InStock',
+    seller: {
+      '@type': 'Organization',
+      name: 'Meserias Local'
+    }
+  },
+  hasOfferCatalog: {
+    '@type': 'OfferCatalog',
+    name: `${service.name} Services in Romania`,
+    numberOfItems: 10
   }
 };
 
@@ -239,12 +313,8 @@ const faqSchema = {
           {sanityContent?.heroTitle || `${service.name} – Profesioniști Verificați în România`}
         </h1>
         
-        <p class="text-xl text-slate-300 mb-4">
-          {sanityContent?.heroSubtitle || 'Meseriași certificați în 42+ orașe'}
-        </p>
-        
         <p class="text-slate-400 mb-8 max-w-2xl mx-auto">
-          {sanityContent?.heroDescription || `Găsește ${service.name.toLowerCase()} verificați în România. Peste 150+ meseriași certificați, oferte gratuite în 24h, recenzii reale și garanție satisfacție.`}
+          {sanityContent?.heroDescription || `Găsește ${service.name.toLowerCase()} verificați în București, Cluj-Napoca, Timișoara, Iași, Constanța, Craiova, Brașov, Galați, Ploiești, Oradea și în toată România. Peste 150+ meseriași certificați, oferte gratuite în 24h.`}
         </p>
 
         <!-- CTA Button -->
@@ -276,21 +346,45 @@ const faqSchema = {
           </div>
         </section>
 
-        <!-- Cities Grid -->
+        <!-- Top Cities Section -->
         <section class="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
-          <h2 class="text-3xl font-bold text-slate-900 mb-6">{service.name} în România</h2>
-          <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-            {cities.map(city => (
+          <h2 class="text-3xl font-bold text-slate-900 mb-6">{service.name} în Orașele Principale din România</h2>
+          <p class="text-slate-600 mb-6 text-lg">Acoperim cele mai importante orașe din România cu profesioniști {service.name.toLowerCase()} verificați. Indiferent de locația ta, vei găsi expertul potrivit pentru proiectul tău.</p>
+          
+          <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
+            {topCities.map(city => (
               <a 
                 href={`/servicii/${categorie}/${serviciu}/${city.slug}/`}
-                class="flex items-center gap-2 p-3 bg-slate-50 rounded-lg hover:bg-emerald-50 hover:border-emerald-200 border border-slate-200 transition-all"
+                class="flex items-center gap-2 p-4 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-lg hover:from-emerald-100 hover:to-teal-100 border border-emerald-200 transition-all group"
               >
-                <svg class="w-4 h-4 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
+                <svg class="w-5 h-5 text-emerald-600 group-hover:text-emerald-700 transition-colors" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
                 </svg>
-                <span class="text-slate-700 font-medium">{city.name}</span>
+                <span class="text-slate-700 font-semibold group-hover:text-emerald-700 transition-colors">{city.name}</span>
               </a>
             ))}
+          </div>
+          
+          <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
+            <h3 class="text-xl font-bold text-slate-900 mb-3 flex items-center gap-2">
+              <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Acoperire Națională Completă
+            </h3>
+            <p class="text-slate-600 mb-4">Pe lângă orașele principale, Meserias Local acoperă și alte orașe din România. Oricât de mică ar fi localitatea ta, vom găsi profesioniști {service.name.toLowerCase()} în zonă.</p>
+            <div class="flex items-center gap-4">
+              <a 
+                href="https://app.meseriaslocal.ro/cere-oferta"
+                class="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Caută în orașul tău
+                <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </a>
+              <span class="text-slate-500 text-sm">• Răspuns în 2-4 ore • Oferte gratuite • Garanție satisfacție</span>
+            </div>
           </div>
         </section>
 
