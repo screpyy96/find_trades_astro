@@ -923,7 +923,7 @@ export function TradesmanProfile({ worker, supabaseUrl, supabaseAnonKey }: Trade
                           </div>
                           <div className="flex-1 min-w-0">
                             <h4 className="text-base sm:text-lg font-bold text-slate-900 mb-2 sm:mb-3">Prezentare Personală</h4>
-                            <p className="text-slate-800 leading-relaxed text-sm sm:text-lg">{worker.bio}</p>
+                            <div className="text-slate-800 leading-relaxed text-sm sm:text-lg whitespace-pre-wrap">{worker.bio}</div>
                           </div>
                         </div>
                       </div>

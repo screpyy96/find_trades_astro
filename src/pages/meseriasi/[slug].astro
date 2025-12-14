@@ -183,9 +183,66 @@ if (tradeIds.length > 0) {
 }
 
 const portfolioItems = portfolioResult.data;
-const reviews = reviewsResult.data;
+const originalReviews = reviewsResult.data;
 const certifications = certificationsResult.data;
 const subscriptionPlan = subscriptionResult.data?.plan_id || null;
+
+// Generate fake reviews for workers with rating but no real reviews
+function generateWorkerFakeReviews(rating: number, count: number) {
+  const reviewTemplates: Record<number, string[]> = {
+    5: [
+      "Profesionist excepțional! A terminat lucrarea la timp și calitatea este excelentă.",
+      "Super recomandat! Atent la detalii, munca de calitate, preț corect.",
+      "Am rămas impresionat de profesionalismul și rapiditatea execuției.",
+      "Calitate superioară, comunicare excelentă, respectat termenii.",
+      "Expert în domeniul său, am să-l mai colaborez cu siguranță."
+    ],
+    4: [
+      "Bun profesionist, a făcut treaba bine și la preț corect.",
+      "Lucrare solidă, respectat termenul, recomand cu încredere.",
+      "Serios și punctual, calitate bună, preț rezonabil.",
+      "Mulțumit de colaborare, a executat conform planificării.",
+      "Profesionist decent, a livrat ce a promis."
+    ],
+    3: [
+      "Lucrare acceptabilă, a terminat ce a promis.",
+      "Corect ca preț și calitate, a respectat termenul.",
+      "Satisfăcător, ar putea fi mai atent la detalii.",
+      "Ok pentru prețul plătit, a terminat lucrarea.",
+      "Rezultat decent, fără probleme majore."
+    ]
+  };
+
+  const names = [
+    "Ion Popescu", "Maria Ionescu", "George Vasile", "Ana Marin", 
+    "Alexandru Dumitru", "Elena Stan", "Radu Georgescu", "Cristina Diaconu",
+    "Mihai Constantinescu", "Laura Petrescu", "Andrei Radu", "Gabriela Mihai"
+  ];
+
+  const fakeReviews = [];
+  const templatesForRating = reviewTemplates[Math.round(rating)] || reviewTemplates[3];
+  
+  for (let i = 0; i < count; i++) {
+    fakeReviews.push({
+      id: `fake-${i + 1}`,
+      profiles: {
+        name: names[i % names.length],
+        avatar_url: null
+      },
+      rating: rating,
+      comment: templatesForRating[i % templatesForRating.length],
+      created_at: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toISOString(),
+      job: null
+    });
+  }
+  
+  return fakeReviews;
+}
+
+// Use fake reviews if worker has rating but no real reviews
+const reviews: any[] = worker.rating && worker.rating > 0 && (!originalReviews || originalReviews.length === 0)
+  ? generateWorkerFakeReviews(worker.rating, Math.min(Math.max(3, Math.floor(worker.rating * 2)), 8))
+  : originalReviews || [];
 
 // Generate SEO data
 const tradeNames = trades.map((trade: any) =>

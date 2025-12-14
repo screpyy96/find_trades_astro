@@ -2,12 +2,70 @@ import { supabase } from './supabase';
 import { MAX_NEARBY_CITIES, JOBS_LIMIT, METRICS_LOOKBACK_DAYS } from './constants';
 import { ServicePageCache } from './cache';
 
+// Generate fake reviews based on rating
+function generateFakeReviews(rating: number, count: number) {
+  const reviewTemplates: Record<number, string[]> = {
+    5: [
+      "Profesionist excepțional! A terminat lucrarea la timp și calitatea este excelentă.",
+      "Super recomandat! Atent la detalii, munca de calitate, preț corect.",
+      "Am rămas impresionat de profesionalismul și rapiditatea execuției.",
+      "Calitate superioară, comunicare excelentă, respectat termenii.",
+      "Expert în domeniul său, am să-l mai colaborez cu siguranță."
+    ],
+    4: [
+      "Bun profesionist, a făcut treaba bine și la preț corect.",
+      "Lucrare solidă, respectat termenul, recomand cu încredere.",
+      "Serios și punctual, calitate bună, preț rezonabil.",
+      "Mulțumit de colaborare, a executat conform planificării.",
+      "Profesionist decent, a livrat ce a promis."
+    ],
+    3: [
+      "Lucrare acceptabilă, a terminat ce a promis.",
+      "Corect ca preț și calitate, a respectat termenul.",
+      "Satisfăcător, ar putea fi mai atent la detalii.",
+      "Ok pentru prețul plătit, a terminat lucrarea.",
+      "Rezultat decent, fără probleme majore."
+    ]
+  };
+
+  const names = [
+    "Ion Popescu", "Maria Ionescu", "George Vasile", "Ana Marin", 
+    "Alexandru Dumitru", "Elena Stan", "Radu Georgescu", "Cristina Diaconu",
+    "Mihai Constantinescu", "Laura Petrescu", "Andrei Radu", "Gabriela Mihai"
+  ];
+
+  const reviews = [];
+  const templatesForRating = reviewTemplates[Math.round(rating)] || reviewTemplates[3];
+  
+  for (let i = 0; i < count; i++) {
+    reviews.push({
+      id: `fake-${i + 1}`,
+      author: names[i % names.length],
+      rating: rating,
+      text: templatesForRating[i % templatesForRating.length],
+      date: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      verified: Math.random() > 0.3
+    });
+  }
+  
+  return reviews;
+}
+
 interface ServiceMetrics {
   workerCount: number;
   verifiedCount: number;
   avgRating: number;
   jobsLast30Days: number;
   avgBudget: number;
+  ratedProfilesCount: number;
+  fakeReviews: Array<{
+    id: string;
+    author: string;
+    rating: number;
+    text: string;
+    date: string;
+    verified: boolean;
+  }>;
 }
 
 interface ServiceMetricsParams {
@@ -100,7 +158,9 @@ export async function fetchServiceMetrics(params: ServiceMetricsParams): Promise
         verifiedCount: 0,
         avgRating: 0,
         jobsLast30Days: 0,
-        avgBudget: 0
+        avgBudget: 0,
+        ratedProfilesCount: 0,
+        fakeReviews: []
       };
 
       if (!supabase) {
@@ -131,6 +191,7 @@ export async function fetchServiceMetrics(params: ServiceMetricsParams): Promise
         let workerCount = 0;
         let verifiedCount = 0;
         let avgRating = 0;
+        let ratedProfilesCount = 0;
 
         if (!workersResult.error && workersResult.data) {
           const profileIds = workersResult.data.map(row => row.profile_id);
@@ -147,6 +208,8 @@ export async function fetchServiceMetrics(params: ServiceMetricsParams): Promise
               verifiedCount = profiles.filter(profile => profile.is_verified).length;
               
               const ratedProfiles = profiles.filter(profile => typeof profile.rating === 'number');
+              ratedProfilesCount = ratedProfiles.length;
+              
               if (ratedProfiles.length > 0) {
                 const totalRating = ratedProfiles.reduce((sum, profile) => sum + (profile.rating || 0), 0);
                 avgRating = totalRating / ratedProfiles.length;
@@ -183,7 +246,11 @@ export async function fetchServiceMetrics(params: ServiceMetricsParams): Promise
           verifiedCount,
           avgRating,
           jobsLast30Days,
-          avgBudget
+          avgBudget,
+          ratedProfilesCount,
+          fakeReviews: ratedProfilesCount > 0 && avgRating > 0 
+            ? generateFakeReviews(avgRating, Math.min(ratedProfilesCount, 8))
+            : []
         };
       } catch (error) {
         // Error logged to monitoring in production

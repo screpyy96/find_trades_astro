@@ -362,7 +362,9 @@ try {
     verifiedCount: 0,
     avgRating: 0,
     jobsLast30Days: 0,
-    avgBudget: 0
+    avgBudget: 0,
+    ratedProfilesCount: 0,
+    fakeReviews: []
   };
 }
 
@@ -419,7 +421,7 @@ function createLocalBusinessSchema(params: { serviceName: string; cityName: stri
     schema.aggregateRating = {
       '@type': 'AggregateRating',
       ratingValue: params.metrics.avgRating.toFixed(1),
-      reviewCount: params.metrics.verifiedCount || params.metrics.workerCount,
+      reviewCount: params.metrics.ratedProfilesCount || params.metrics.verifiedCount || params.metrics.workerCount,
       bestRating: '5',
       worstRating: '1'
     };
@@ -511,9 +513,9 @@ const breadcrumbSchema = {
 
 <Base title={title} description={description} canonical={canonical}>
   <!-- Structured Data -->
-  <script type="application/ld+json" set:html={JSON.stringify(localBusinessSchema)}></script>
-  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)}></script>
-  {faqSchema && <script type="application/ld+json" set:html={JSON.stringify(faqSchema)}></script>}
+  <script type="application/ld+json" set:html={JSON.stringify(localBusinessSchema)} is:inline></script>
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} is:inline></script>
+  {faqSchema && <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} is:inline></script>}
 
   <!-- Hero Section -->
   <section class="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white overflow-hidden">
