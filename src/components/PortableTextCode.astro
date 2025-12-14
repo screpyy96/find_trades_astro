@@ -1,0 +1,76 @@
+---
+// Custom renderer for Sanity Portable Text `code` blocks.
+// If the code looks like a Markdown pipe table, render it as a <table>.
+// Otherwise render as a standard <pre><code>.
+
+const { node } = Astro.props;
+
+const raw = String(node?.code ?? '');
+const language = String(node?.language ?? '');
+
+const lines = raw
+  .replace(/\r\n/g, '\n')
+  .split('\n')
+  .map((l) => l.trimEnd())
+  .filter((l) => l.length > 0);
+
+const isSeparatorRow = (line) => {
+  // Match `| --- | --- |` or `---|---` etc.
+  const s = line.trim();
+  if (!s.includes('|')) return false;
+  const parts = s
+    .split('|')
+    .map((p) => p.trim())
+    .filter(Boolean);
+  if (parts.length < 2) return false;
+  return parts.every((p) => /^:?-{3,}:?$/.test(p));
+};
+
+const parseRow = (line) => {
+  const s = line.trim();
+  const noEdge = s.replace(/^\|/, '').replace(/\|$/, '');
+  return noEdge.split('|').map((c) => c.trim());
+};
+
+const looksLikePipeTable =
+  (language === 'markdown' || language === 'md' || language === '') &&
+  lines.length >= 2 &&
+  lines[0].includes('|') &&
+  isSeparatorRow(lines[1]);
+
+let header = [];
+let rows = [];
+
+if (looksLikePipeTable) {
+  header = parseRow(lines[0]);
+  const bodyLines = lines.slice(2);
+  rows = bodyLines
+    .filter((l) => l.includes('|'))
+    .map((l) => parseRow(l));
+}
+---
+
+{looksLikePipeTable ? (
+  <div class="overflow-x-auto">
+    <table class="w-full">
+      <thead>
+        <tr>
+          {header.map((h) => (
+            <th class="text-left" set:html={h} />
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map((r) => (
+          <tr>
+            {r.map((c) => (
+              <td class="align-top" set:html={c} />
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+) : (
+  <pre><code class={language ? `language-${language}` : undefined}>{raw}</code></pre>
+)}

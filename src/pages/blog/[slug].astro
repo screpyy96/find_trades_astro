@@ -2,6 +2,7 @@
 import Base from '../../layouts/Base.astro';
 import { getBlogPostBySlug, getImageUrl } from '../../lib/sanity';
 import { PortableText } from 'astro-portabletext';
+import PortableTextCode from '../../components/PortableTextCode.astro';
 
 export const prerender = false;
 
@@ -291,7 +292,14 @@ const imageUrl = post.featuredImage ? getImageUrl(post.featuredImage) : null;
 
     <!-- Content -->
     <div class="prose prose-slate prose-lg max-w-none">
-      <PortableText value={content} />
+      <PortableText
+        value={content}
+        components={{
+          type: {
+            code: PortableTextCode,
+          },
+        }}
+      />
     </div>
 
     <!-- Author Box (E-E-A-T) -->

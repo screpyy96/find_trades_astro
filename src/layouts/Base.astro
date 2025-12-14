@@ -22,6 +22,9 @@ const ogImageURL = ogImage || `${Astro.site}og-image.png`;
 // Use empty strings for relative URLs (stay on same domain)
 const APP_URL = 'https://app.meseriaslocal.ro';
 const WEB_URL = 'https://www.meseriaslocal.ro';
+
+const GTM_ID = import.meta.env.PUBLIC_GTM_ID;
+
 ---
 
 <!DOCTYPE html>
@@ -100,6 +103,17 @@ const WEB_URL = 'https://www.meseriaslocal.ro';
     <slot name="head" />
   </head>
   <body class="min-h-screen bg-white text-gray-900">
+    {import.meta.env.PROD && GTM_ID && (
+      <noscript>
+        <iframe
+          src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
+          height="0"
+          width="0"
+          style="display:none;visibility:hidden"
+          title="Google Tag Manager"
+        ></iframe>
+      </noscript>
+    )}
     
     <!-- Desktop Navbar with loading optimization -->
     <div class="navbar-container">
