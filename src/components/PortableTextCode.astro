@@ -11,25 +11,25 @@ const language = String(node?.language ?? '');
 const lines = raw
   .replace(/\r\n/g, '\n')
   .split('\n')
-  .map((l) => l.trimEnd())
-  .filter((l) => l.length > 0);
+  .map((l: string) => l.trimEnd())
+  .filter((l: string) => l.length > 0);
 
-const isSeparatorRow = (line) => {
+const isSeparatorRow = (line: string) => {
   // Match `| --- | --- |` or `---|---` etc.
   const s = line.trim();
   if (!s.includes('|')) return false;
   const parts = s
     .split('|')
-    .map((p) => p.trim())
-    .filter(Boolean);
+    .map((p: string) => p.trim())
+    .filter((p: string) => p.length > 0);
   if (parts.length < 2) return false;
-  return parts.every((p) => /^:?-{3,}:?$/.test(p));
+  return parts.every((p: string) => /^:?-{3,}:?$/.test(p));
 };
 
-const parseRow = (line) => {
+const parseRow = (line: string) => {
   const s = line.trim();
   const noEdge = s.replace(/^\|/, '').replace(/\|$/, '');
-  return noEdge.split('|').map((c) => c.trim());
+  return noEdge.split('|').map((c: string) => c.trim());
 };
 
 const looksLikePipeTable =
@@ -38,8 +38,8 @@ const looksLikePipeTable =
   lines[0].includes('|') &&
   isSeparatorRow(lines[1]);
 
-let header = [];
-let rows = [];
+let header: string[] = [];
+let rows: string[][] = [];
 
 if (looksLikePipeTable) {
   header = parseRow(lines[0]);
