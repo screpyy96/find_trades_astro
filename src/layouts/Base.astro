@@ -139,8 +139,8 @@ const GTM_ID = import.meta.env.PUBLIC_GTM_ID;
     <!-- Mobile Bottom Navigation -->
     <MobileNavbar client:load currentPath={Astro.url.pathname} appUrl={APP_URL} webUrl={WEB_URL} />
     
-    <!-- Add padding: top for mobile header (64px) and desktop navbar (96px), bottom for mobile bottom nav -->
-    <main class="pt-16 lg:pt-24 pb-24 lg:pb-0">
+    <!-- Add padding: top for mobile header only, bottom for mobile bottom nav -->
+    <main class="pt-16 lg:pt-0 pb-24 lg:pb-0">
       <slot />
     </main>
     
