@@ -17,6 +17,37 @@ if (!post) {
   return Astro.redirect('/blog', 404);
 }
 
+const cleanPortableText = (value: any) => {
+  if (!Array.isArray(value)) return value;
+
+  return value
+    .map((block: any) => {
+      if (!block || typeof block !== 'object') return block;
+      if (block._type !== 'block' || !Array.isArray(block.children)) return block;
+
+      const nextChildren = block.children.filter((child: any) => {
+        if (!child || typeof child !== 'object') return true;
+        const t = String(child.text || '').trim();
+        return t !== '>';
+      });
+
+      return {
+        ...block,
+        children: nextChildren,
+      };
+    })
+    .filter((block: any) => {
+      if (!block || typeof block !== 'object') return true;
+      if (block._type !== 'block' || !Array.isArray(block.children)) return true;
+      const text = block.children
+        .map((c: any) => (c && typeof c === 'object' ? String(c.text || '') : ''))
+        .join('');
+      return text.trim() !== '>';
+    });
+};
+
+const content = cleanPortableText(post.content);
+
 const imageUrl = post.featuredImage ? getImageUrl(post.featuredImage) : null;
 ---
 
@@ -69,7 +100,7 @@ const imageUrl = post.featuredImage ? getImageUrl(post.featuredImage) : null;
     },
     "articleSection": post.category?.name || "General",
     "keywords": post.tags?.join(", ") || "",
-    "wordCount": post.content?.reduce((acc: number, block: any) => {
+    "wordCount": content?.reduce((acc: number, block: any) => {
       if (block._type === 'block' && block.children) {
         return acc + block.children.reduce((sum: number, child: any) => sum + (child.text?.split(' ').length || 0), 0);
       }
@@ -260,7 +291,7 @@ const imageUrl = post.featuredImage ? getImageUrl(post.featuredImage) : null;
 
     <!-- Content -->
     <div class="prose prose-slate prose-lg max-w-none">
-      <PortableText value={post.content} />
+      <PortableText value={content} />
     </div>
 
     <!-- Author Box (E-E-A-T) -->

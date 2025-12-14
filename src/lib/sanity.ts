@@ -4,7 +4,7 @@ import type { PortableTextBlock } from '@portabletext/types';
 const sanityClient = createClient({
   projectId: '7094dn36',
   dataset: 'production',
-  useCdn: true,
+  useCdn: false,
   apiVersion: '2024-01-01',
 });
 
@@ -296,7 +296,12 @@ export async function getAllBlogPosts(): Promise<BlogPost[]> {
 }
 
 export async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> {
-  const query = `*[_type == "blogPost" && slug.current == $slug && publishedAt <= $now][0] {
+  const query = `*[
+    _type == "blogPost" &&
+    slug.current == $slug &&
+    publishedAt <= $now &&
+    !(_id in path("drafts.**"))
+  ] | order(coalesce(updatedAt, _updatedAt) desc)[0] {
     _id,
     title,
     slug,
