@@ -71,16 +71,30 @@ const { page } = Astro.props as Props;
 const cleanPortableText = (value: any) => {
   if (!Array.isArray(value)) return value;
 
-  return value.filter((block: any) => {
-    if (!block || typeof block !== 'object') return true;
-    if (block._type !== 'block' || !Array.isArray(block.children)) return true;
+  console.log('Original content blocks:', value.length);
+  
+  return value.filter((block: any, index: number) => {
+    if (!block || typeof block !== 'object') {
+      console.log(`Block ${index}: Not an object, keeping`);
+      return true;
+    }
+    if (block._type !== 'block' || !Array.isArray(block.children)) {
+      console.log(`Block ${index}: Not a block type or no children, keeping`);
+      return true;
+    }
 
     const text = block.children
       .map((c: any) => (c && typeof c === 'object' ? String(c.text || '') : ''))
       .join('')
       .trim();
 
-    return text !== '>' && text !== '>>' && text !== '>>>';
+    // Filter out blocks with only > characters (with or without whitespace)
+    const shouldKeep = !/^(>\s*)+$/.test(text);
+    
+    // Debug logging for all blocks
+    console.log(`Block ${index}: "${text}" - shouldKeep: ${shouldKeep}`);
+    
+    return shouldKeep;
   });
 };
 
