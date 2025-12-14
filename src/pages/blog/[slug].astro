@@ -1,6 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import { getBlogPostBySlug, getImageUrl } from '../../lib/sanity';
+import { PortableText } from 'astro-portabletext';
 
 export const prerender = false;
 
@@ -17,63 +18,6 @@ if (!post) {
 }
 
 const imageUrl = post.featuredImage ? getImageUrl(post.featuredImage) : null;
-
-// Helper to render portable text with link support
-function renderPortableText(blocks: any[]) {
-  if (!blocks) return '';
-  
-  // Track marks that are links
-  const markDefs = blocks.reduce((acc: any, block: any) => {
-    if (block.markDefs) {
-      block.markDefs.forEach((def: any) => {
-        acc[def._key] = def;
-      });
-    }
-    return acc;
-  }, {});
-  
-  return blocks.map((block: any) => {
-    if (block._type === 'block') {
-      const children = block.children?.map((child: any) => {
-        let text = child.text || '';
-        
-        // Process marks (bold, italic, links, etc.)
-        if (child.marks && child.marks.length > 0) {
-          child.marks.forEach((mark: string) => {
-            // Check if it's a link mark
-            if (markDefs[mark]) {
-              const linkDef = markDefs[mark];
-              if (linkDef._type === 'link') {
-                const href = linkDef.href || '';
-                const target = href.startsWith('http') ? ' target="_blank" rel="noopener noreferrer"' : '';
-                text = `<a href="${href}"${target} class="text-blue-600 hover:text-blue-700 underline font-medium">${text}</a>`;
-              }
-            }
-            // Standard marks
-            else if (mark === 'strong') {
-              text = `<strong>${text}</strong>`;
-            } else if (mark === 'em') {
-              text = `<em>${text}</em>`;
-            } else if (mark === 'code') {
-              text = `<code class="bg-slate-100 px-1 py-0.5 rounded text-sm">${text}</code>`;
-            }
-          });
-        }
-        
-        return text;
-      }).join('') || '';
-      
-      if (block.style === 'h2') return `<h2 class="text-2xl font-bold text-slate-900 mt-8 mb-4">${children}</h2>`;
-      if (block.style === 'h3') return `<h3 class="text-xl font-semibold text-slate-900 mt-6 mb-3">${children}</h3>`;
-      if (block.style === 'h4') return `<h4 class="text-lg font-semibold text-slate-900 mt-4 mb-2">${children}</h4>`;
-      if (block.listItem === 'bullet') return `<li class="ml-6 mb-2">${children}</li>`;
-      if (block.listItem === 'number') return `<li class="ml-6 mb-2">${children}</li>`;
-      if (block.style === 'blockquote') return `<blockquote class="border-l-4 border-blue-500 pl-4 italic my-4">${children}</blockquote>`;
-      return `<p class="text-slate-700 leading-relaxed mb-4">${children}</p>`;
-    }
-    return '';
-  }).join('');
-}
 ---
 
 <Base 
@@ -315,11 +259,13 @@ function renderPortableText(blocks: any[]) {
     )}
 
     <!-- Content -->
-    <div class="prose prose-slate prose-lg max-w-none" set:html={renderPortableText(post.content)} />
+    <div class="prose prose-slate prose-lg max-w-none">
+      <PortableText value={post.content} />
+    </div>
 
     <!-- Author Box (E-E-A-T) -->
     {post.author && (
-      <div class="mt-12 p-6 bg-gradient-to-br from-slate-50 to-blue-50 rounded-2xl border border-slate-200">
+      <div class="mt-12 p-6 bg-slate-50 rounded-2xl border border-slate-200">
         <div class="flex items-start gap-4">
           {post.author.avatar && (
             <img
