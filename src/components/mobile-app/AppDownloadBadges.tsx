@@ -13,6 +13,7 @@ export function AppDownloadBadges({
   className = '' 
 }: AppDownloadBadgesProps) {
   const googlePlayUrl = 'https://play.google.com/store/apps/details?id=com.screpyy.meserias';
+  const appStoreUrl = 'https://apps.apple.com/gb/app/meserias-local/id6755662662';
   
   const sizeClasses = {
     sm: 'h-10',
@@ -48,15 +49,21 @@ export function AppDownloadBadges({
           />
         </a>
 
-        {/* App Store Badge - Coming Soon (placeholder pentru viitor) */}
-        <div className="inline-block opacity-50 cursor-not-allowed" title="În curând pe App Store">
+        {/* App Store Badge */}
+        <a
+          href={appStoreUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-block transition-transform hover:scale-105 active:scale-95"
+          aria-label="Descarcă din App Store"
+        >
           <img
             src="/images/app-store-badge.svg"
-            alt="În curând pe App Store"
-            className={`${sizeClasses[size]} w-auto grayscale`}
+            alt="Disponibil pe App Store"
+            className={`${sizeClasses[size]} w-auto`}
             loading="lazy"
           />
-        </div>
+        </a>
       </div>
     </div>
   );
