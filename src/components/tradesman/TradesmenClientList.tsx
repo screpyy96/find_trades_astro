@@ -6,6 +6,44 @@ import { useInView } from 'react-intersection-observer';
 import { ServicePageCache, CacheKeys } from '../../lib/cache';
 import { trades } from '../../data';
 
+// Helper function to batch fetch subscriptions to avoid URL too long errors
+async function fetchSubscriptionsInBatches(
+  supabase: any,
+  userIds: string[],
+  batchSize: number = 50
+): Promise<{ user_id: string; plan_id: string; status: string }[]> {
+  if (!userIds.length) return [];
+  
+  const results: { user_id: string; plan_id: string; status: string }[] = [];
+  
+  // Split userIds into batches
+  for (let i = 0; i < userIds.length; i += batchSize) {
+    const batch = userIds.slice(i, i + batchSize);
+    
+    try {
+      const { data, error } = await supabase
+        .from('user_subscriptions')
+        .select('user_id, plan_id, status')
+        .in('user_id', batch)
+        .eq('status', 'active');
+      
+      if (error) {
+        console.error(`❌ Error fetching subscriptions batch ${i / batchSize + 1}:`, error);
+        continue;
+      }
+      
+      if (data) {
+        results.push(...data);
+      }
+    } catch (err) {
+      console.error(`❌ Exception fetching subscriptions batch ${i / batchSize + 1}:`, err);
+    }
+  }
+  
+  console.log(`💳 Fetched ${results.length} active subscriptions from ${userIds.length} users in ${Math.ceil(userIds.length / batchSize)} batches`);
+  return results;
+}
+
 interface Worker {
   id: string;
   name: string;
@@ -328,20 +366,8 @@ export function TradesmenClientList({
             }
           }
 
-          // Fetch user subscriptions for pro users
-          const { data: subscriptionsData, error: subscriptionsError } = await supabase
-            .from('user_subscriptions')
-            .select('user_id, plan_id, status')
-            .in('user_id', workerIds)
-            .eq('status', 'active');
-
-          if (subscriptionsError) {
-            console.error('❌ Error loading subscriptions:', subscriptionsError);
-          }
-
-           
-          
-        
+          // Fetch user subscriptions for pro users (batched to avoid URL too long)
+          const subscriptionsData = await fetchSubscriptionsInBatches(supabase, workerIds);
 
           // Create maps for efficient lookup
           const tradeMap = new Map((trades || []).map((t: any) => [t.id, t]));
@@ -538,24 +564,15 @@ export function TradesmenClientList({
             }
           }
 
-          // Fetch user subscriptions for pro users
-          const { data: subscriptionsData, error: subscriptionsError } = await supabase
-            .from('user_subscriptions')
-            .select('user_id, plan_id, status')
-            .in('user_id', workerIds)
-            .eq('status', 'active');
-
-          if (subscriptionsError) {
-            console.error('❌ Error loading subscriptions:', subscriptionsError);
-          }
+          // Fetch user subscriptions for pro users (batched to avoid URL too long)
+          const subscriptionsData = await fetchSubscriptionsInBatches(supabase, workerIds);
 
           console.log('💳 Subscriptions loaded:', { 
             workerIds: workerIds.length, 
             firstFewWorkerIds: workerIds.slice(0, 3),
             subscriptions: subscriptionsData?.length || 0,
             data: subscriptionsData,
-            firstSubscription: subscriptionsData?.[0] || null,
-            error: subscriptionsError
+            firstSubscription: subscriptionsData?.[0] || null
           });
 
           // Create maps for efficient lookup
