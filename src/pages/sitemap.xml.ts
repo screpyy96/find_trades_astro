@@ -198,10 +198,13 @@ export async function GET() {
   // 4️⃣ PRO TRADESMEN PROFILES (PUBLIC SEO PAGES)
   // ========================================
   try {
-    // Import Supabase client
+    // Import Supabase client and SEO utils
     const { createClient } = await import('@supabase/supabase-js');
-    const supabaseUrl = process.env.PUBLIC_SUPABASE_URL;
-    const supabaseKey = process.env.PUBLIC_SUPABASE_ANON_KEY;
+    const { generateWorkerSeoSlug } = await import('../utils/seo-urls.js');
+    
+    // Use import.meta.env instead of process.env for Astro
+    const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+    const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
     
     if (supabaseUrl && supabaseKey) {
       const supabaseClient = createClient(supabaseUrl, supabaseKey);
@@ -219,16 +222,54 @@ export async function GET() {
         // Get verified worker profiles with PRO subscriptions
         const { data: proWorkers } = await supabaseClient
           .from('profiles')
-          .select('id, name, slug')
+          .select('id, name, address')
           .in('id', proUserIds)
           .eq('role', 'worker')
           .eq('is_verified', true)
-          .not('slug', 'is', null);
+          .not('name', 'is', null);
         
         if (proWorkers && proWorkers.length > 0) {
+          // Get worker trades for SEO slug generation
+          const { data: workerTradesData } = await supabaseClient
+            .from('worker_trades')
+            .select('profile_id, trade_ids')
+            .in('profile_id', proUserIds);
+          
+          // Get all trade details
+          const allTradeIds = new Set<number>();
+          workerTradesData?.forEach(wt => {
+            if (wt.trade_ids && Array.isArray(wt.trade_ids)) {
+              wt.trade_ids.forEach(id => allTradeIds.add(id));
+            }
+          });
+          
+          let tradesData: any[] = [];
+          if (allTradeIds.size > 0) {
+            const { data: trades } = await supabaseClient
+              .from('trades')
+              .select('id, name, slug')
+              .in('id', Array.from(allTradeIds));
+            tradesData = trades || [];
+          }
+          
+          // Create maps for efficient lookup
+          const tradeMap = new Map(tradesData.map(t => [t.id, t]));
+          const workerTradesMap = new Map(
+            workerTradesData?.map(wt => [wt.profile_id, wt.trade_ids]) || []
+          );
+          
           proWorkers.forEach(worker => {
-            if (worker.slug && worker.slug.trim()) {
-              const loc = ensureTrailingSlash(`${baseUrl}/meseriasi/${worker.slug}`);
+            if (worker.name && worker.name.trim()) {
+              // Get worker's trades for SEO slug
+              const tradeIds = workerTradesMap.get(worker.id) || [];
+              const workerTrades = (Array.isArray(tradeIds) ? tradeIds : [])
+                .map(id => tradeMap.get(id))
+                .filter(Boolean);
+              
+              // Generate SEO slug
+              const seoSlug = generateWorkerSeoSlug(worker, workerTrades);
+              const loc = ensureTrailingSlash(`${baseUrl}/meseriasi/${seoSlug}`);
+              
               urls.push(`  <url>
     <loc>${xmlEscape(loc)}</loc>
     <lastmod>${currentDate}</lastmod>
