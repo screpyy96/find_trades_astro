@@ -11,7 +11,7 @@ export default defineType({
       name: 'title',
       title: 'Titlu pagină',
       type: 'string',
-      description: 'Ex: Electrician București - Ghid complet 2025',
+      description: 'Ex: Electrician București - Ghid complet 2026',
       validation: (Rule) => Rule.required().min(10).max(100),
     }),
     defineField({
@@ -150,7 +150,7 @@ export default defineType({
       name: 'heroTitle',
       title: 'Hero - Titlu Principal',
       type: 'string',
-      description: 'Ex: Electrician București - Servicii Profesionale 2025',
+      description: 'Ex: Electrician București - Servicii Profesionale 2026',
       validation: (Rule) => Rule.max(80),
     }),
     defineField({

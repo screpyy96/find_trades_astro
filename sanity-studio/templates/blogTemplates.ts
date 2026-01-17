@@ -62,7 +62,7 @@ export function seoGuideTemplateValue() {
     readingTime: 12,
     isFeatured: false,
     // ASCII-only meta placeholders (editorii le ajustează)
-    metaTitle: 'Ghid meseriasi Romania 2025 | Meserias Local',
+    metaTitle: 'Ghid meseriasi Romania 2026 | Meserias Local',
     metaDescription: 'Ghid complet pentru găsirea meseriasilor potriviți in Romania. Preturi, verificari, sfaturi si linkuri utile.'
   }
 }

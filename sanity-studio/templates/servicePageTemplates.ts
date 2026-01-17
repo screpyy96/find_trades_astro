@@ -19,7 +19,7 @@ export function generateServicePageTemplate({
   categoryName,
   categorySlug,
 }: ServicePageTemplateParams) {
-  const title = `${tradeName} ${cityName} - Ghid complet 2025`;
+  const title = `${tradeName} ${cityName} - Ghid complet 2026`;
   
   return {
     title,

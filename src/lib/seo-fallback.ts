@@ -32,10 +32,10 @@ function capitalizeFirst(str: string): string {
 
 /**
  * Generate H1 title
- * Format: {{ServiceName}} în {{CityName}} – Servicii Profesionale și Prețuri 2025
+ * Format: {{ServiceName}} în {{CityName}} – Servicii Profesionale și Prețuri 2026
  */
 function generateH1(serviceName: string, cityName: string): string {
-  return `${capitalizeFirst(serviceName)} în ${cityName} – Servicii Profesionale și Prețuri 2025`;
+  return `${capitalizeFirst(serviceName)} în ${cityName} – Servicii Profesionale și Prețuri 2026`;
 }
 
 /**

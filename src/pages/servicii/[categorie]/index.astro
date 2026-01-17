@@ -1,6 +1,8 @@
 ---
 import Base from '../../../layouts/Base.astro';
 import { supabase } from '../../../lib/supabase';
+import { getPublicSupabaseConfig } from '../../../lib/publicEnv';
+import { RecommendedTradesmen } from '../../../components/tradesman/RecommendedTradesmen';
 
 export const prerender = false;
 export const config = { revalidate: 1800 };
@@ -48,6 +50,9 @@ if (trades.length === 0) {
 
 // Get the category name from the first trade
 const categoryName = trades[0].category;
+
+// Get Supabase config for the component
+const { url: supabaseUrl, anonKey: supabaseAnonKey } = getPublicSupabaseConfig();
 
 // Helper function to capitalize
 const capitalizeFirst = (str: string) => {
@@ -209,6 +214,30 @@ const breadcrumbSchema = {
           </a>
         ))}
       </div>
+    </div>
+  </section>
+
+  <!-- Recommended Tradesmen -->
+  <section class="py-16 bg-slate-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-10">
+        <h2 class="text-3xl font-bold text-slate-900 mb-3">
+          Meseriași Premium din categoria {categoryName}
+        </h2>
+        <p class="text-slate-600 max-w-2xl mx-auto">
+          Profesioniști verificați cu abonament PRO, gata să îți ofere servicii de calitate
+        </p>
+      </div>
+
+      <RecommendedTradesmen
+        cityName="România"
+        categoryName={categoryName}
+        supabaseUrl={supabaseUrl}
+        supabaseAnonKey={supabaseAnonKey}
+        maxResults={9}
+        compact={true}
+        client:load
+      />
     </div>
   </section>
 

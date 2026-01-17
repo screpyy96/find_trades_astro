@@ -195,9 +195,60 @@ export async function GET() {
   }
 
   // ========================================
+  // 4️⃣ PRO TRADESMEN PROFILES (PUBLIC SEO PAGES)
+  // ========================================
+  try {
+    // Import Supabase client
+    const { createClient } = await import('@supabase/supabase-js');
+    const supabaseUrl = process.env.PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.PUBLIC_SUPABASE_ANON_KEY;
+    
+    if (supabaseUrl && supabaseKey) {
+      const supabaseClient = createClient(supabaseUrl, supabaseKey);
+      
+      // Get PRO users with active subscriptions
+      const { data: proSubscriptions } = await supabaseClient
+        .from('user_subscriptions')
+        .select('user_id')
+        .eq('status', 'active')
+        .eq('plan_id', 'pro');
+      
+      if (proSubscriptions && proSubscriptions.length > 0) {
+        const proUserIds = proSubscriptions.map(sub => sub.user_id);
+        
+        // Get verified worker profiles with PRO subscriptions
+        const { data: proWorkers } = await supabaseClient
+          .from('profiles')
+          .select('id, name, slug')
+          .in('id', proUserIds)
+          .eq('role', 'worker')
+          .eq('is_verified', true)
+          .not('slug', 'is', null);
+        
+        if (proWorkers && proWorkers.length > 0) {
+          proWorkers.forEach(worker => {
+            if (worker.slug && worker.slug.trim()) {
+              const loc = ensureTrailingSlash(`${baseUrl}/meseriasi/${worker.slug}`);
+              urls.push(`  <url>
+    <loc>${xmlEscape(loc)}</loc>
+    <lastmod>${currentDate}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>`);
+            }
+          });
+        }
+      }
+    }
+  } catch (error) {
+    console.error('❌ Error fetching PRO tradesmen for sitemap:', error);
+    // Continue without PRO tradesmen if there's an error
+  }
+
+  // ========================================
   // NOTE: EXCLUDED FROM SITEMAP
   // ========================================
-  // - /meseriasi/* - Individual tradesman profiles (noindex, private)
+  // - /meseriasi/* - Regular tradesman profiles (noindex, private) - EXCEPT PRO users above
   // - /solicitari/* - Job posts (noindex, private)
   // - /dashboard/* - User dashboards (noindex, private)
   // - /cere-oferta - Form page (noindex)

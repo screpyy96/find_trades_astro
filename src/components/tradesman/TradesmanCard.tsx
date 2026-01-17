@@ -233,58 +233,6 @@ export const TradesmanCard = memo(({ worker }: { worker: WorkerProfile }) => {
           </div>
         )}
         
-        {/* Trades */}
-        {trades.length > 0 && (
-          <div className="mb-5">
-            <div className="flex flex-wrap gap-2">
-              {trades.slice(0, 3).map((trade: TradeObject, index: number) => {
-                const gradients = isPro ? [
-                  'from-blue-600 via-indigo-600 to-purple-600',
-                  'from-purple-600 via-pink-600 to-rose-600',
-                  'from-emerald-600 via-teal-600 to-cyan-600'
-                ] : [
-                  'from-blue-500 to-cyan-500',
-                  'from-purple-500 to-pink-500',
-                  'from-emerald-500 to-teal-500'
-                ];
-                return (
-                  <div key={trade.id || index} className="relative group/trade">
-                    {isPro && (
-                      <div className={`absolute -inset-0.5 bg-gradient-to-r ${gradients[index % gradients.length]} rounded-lg blur-sm opacity-50 group-hover/trade:opacity-75 transition-opacity`}></div>
-                    )}
-                    <span className={`relative inline-flex items-center px-3 py-1.5 rounded-lg bg-gradient-to-r ${gradients[index % gradients.length]} text-white text-xs font-bold shadow-md ${isPro ? 'ring-1 ring-white/40' : ''}`}>
-                      {trade.name}
-                    </span>
-                  </div>
-                );
-              })}
-              {trades.length > 3 && (
-                <div className="relative">
-                  {isPro && (
-                    <div className="absolute -inset-0.5 bg-gradient-to-r from-slate-700 to-slate-900 rounded-lg blur-sm opacity-50"></div>
-                  )}
-                  <span className={`relative inline-flex items-center px-3 py-1.5 rounded-lg bg-gradient-to-r from-slate-600 to-slate-800 text-white text-xs font-bold shadow-md ${isPro ? 'ring-1 ring-white/40' : ''}`}>
-                    +{trades.length - 3}
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Bio */}
-        {worker.bio && (
-          <div className="mb-6 p-4 rounded-2xl border shadow-sm transition-colors duration-300">
-            <p className={`text-sm leading-relaxed line-clamp-3 font-medium ${
-              isPro
-                ? 'text-slate-700 bg-gradient-to-r from-blue-50/50 to-indigo-50/50 border-blue-200 hover:from-blue-50 hover:to-indigo-50'
-                : 'text-slate-700 bg-gradient-to-r from-slate-50 to-gray-50 border-slate-200 hover:from-slate-100 hover:to-gray-100'
-            }`}>
-              {worker.bio}
-            </p>
-          </div>
-        )}
-        
         {/* Action Buttons */}
         <div className="flex flex-col gap-3 mt-6">
           <a
