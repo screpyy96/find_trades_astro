@@ -369,28 +369,34 @@ export function TradesmenClientList({
           query = query.ilike('address', `%${activeCity}%`);
         }
         
+        // OPTIMIZATION: Apply search at database level when possible
+        // Search in name, bio, address using OR condition
+        if (effectiveSearch && effectiveSearch.trim().length > 0) {
+          const searchTerm = effectiveSearch.trim();
+          console.log('🔍 Applying database-level search:', searchTerm);
+          
+          // Use Supabase's or() for searching across multiple fields
+          query = query.or(`name.ilike.%${searchTerm}%,bio.ilike.%${searchTerm}%,address.ilike.%${searchTerm}%`);
+        }
+        
         // Handle remaining search terms (after trade detection)
-        const needsClientSideSearch = effectiveSearch && effectiveSearch.trim().length > 0;
+        // Now search is done at DB level, so we can use pagination
+        const needsClientSideSearch = false; // Search is now at DB level
         
         // IMPORTANT: When trade filter is applied, we already filtered at DB level
         // So we should load all matching workers (they're already filtered)
         // Only apply pagination when NO trade filter (to avoid loading too many)
-        const shouldUsePagination = !effectiveTrade && !needsClientSideSearch;
+        const shouldUsePagination = !effectiveTrade;
         
-        if (needsClientSideSearch) {
-          // Load limited workers for client-side search filtering
-          console.log('🔍 Loading workers for client-side search filtering:', effectiveSearch);
-          const MAX_WORKERS_FOR_SEARCH = 200;
-          query = query.order('rating', { ascending: false, nullsFirst: false }).limit(MAX_WORKERS_FOR_SEARCH);
-        } else if (shouldUsePagination) {
-          // Use database-level pagination (when NO trade filter)
-          console.log('📊 Using database-level pagination for filtered results');
+        if (shouldUsePagination) {
+          // Use database-level pagination
+          console.log('� Using database-level pagination for filtered results');
           const from = pageNum * ITEMS_PER_PAGE;
           const to = from + ITEMS_PER_PAGE - 1;
           query = query.range(from, to).order('rating', { ascending: false, nullsFirst: false });
         } else {
           // Trade filter applied - load all matching workers (already filtered at DB)
-          console.log('🔧 Loading all workers matching trade filter');
+          console.log('� Loading all workers matching trade filter');
           query = query.order('rating', { ascending: false, nullsFirst: false }).limit(500);
         }
 
@@ -494,69 +500,14 @@ export function TradesmenClientList({
             }))
           });
 
-          // Client-side search filter (name, bio, address only - trades already filtered at DB level)
-          if (effectiveSearch && effectiveSearch.trim().length > 0) {
-            const searchLower = effectiveSearch.toLowerCase();
-            const searchTerms = searchLower.split(' ').filter(term => term.length > 0);
-            
-            // Normalize function to remove diacritics and extra text
-            const normalize = (text: string) => {
-              if (!text) return '';
-              return text
-                .toLowerCase()
-                .normalize('NFD')
-                .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
-                .replace(/[,\-]/g, ' ') // Replace commas and dashes with spaces
-                .replace(/\s+/g, ' ') // Normalize multiple spaces
-                .trim();
-            };
-            
-            console.log('🔍 Search Filter Debug:', { 
-              effectiveSearch, 
-              searchTerms,
-              beforeFilter: workersWithTrades.length 
-            });
-            
-            workersWithTrades = workersWithTrades.filter((worker: any) => {
-              // Normalize all searchable fields
-              const normalizedName = normalize(worker.name || '');
-              const normalizedBio = normalize(worker.bio || '');
-              const normalizedAddress = normalize(worker.address || '');
-              
-              // Check if all search terms match in any field
-              const matchesAllTerms = searchTerms.every(term => {
-                const normalizedTerm = normalize(term);
-                const matchesName = normalizedName.includes(normalizedTerm);
-                const matchesBio = normalizedBio.includes(normalizedTerm);
-                const matchesAddress = normalizedAddress.includes(normalizedTerm);
-                
-                return matchesName || matchesBio || matchesAddress;
-              });
-              
-              if (matchesAllTerms) {
-                console.log(`✅ Search Match: ${worker.name}`, { 
-                  address: worker.address,
-                  normalizedAddress,
-                  trades: worker.trades?.map((t: any) => t.name),
-                  matchedTerms: searchTerms
-                });
-              }
-              
-              return matchesAllTerms;
-            });
-            
-            console.log('🔍 Search Filter Results:', { 
-              afterFilter: workersWithTrades.length 
-            });
-          }
+          // Search is now done at database level, no client-side filtering needed
 
           // Trade filter is now handled at database level, no client-side filtering needed
 
           // Check if we need client-side pagination
-          // - For search: yes (filtered client-side)
           // - For trade filter: yes (loaded all matching workers)
-          // - For other filters only: no (DB pagination already applied)
-          const needsClientSidePagination = (effectiveSearch && effectiveSearch.trim().length > 0) || effectiveTrade;
+          // - For other filters: no (DB pagination already applied)
+          const needsClientSidePagination = effectiveTrade;
 
           if (needsClientSidePagination) {
             // Sort: PRO users first, then by rating
