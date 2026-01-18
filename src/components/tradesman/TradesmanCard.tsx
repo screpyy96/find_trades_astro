@@ -233,6 +233,38 @@ export const TradesmanCard = memo(({ worker }: { worker: WorkerProfile }) => {
           </div>
         )}
         
+        {/* Trades/Specializations */}
+        {trades.length > 0 && (
+          <div className="mb-5">
+            <div className="flex flex-wrap gap-2">
+              {trades.slice(0, 3).map((trade: any, index: number) => {
+                const gradients = isPro ? [
+                  'from-blue-600 to-indigo-600',
+                  'from-purple-600 to-pink-600',
+                  'from-emerald-600 to-teal-600'
+                ] : [
+                  'from-blue-500 to-cyan-500',
+                  'from-purple-500 to-pink-500',
+                  'from-emerald-500 to-teal-500'
+                ];
+                return (
+                  <span 
+                    key={trade.id || index} 
+                    className={`inline-flex items-center px-3 py-1.5 rounded-lg bg-gradient-to-r ${gradients[index % gradients.length]} text-white text-xs font-bold shadow-md transition-all hover:shadow-lg ${isPro ? 'ring-1 ring-white/40' : ''}`}
+                  >
+                    {trade.name}
+                  </span>
+                );
+              })}
+              {trades.length > 3 && (
+                <span className={`inline-flex items-center px-3 py-1.5 rounded-lg bg-gradient-to-r from-slate-600 to-slate-700 text-white text-xs font-bold shadow-md ${isPro ? 'ring-1 ring-white/40' : ''}`}>
+                  +{trades.length - 3}
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+        
         {/* Action Buttons */}
         <div className="flex flex-col gap-3 mt-6">
           <a

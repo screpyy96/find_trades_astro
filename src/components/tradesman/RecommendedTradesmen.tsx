@@ -260,11 +260,20 @@ export function RecommendedTradesmen({
 
         let trades: any[] = [];
         if (allTradeIds.size > 0) {
-          const { data: tradeData } = await supabase
-            .from('trades')
-            .select('id, name, slug')
-            .in('id', Array.from(allTradeIds));
-          trades = tradeData || [];
+          // Fetch trades in batches to avoid URL too long
+          const tradeIdsArray = Array.from(allTradeIds);
+          const tradeBatchSize = 100;
+          
+          for (let i = 0; i < tradeIdsArray.length; i += tradeBatchSize) {
+            const batch = tradeIdsArray.slice(i, i + tradeBatchSize);
+            const { data: tradeData } = await supabase
+              .from('trades')
+              .select('id, name, slug')
+              .in('id', batch);
+            if (tradeData) {
+              trades.push(...tradeData);
+            }
+          }
         }
 
         // Fetch subscriptions (batched to avoid URL too long)

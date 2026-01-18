@@ -272,53 +272,127 @@ export function TradesmenClientList({
         .not('name', 'is', null);
 
       if (hasFilters) {
-        console.log('🎯 Filters applied - using filtered search');
+        console.log('🎯 Filters applied - using optimized filtered search');
         
-        // When search term OR trade filter is provided, we need to search in trades too
-        // So we load all verified workers first, then filter client-side
-        if (searchTerm || activeTrade) {
-          console.log('🔍 Applying search/trade filter:', { searchTerm, activeTrade });
+        // SMART DETECTION: Check if search term contains a trade name
+        let detectedTrade: string | null = null;
+        let remainingSearchTerms: string[] = [];
+        
+        if (searchTerm && !activeTrade) {
+          // Try to detect trade in search term
+          const searchLower = searchTerm.toLowerCase();
+          const searchWords = searchLower.split(' ').filter(w => w.length > 2);
           
-          // Load all verified workers for client-side filtering
-          query = query.eq('is_verified', true);
+          // Common trades to detect
+          const commonTrades = [
+            'electrician', 'zugrav', 'instalator', 'constructor', 'finisor',
+            'tamplar', 'zidar', 'dulgher', 'pavator', 'gresist', 'faiantar',
+            'rigipsar', 'tencuitor', 'izolator', 'acoperitor', 'tinichigiu'
+          ];
           
-          // Apply other filters
-          if (activeOnlyOnline) {
-            query = query.eq('is_online', true);
-          }
-          if (activeMinRating) {
-            query = query.gte('rating', activeMinRating);
-          }
-          if (activeCity) {
-            console.log('🏙️ Applying city filter:', activeCity);
-            query = query.ilike('address', `%${activeCity}%`);
-          }
-        } else {
-          // No search term or trade filter - apply filters normally
-          // Apply verified filter
-          if (activeOnlyVerified) {
-            query = query.eq('is_verified', true);
-          }
-
-          // Apply online filter
-          if (activeOnlyOnline) {
-            query = query.eq('is_online', true);
-          }
-
-          // Apply rating filter
-          if (activeMinRating) {
-            query = query.gte('rating', activeMinRating);
-          }
-
-          // Apply city filter
-          if (activeCity) {
-            console.log('🏙️ Applying city filter:', activeCity);
-            query = query.ilike('address', `%${activeCity}%`);
+          // Check if any search word matches a trade
+          for (const word of searchWords) {
+            if (commonTrades.some(trade => trade.includes(word) || word.includes(trade))) {
+              detectedTrade = word;
+              // Remove trade from search terms
+              remainingSearchTerms = searchWords.filter(w => w !== word);
+              console.log('🔍 Auto-detected trade in search:', { detectedTrade, remainingSearchTerms });
+              break;
+            }
           }
         }
+        
+        // Use detected trade or explicit trade filter
+        const effectiveTrade = activeTrade || detectedTrade;
+        const effectiveSearch = detectedTrade ? remainingSearchTerms.join(' ') : searchTerm;
+        
+        // OPTIMIZATION: Handle trade filter at database level
+        let workerIdsFromTrade: string[] | null = null;
+        
+        if (effectiveTrade) {
+          console.log('🔧 Pre-filtering by trade at database level:', effectiveTrade);
+          
+          // Step 1: Find trade IDs matching the trade name
+          const { data: tradesData } = await supabase
+            .from('trades')
+            .select('id')
+            .ilike('name', `%${effectiveTrade}%`)
+            .limit(10); // Limit to avoid too many matches
+          
+          if (tradesData && tradesData.length > 0) {
+            const tradeIds = tradesData.map((t: any) => t.id);
+            console.log('🔧 Found trade IDs:', tradeIds);
+            
+            // Step 2: Find workers with these trades
+            const { data: workerTradesData } = await supabase
+              .from('worker_trades')
+              .select('profile_id')
+              .overlaps('trade_ids', tradeIds);
+            
+            if (workerTradesData && workerTradesData.length > 0) {
+              workerIdsFromTrade = workerTradesData.map((wt: any) => wt.profile_id);
+              console.log('🔧 Found workers with trade:', workerIdsFromTrade.length);
+              
+              // Apply worker IDs filter
+              query = query.in('id', workerIdsFromTrade);
+            } else {
+              // No workers found with this trade
+              console.log('🔧 No workers found with trade');
+              setWorkers([]);
+              setIsLoading(false);
+              setHasMore(false);
+              return;
+            }
+          } else {
+            // Trade not found
+            console.log('🔧 Trade not found in database');
+            setWorkers([]);
+            setIsLoading(false);
+            setHasMore(false);
+            return;
+          }
+        }
+        
+        // Apply standard filters
+        query = query.eq('is_verified', true);
+        
+        if (activeOnlyOnline) {
+          query = query.eq('is_online', true);
+        }
+        if (activeMinRating) {
+          query = query.gte('rating', activeMinRating);
+        }
+        if (activeCity) {
+          console.log('🏙️ Applying city filter:', activeCity);
+          query = query.ilike('address', `%${activeCity}%`);
+        }
+        
+        // Handle remaining search terms (after trade detection)
+        const needsClientSideSearch = effectiveSearch && effectiveSearch.trim().length > 0;
+        
+        // IMPORTANT: When trade filter is applied, we already filtered at DB level
+        // So we should load all matching workers (they're already filtered)
+        // Only apply pagination when NO trade filter (to avoid loading too many)
+        const shouldUsePagination = !effectiveTrade && !needsClientSideSearch;
+        
+        if (needsClientSideSearch) {
+          // Load limited workers for client-side search filtering
+          console.log('🔍 Loading workers for client-side search filtering:', effectiveSearch);
+          const MAX_WORKERS_FOR_SEARCH = 200;
+          query = query.order('rating', { ascending: false, nullsFirst: false }).limit(MAX_WORKERS_FOR_SEARCH);
+        } else if (shouldUsePagination) {
+          // Use database-level pagination (when NO trade filter)
+          console.log('📊 Using database-level pagination for filtered results');
+          const from = pageNum * ITEMS_PER_PAGE;
+          const to = from + ITEMS_PER_PAGE - 1;
+          query = query.range(from, to).order('rating', { ascending: false, nullsFirst: false });
+        } else {
+          // Trade filter applied - load all matching workers (already filtered at DB)
+          console.log('🔧 Loading all workers matching trade filter');
+          query = query.order('rating', { ascending: false, nullsFirst: false }).limit(500);
+        }
 
-        // When filters are active, load all workers (no pagination) for proper client-side filtering
-        console.log('📊 Loading all workers for client-side filtering...');
+        console.log('📊 Loading workers with filters...');
         const { data, error: fetchError } = await query;
 
         if (fetchError) {
@@ -329,11 +403,19 @@ export function TradesmenClientList({
           // Get worker IDs from current page
           const workerIds = data.map((w: any) => w.id);
 
-          // Fetch worker_trades for these workers
-          const { data: workerTradesData } = await supabase
-            .from('worker_trades')
-            .select('profile_id, trade_ids')
-            .in('profile_id', workerIds);
+          // Fetch worker_trades for these workers in batches to avoid URL too long
+          let workerTradesData: any[] = [];
+          const batchSize = 50;
+          for (let i = 0; i < workerIds.length; i += batchSize) {
+            const batch = workerIds.slice(i, i + batchSize);
+            const { data: batchData } = await supabase
+              .from('worker_trades')
+              .select('profile_id, trade_ids')
+              .in('profile_id', batch);
+            if (batchData) {
+              workerTradesData.push(...batchData);
+            }
+          }
 
           // Collect all unique trade IDs
           const allTradeIds = new Set<number>();
@@ -343,18 +425,28 @@ export function TradesmenClientList({
             }
           });
 
-          // Fetch trade details with caching
+          // Fetch trade details with caching and batching
           let trades: any[] = [];
           if (allTradeIds.size > 0) {
             const tradesCacheKey = CacheKeys.trades();
             let cachedTrades = (window as any).__WORKERS_CACHE?.get(tradesCacheKey);
             
             if (!cachedTrades) {
-              const { data: tradeData } = await supabase
-                .from('trades')
-                .select('id, name, slug')
-                .in('id', Array.from(allTradeIds));
-              trades = tradeData || [];
+              // Fetch trades in batches to avoid URL too long
+              const tradeIdsArray = Array.from(allTradeIds);
+              const tradeBatchSize = 100;
+              trades = [];
+              
+              for (let i = 0; i < tradeIdsArray.length; i += tradeBatchSize) {
+                const batch = tradeIdsArray.slice(i, i + tradeBatchSize);
+                const { data: tradeData } = await supabase
+                  .from('trades')
+                  .select('id, name, slug')
+                  .in('id', batch);
+                if (tradeData) {
+                  trades.push(...tradeData);
+                }
+              }
               
               // Cache trades data
               if (!(window as any).__WORKERS_CACHE) {
@@ -384,11 +476,6 @@ export function TradesmenClientList({
             const workerTrades = (Array.isArray(tradeIds) ? tradeIds : []).map((id: number) => tradeMap.get(id)).filter(Boolean);
             const subscriptionPlan = subscriptionMap.get(worker.id) || null;
             
-            console.log('🔧 Mapping worker:', worker.name, { 
-              workerId: worker.id, 
-              subscriptionPlan 
-            });
-            
             return {
               ...worker,
               trades: workerTrades,
@@ -396,33 +483,58 @@ export function TradesmenClientList({
             };
           });
 
-          // Client-side search filter (name, bio, address, trades)
-          if (searchTerm) {
-            const searchLower = searchTerm.toLowerCase();
+          console.log('💼 Workers mapped with subscriptions:', {
+            total: workersWithTrades.length,
+            proCount: workersWithTrades.filter((w: any) => w.subscription_plan === 'pro').length,
+            firstFew: workersWithTrades.slice(0, 3).map((w: any) => ({
+              name: w.name,
+              subscription: w.subscription_plan
+            }))
+          });
+
+          // Client-side search filter (name, bio, address only - trades already filtered at DB level)
+          if (effectiveSearch && effectiveSearch.trim().length > 0) {
+            const searchLower = effectiveSearch.toLowerCase();
             const searchTerms = searchLower.split(' ').filter(term => term.length > 0);
             
+            // Normalize function to remove diacritics and extra text
+            const normalize = (text: string) => {
+              if (!text) return '';
+              return text
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+                .replace(/[,\-]/g, ' ') // Replace commas and dashes with spaces
+                .replace(/\s+/g, ' ') // Normalize multiple spaces
+                .trim();
+            };
+            
             console.log('🔍 Search Filter Debug:', { 
-              searchTerm, 
+              effectiveSearch, 
               searchTerms,
               beforeFilter: workersWithTrades.length 
             });
             
             workersWithTrades = workersWithTrades.filter((worker: any) => {
+              // Normalize all searchable fields
+              const normalizedName = normalize(worker.name || '');
+              const normalizedBio = normalize(worker.bio || '');
+              const normalizedAddress = normalize(worker.address || '');
+              
               // Check if all search terms match in any field
               const matchesAllTerms = searchTerms.every(term => {
-                const matchesName = worker.name?.toLowerCase().includes(term);
-                const matchesBio = worker.bio?.toLowerCase().includes(term);
-                const matchesAddress = worker.address?.toLowerCase().includes(term);
-                const matchesTrade = worker.trades?.some((trade: any) => 
-                  trade.name?.toLowerCase().includes(term)
-                );
+                const normalizedTerm = normalize(term);
+                const matchesName = normalizedName.includes(normalizedTerm);
+                const matchesBio = normalizedBio.includes(normalizedTerm);
+                const matchesAddress = normalizedAddress.includes(normalizedTerm);
                 
-                return matchesName || matchesBio || matchesAddress || matchesTrade;
+                return matchesName || matchesBio || matchesAddress;
               });
               
               if (matchesAllTerms) {
                 console.log(`✅ Search Match: ${worker.name}`, { 
                   address: worker.address,
+                  normalizedAddress,
                   trades: worker.trades?.map((t: any) => t.name),
                   matchedTerms: searchTerms
                 });
@@ -436,67 +548,80 @@ export function TradesmenClientList({
             });
           }
 
-          // Client-side filter by trade name if specified
-          if (activeTrade) {
-            const tradeLower = activeTrade.toLowerCase();
-            console.log('🔧 Trade Filter Debug:', { 
-              activeTrade, 
-              beforeFilter: workersWithTrades.length,
-              cityFilter: activeCity 
-            });
-            
-            workersWithTrades = workersWithTrades.filter((worker: any) => {
-              const hasTrade = worker.trades?.some((trade: any) => 
-                trade.name?.toLowerCase().includes(tradeLower)
-              );
+          // Trade filter is now handled at database level, no client-side filtering needed
+
+          // Check if we need client-side pagination
+          // - For search: yes (filtered client-side)
+          // - For trade filter: yes (loaded all matching workers)
+          // - For other filters only: no (DB pagination already applied)
+          const needsClientSidePagination = (effectiveSearch && effectiveSearch.trim().length > 0) || effectiveTrade;
+
+          if (needsClientSidePagination) {
+            // Sort: PRO users first, then by rating
+            workersWithTrades.sort((a: any, b: any) => {
+              const aIsPro = a.subscription_plan === 'pro';
+              const bIsPro = b.subscription_plan === 'pro';
               
-              if (hasTrade) {
-                console.log(`✅ Trade Match: ${worker.name}`, { 
-                  address: worker.address,
-                  trades: worker.trades?.map((t: any) => t.name) 
-                });
-              }
+              // PRO users first
+              if (aIsPro && !bIsPro) return -1;
+              if (!aIsPro && bIsPro) return 1;
               
-              return hasTrade;
+              // Then by rating
+              return (b.rating || 0) - (a.rating || 0);
             });
-            
-            console.log('🔧 Trade Filter Results:', { 
-              afterFilter: workersWithTrades.length 
+
+            console.log('🔄 After sorting:', {
+              total: workersWithTrades.length,
+              proCount: workersWithTrades.filter((w: any) => w.subscription_plan === 'pro').length,
+              firstFive: workersWithTrades.slice(0, 5).map((w: any) => ({
+                name: w.name,
+                subscription: w.subscription_plan,
+                rating: w.rating
+              }))
             });
-          }
 
-          // Sort: PRO users first, then by rating
-          workersWithTrades.sort((a: any, b: any) => {
-            const aIsPro = a.subscription_plan === 'pro';
-            const bIsPro = b.subscription_plan === 'pro';
-            
-            // PRO users first
-            if (aIsPro && !bIsPro) return -1;
-            if (!aIsPro && bIsPro) return 1;
-            
-            // Then by rating
-            return (b.rating || 0) - (a.rating || 0);
-          });
+            // Apply client-side pagination after all filtering
+            const from = pageNum * ITEMS_PER_PAGE;
+            const to = from + ITEMS_PER_PAGE;
+            const paginatedWorkers = workersWithTrades.slice(from, to);
 
-          // Apply client-side pagination after all filtering
-          const from = pageNum * ITEMS_PER_PAGE;
-          const to = from + ITEMS_PER_PAGE;
-          const paginatedWorkers = workersWithTrades.slice(from, to);
+            console.log('📄 Client-side pagination:', { 
+              totalFiltered: workersWithTrades.length,
+              page: pageNum,
+              from, 
+              to,
+              itemsOnPage: paginatedWorkers.length,
+              proInPage: paginatedWorkers.filter((w: any) => w.subscription_plan === 'pro').length
+            });
 
-          console.log('📄 Client-side pagination:', { 
-            totalFiltered: workersWithTrades.length,
-            page: pageNum,
-            from, 
-            to,
-            itemsOnPage: paginatedWorkers.length 
-          });
-
-          if (reset) {
-            setWorkers(paginatedWorkers as Worker[]);
+            if (reset) {
+              setWorkers(paginatedWorkers as Worker[]);
+            } else {
+              setWorkers((prev: Worker[]) => [...prev, ...(paginatedWorkers as Worker[])]);
+            }
+            setHasMore(workersWithTrades.length > to);
           } else {
-            setWorkers((prev: Worker[]) => [...prev, ...(paginatedWorkers as Worker[])]);
+            // Database-level pagination was already applied
+            // Just sort PRO users first within current page
+            workersWithTrades.sort((a: any, b: any) => {
+              const aIsPro = a.subscription_plan === 'pro';
+              const bIsPro = b.subscription_plan === 'pro';
+              
+              // PRO users first
+              if (aIsPro && !bIsPro) return -1;
+              if (!aIsPro && bIsPro) return 1;
+              
+              // Keep database rating order
+              return 0;
+            });
+
+            if (reset) {
+              setWorkers(workersWithTrades as Worker[]);
+            } else {
+              setWorkers((prev: Worker[]) => [...prev, ...(workersWithTrades as Worker[])]);
+            }
+            setHasMore(data.length === ITEMS_PER_PAGE);
           }
-          setHasMore(workersWithTrades.length > to);
         } else {
           console.log('📊 No workers found after filtering');
           if (reset) {
@@ -505,33 +630,52 @@ export function TradesmenClientList({
           setHasMore(false);
         }
       } else {
-        console.log('📊 No filters - using default pagination with PRO priority');
+        console.log('📊 No filters - using optimized pagination with database-level sorting');
         
         // Apply default verified filter for main listing
         query = query.eq('is_verified', true);
 
-        // Fetch ALL workers to properly sort PRO users first
-        // No limit - we need all workers to sort them correctly
-        const { data: allData, error: fetchError } = await query;
+        // OPTIMIZATION: Use database-level pagination instead of loading all workers
+        // Calculate offset for current page
+        const from = pageNum * ITEMS_PER_PAGE;
+        const to = from + ITEMS_PER_PAGE - 1;
+        
+        // Apply pagination at database level
+        query = query.range(from, to);
+        
+        // Sort by rating (PRO users will be handled separately)
+        query = query.order('rating', { ascending: false, nullsFirst: false });
+
+        const { data, error: fetchError } = await query;
 
         if (fetchError) {
           throw new Error(fetchError.message);
         }
 
-        console.log('📊 Default pagination results:', { 
-          totalWorkers: allData?.length || 0, 
-          page: pageNum
+        console.log('📊 Optimized pagination results:', { 
+          page: pageNum,
+          from,
+          to,
+          workersLoaded: data?.length || 0
         });
 
-        if (allData && allData.length > 0) {
-          // Get worker IDs from fetched data
-          const workerIds = allData.map((w: any) => w.id);
+        if (data && data.length > 0) {
+          // Get worker IDs from current page only
+          const workerIds = data.map((w: any) => w.id);
 
-          // Fetch worker_trades for these workers
-          const { data: workerTradesData } = await supabase
-            .from('worker_trades')
-            .select('profile_id, trade_ids')
-            .in('profile_id', workerIds);
+          // Fetch worker_trades for these workers in batches
+          let workerTradesData: any[] = [];
+          const batchSize = 50;
+          for (let i = 0; i < workerIds.length; i += batchSize) {
+            const batch = workerIds.slice(i, i + batchSize);
+            const { data: batchData } = await supabase
+              .from('worker_trades')
+              .select('profile_id, trade_ids')
+              .in('profile_id', batch);
+            if (batchData) {
+              workerTradesData.push(...batchData);
+            }
+          }
 
           // Collect all unique trade IDs
           const allTradeIds = new Set<number>();
@@ -541,18 +685,28 @@ export function TradesmenClientList({
             }
           });
 
-          // Fetch trade details with caching
+          // Fetch trade details with caching and batching
           let trades: any[] = [];
           if (allTradeIds.size > 0) {
             const tradesCacheKey = CacheKeys.trades();
             let cachedTrades = (window as any).__WORKERS_CACHE?.get(tradesCacheKey);
             
             if (!cachedTrades) {
-              const { data: tradeData } = await supabase
-                .from('trades')
-                .select('id, name, slug')
-                .in('id', Array.from(allTradeIds));
-              trades = tradeData || [];
+              // Fetch trades in batches to avoid URL too long
+              const tradeIdsArray = Array.from(allTradeIds);
+              const tradeBatchSize = 100;
+              trades = [];
+              
+              for (let i = 0; i < tradeIdsArray.length; i += tradeBatchSize) {
+                const batch = tradeIdsArray.slice(i, i + tradeBatchSize);
+                const { data: tradeData } = await supabase
+                  .from('trades')
+                  .select('id, name, slug')
+                  .in('id', batch);
+                if (tradeData) {
+                  trades.push(...tradeData);
+                }
+              }
               
               // Cache trades data
               if (!(window as any).__WORKERS_CACHE) {
@@ -584,8 +738,8 @@ export function TradesmenClientList({
             subscriptionsData?.map((sub: any) => [sub.user_id, sub.plan_id]) || []
           );
 
-          // Map trades to workers
-          let workersWithTrades = allData.map((worker: any) => {
+          // Map trades and subscriptions to workers (only current page)
+          let workersWithTrades = data.map((worker: any) => {
             const tradeIds = workerTradesMap.get(worker.id) || [];
             const workerTrades = (Array.isArray(tradeIds) ? tradeIds : []).map((id: number) => tradeMap.get(id)).filter(Boolean);
             
@@ -596,7 +750,7 @@ export function TradesmenClientList({
             };
           });
 
-          // Sort: PRO users first, then by rating
+          // Sort current page: PRO users first, then by rating (already sorted by rating from DB)
           workersWithTrades.sort((a: any, b: any) => {
             const aIsPro = a.subscription_plan === 'pro';
             const bIsPro = b.subscription_plan === 'pro';
@@ -605,23 +759,20 @@ export function TradesmenClientList({
             if (aIsPro && !bIsPro) return -1;
             if (!aIsPro && bIsPro) return 1;
             
-            // Then by rating
-            return (b.rating || 0) - (a.rating || 0);
+            // Keep existing rating order from database
+            return 0;
           });
 
-          // Apply pagination after sorting
-          const from = pageNum * ITEMS_PER_PAGE;
-          const to = from + ITEMS_PER_PAGE;
-          const paginatedWorkers = workersWithTrades.slice(from, to);
-
           if (reset) {
-            setWorkers(paginatedWorkers as Worker[]);
+            setWorkers(workersWithTrades as Worker[]);
           } else {
-            setWorkers((prev: Worker[]) => [...prev, ...(paginatedWorkers as Worker[])]);
+            setWorkers((prev: Worker[]) => [...prev, ...(workersWithTrades as Worker[])]);
           }
-          setHasMore(workersWithTrades.length > to);
+          
+          // Check if there are more results
+          setHasMore(data.length === ITEMS_PER_PAGE);
         } else {
-          console.log('📊 No workers found in default pagination');
+          console.log('📊 No workers found in optimized pagination');
           if (reset) {
             setWorkers([]);
           }
