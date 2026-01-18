@@ -210,30 +210,61 @@ export async function GET() {
       const supabaseClient = createClient(supabaseUrl, supabaseKey);
       
       // Get PRO users with active subscriptions
-      const { data: proSubscriptions } = await supabaseClient
+      const { data: proSubscriptions, error: subsError } = await supabaseClient
         .from('user_subscriptions')
-        .select('user_id')
+        .select('user_id, plan_id, status')
         .eq('status', 'active')
         .eq('plan_id', 'pro');
+      
+      console.log('🔍 Sitemap PRO subscriptions:', {
+        count: proSubscriptions?.length || 0,
+        error: subsError,
+        subscriptions: proSubscriptions
+      });
       
       if (proSubscriptions && proSubscriptions.length > 0) {
         const proUserIds = proSubscriptions.map(sub => sub.user_id);
         
-        // Get verified worker profiles with PRO subscriptions
-        const { data: proWorkers } = await supabaseClient
+        // Get ALL worker profiles with PRO subscriptions (remove verified filter to debug)
+        const { data: proWorkers, error: workersError } = await supabaseClient
           .from('profiles')
-          .select('id, name, address')
+          .select('id, name, address, is_verified, role')
           .in('id', proUserIds)
           .eq('role', 'worker')
-          .eq('is_verified', true)
           .not('name', 'is', null);
         
-        if (proWorkers && proWorkers.length > 0) {
+        console.log('🔍 Sitemap ALL PRO workers:', {
+          count: proWorkers?.length || 0,
+          error: workersError,
+          workers: proWorkers?.map(w => ({ 
+            id: w.id, 
+            name: w.name, 
+            verified: w.is_verified,
+            role: w.role 
+          }))
+        });
+        
+        // Filter verified workers for sitemap
+        const verifiedProWorkers = proWorkers?.filter(w => w.is_verified === true) || [];
+        
+        console.log('🔍 Verified PRO workers for sitemap:', {
+          count: verifiedProWorkers.length,
+          workers: verifiedProWorkers.map(w => ({ id: w.id, name: w.name }))
+        });
+        
+        if (verifiedProWorkers.length > 0) {
+          const verifiedProUserIds = verifiedProWorkers.map(w => w.id);
+          
           // Get worker trades for SEO slug generation
           const { data: workerTradesData } = await supabaseClient
             .from('worker_trades')
             .select('profile_id, trade_ids')
-            .in('profile_id', proUserIds);
+            .in('profile_id', verifiedProUserIds);
+          
+          console.log('🔍 Worker trades data:', {
+            count: workerTradesData?.length || 0,
+            data: workerTradesData
+          });
           
           // Get all trade details
           const allTradeIds = new Set<number>();
@@ -252,13 +283,18 @@ export async function GET() {
             tradesData = trades || [];
           }
           
+          console.log('🔍 Trades data:', {
+            count: tradesData.length,
+            tradeIds: Array.from(allTradeIds)
+          });
+          
           // Create maps for efficient lookup
           const tradeMap = new Map(tradesData.map(t => [t.id, t]));
           const workerTradesMap = new Map(
             workerTradesData?.map(wt => [wt.profile_id, wt.trade_ids]) || []
           );
           
-          proWorkers.forEach(worker => {
+          verifiedProWorkers.forEach(worker => {
             if (worker.name && worker.name.trim()) {
               // Get worker's trades for SEO slug
               const tradeIds = workerTradesMap.get(worker.id) || [];
@@ -270,6 +306,12 @@ export async function GET() {
               const seoSlug = generateWorkerSeoSlug(worker, workerTrades);
               const loc = ensureTrailingSlash(`${baseUrl}/meseriasi/${seoSlug}`);
               
+              console.log('✅ Adding PRO worker to sitemap:', {
+                name: worker.name,
+                slug: seoSlug,
+                tradesCount: workerTrades.length
+              });
+              
               urls.push(`  <url>
     <loc>${xmlEscape(loc)}</loc>
     <lastmod>${currentDate}</lastmod>
@@ -278,6 +320,8 @@ export async function GET() {
   </url>`);
             }
           });
+          
+          console.log('✅ Total PRO workers added to sitemap:', verifiedProWorkers.length);
         }
       }
     }
