@@ -270,16 +270,6 @@ export function JobsClientList({ jobs }: JobsClientListProps) {
 
             return (
               <div key={job.id} className="group bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ring-1 ring-transparent hover:ring-2 hover:ring-amber-400/50 flex flex-col relative">
-                {/* New badge */}
-                {isNew && (
-                  <div className="absolute top-4 right-4 z-10">
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg animate-pulse">
-                      <span className="w-1.5 h-1.5 bg-white rounded-full"></span>
-                      NOU
-                    </span>
-                  </div>
-                )}
-
                 {/* Header */}
                 <div className="p-5 sm:p-6 border-b border-slate-100 bg-gradient-to-br from-white to-slate-50/50">
                   <div className="flex justify-between items-start gap-3">
@@ -288,9 +278,17 @@ export function JobsClientList({ jobs }: JobsClientListProps) {
                         {job.title || 'Fără titlu'}
                       </a>
                     </h3>
-                    <span className="px-3 py-1.5 text-xs font-bold rounded-full whitespace-nowrap bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-md">
-                      DESCHIS
-                    </span>
+                    {/* Show NOU badge if new, otherwise DESCHIS */}
+                    {isNew ? (
+                      <span className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold rounded-full whitespace-nowrap bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md flex-shrink-0 animate-pulse">
+                        <span className="w-1.5 h-1.5 bg-white rounded-full"></span>
+                        NOU
+                      </span>
+                    ) : (
+                      <span className="px-3 py-1.5 text-xs font-bold rounded-full whitespace-nowrap bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-md flex-shrink-0">
+                        DESCHIS
+                      </span>
+                    )}
                   </div>
                 </div>
 
