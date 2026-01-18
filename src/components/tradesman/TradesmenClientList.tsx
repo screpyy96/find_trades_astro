@@ -333,8 +333,10 @@ export function TradesmenClientList({
               workerIdsFromTrade = workerTradesData.map((wt: any) => wt.profile_id);
               console.log('🔧 Found workers with trade:', workerIdsFromTrade.length);
               
-              // Apply worker IDs filter
-              query = query.in('id', workerIdsFromTrade);
+              // Apply worker IDs filter (check for null to satisfy TypeScript)
+              if (workerIdsFromTrade && workerIdsFromTrade.length > 0) {
+                query = query.in('id', workerIdsFromTrade);
+              }
             } else {
               // No workers found with this trade
               console.log('🔧 No workers found with trade');
