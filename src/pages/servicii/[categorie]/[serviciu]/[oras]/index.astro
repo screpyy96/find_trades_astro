@@ -14,6 +14,7 @@ import {
   CACHE_REVALIDATE_CITY
 } from '../../../../../lib/constants';
 import { HeroProfessionals } from '../../../../../components/hero/HeroProfessionals';
+import { RecommendedTradesmen } from '../../../../../components/tradesman/RecommendedTradesmen';
 
 export const prerender = false;
 export const config = { revalidate: CACHE_REVALIDATE_CITY };
@@ -540,99 +541,88 @@ const breadcrumbSchema = {
     </div>
 
     <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center">
-        <!-- Left Column: Content -->
-        <div class="relative z-40 lg:col-span-8 text-center lg:text-left">
-          <!-- Breadcrumb -->
-          <nav class="flex justify-center lg:justify-start mb-6">
-            <div class="bg-slate-800/40 backdrop-blur-md rounded-full px-4 py-2 border border-slate-700/50">
-              <ol class="flex items-center space-x-2 text-slate-300 text-xs font-medium">
-                <li class="flex items-center">
-                  <a href="/" class="hover:text-white transition-colors">Acasă</a>
-                </li>
-                <li class="flex items-center">
-                  <span class="mx-2 text-white/40">›</span>
-                  <a href="/servicii/" class="hover:text-white transition-colors">Servicii</a>
-                </li>
-                <li class="flex items-center">
-                  <span class="mx-2 text-white/40">›</span>
-                  <a href={`/servicii/${categorie}/`} class="hover:text-white transition-colors">{service.category}</a>
-                </li>
-                <li class="flex items-center">
-                  <span class="mx-2 text-white/40">›</span>
-                  <a href={`/servicii/${categorie}/${serviciu}/`} class="hover:text-white transition-colors">{service.name}</a>
-                </li>
-                <li class="flex items-center">
-                  <span class="mx-2 text-white/40">›</span>
-                  <span class="text-orange-400 font-semibold">{city.name}</span>
-                </li>
-              </ol>
-            </div>
-          </nav>
-
-          <!-- Main Heading -->
-          <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
-            {heroTitle}
-          </h1>
-          
-          <p class="text-xl text-slate-300 mb-4">
-            {heroSubtitle}
-          </p>
-
-          <p class="text-lg text-slate-300 mb-8 leading-relaxed max-w-3xl mx-auto lg:mx-0">
-            {heroDescription}
-          </p>
-
-          <!-- Stats -->
-          {heroStats.length > 0 && (
-            <div class="flex flex-wrap items-center justify-center lg:justify-start gap-4 mb-8">
-              {heroStats.map(stat => (
-                <div class="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2 border border-white/20">
-                  <div class="text-amber-400 font-bold text-lg">{stat.value}</div>
-                  <div class="text-slate-300 text-sm">{stat.label}</div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          <!-- CTA Button -->
-          <div class="flex flex-wrap items-center justify-center lg:justify-start gap-4">
-            <a 
-              href={`${APP_URL}/cere-oferta?tradeId=${trade.id}&title=${encodeURIComponent(service.name)}`}
-              class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-xl hover:from-amber-600 hover:to-orange-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
-            >
-              Cere ofertă gratuită
-              <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-            </a>
+      <div class="max-w-4xl mx-auto text-center">
+        <!-- Breadcrumb -->
+        <nav class="flex justify-center mb-6">
+          <div class="bg-slate-800/40 backdrop-blur-md rounded-full px-4 py-2 border border-slate-700/50">
+            <ol class="flex items-center space-x-2 text-slate-300 text-xs font-medium">
+              <li class="flex items-center">
+                <a href="/" class="hover:text-white transition-colors">Acasă</a>
+              </li>
+              <li class="flex items-center">
+                <span class="mx-2 text-white/40">›</span>
+                <a href="/servicii/" class="hover:text-white transition-colors">Servicii</a>
+              </li>
+              <li class="flex items-center">
+                <span class="mx-2 text-white/40">›</span>
+                <a href={`/servicii/${categorie}/`} class="hover:text-white transition-colors">{service.category}</a>
+              </li>
+              <li class="flex items-center">
+                <span class="mx-2 text-white/40">›</span>
+                <a href={`/servicii/${categorie}/${serviciu}/`} class="hover:text-white transition-colors">{service.name}</a>
+              </li>
+              <li class="flex items-center">
+                <span class="mx-2 text-white/40">›</span>
+                <span class="text-orange-400 font-semibold">{city.name}</span>
+              </li>
+            </ol>
           </div>
-        </div>
+        </nav>
 
-        <!-- Right Column: PRO Professionals -->
-        <div class="hidden lg:flex lg:col-span-4 items-center justify-center relative z-10">
-          <HeroProfessionals
-            tradeId={trade.id}
-            cityName={city.name}
-            supabaseUrl={supabaseUrl}
-            supabaseAnonKey={supabaseAnonKey}
-            maxResults={6}
-            client:load
-          />
+        <!-- Main Heading -->
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
+          {heroTitle}
+        </h1>
+        
+        <p class="text-xl text-slate-300 mb-4">
+          {heroSubtitle}
+        </p>
+
+        <p class="text-lg text-slate-300 mb-8 leading-relaxed max-w-3xl mx-auto">
+          {heroDescription}
+        </p>
+
+        <!-- Stats -->
+        {heroStats.length > 0 && (
+          <div class="flex flex-wrap items-center justify-center gap-4 mb-8">
+            {heroStats.map(stat => (
+              <div class="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2 border border-white/20">
+                <div class="text-amber-400 font-bold text-lg">{stat.value}</div>
+                <div class="text-slate-300 text-sm">{stat.label}</div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <!-- CTA Button -->
+        <div class="flex flex-wrap items-center justify-center gap-4">
+          <a 
+            href={`${APP_URL}/cere-oferta?tradeId=${trade.id}&title=${encodeURIComponent(service.name)}`}
+            class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-xl hover:from-amber-600 hover:to-orange-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+          >
+            Cere ofertă gratuită
+            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          </a>
         </div>
       </div>
+    </div>
+  </section>
 
-      <!-- Mobile PRO Professionals -->
-      <div class="lg:hidden mt-12 flex justify-center">
-        <HeroProfessionals
-          tradeId={trade.id}
-          cityName={city.name}
-          supabaseUrl={supabaseUrl}
-          supabaseAnonKey={supabaseAnonKey}
-          maxResults={4}
-          client:load
-        />
-      </div>
+  <!-- PRO Tradesmen Section -->
+  <section class="bg-gradient-to-b from-slate-50 to-white py-6">
+    <div class="max-w-7xl mx-auto px-4">
+      <RecommendedTradesmen
+        tradeId={trade.id}
+        tradeName={service.name}
+        cityName={city.name}
+        supabaseUrl={supabaseUrl}
+        supabaseAnonKey={supabaseAnonKey}
+        maxResults={6}
+        compact={true}
+        client:load
+      />
     </div>
   </section>
 

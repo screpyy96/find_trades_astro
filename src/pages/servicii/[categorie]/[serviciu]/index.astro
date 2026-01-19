@@ -298,7 +298,7 @@ const faqSchema = {
       <div style="background-image: linear-gradient(rgba(45, 51, 45, 0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(45, 51, 45, 0.4) 1px, transparent 1px); background-size: 60px 60px"></div>
     </div>
 
-    <div class="relative z-10 max-w-7xl mx-auto px-4 py-16 sm:py-24">
+    <div class="relative z-10 max-w-7xl mx-auto px-4 py-16 sm:py-20">
       <div class="max-w-4xl mx-auto text-center">
         <!-- Breadcrumb -->
         <nav class="flex justify-center mb-6">
@@ -317,7 +317,7 @@ const faqSchema = {
           {sanityContent?.heroTitle || `${service.name} – Profesioniști Verificați în România`}
         </h1>
         
-        <p class="text-slate-400 mb-8 max-w-2xl mx-auto">
+        <p class="text-lg text-slate-300 mb-8 max-w-2xl mx-auto">
           {sanityContent?.heroDescription || `Găsește ${service.name.toLowerCase()} verificați în București, Cluj-Napoca, Timișoara, Iași, Constanța, Craiova, Brașov, Galați, Ploiești, Oradea și în toată România. Peste 150+ meseriași certificați, oferte gratuite în 24h.`}
         </p>
 
@@ -337,20 +337,25 @@ const faqSchema = {
     </div>
   </section>
 
-  <!-- Main Content -->
-  <div class="max-w-4xl mx-auto px-4 py-8 sm:py-12">
-    <div class="space-y-8 sm:space-y-10">
-      <!-- Recommended Tradesmen - Moved to top for better visibility -->
+  <!-- PRO Tradesmen Section -->
+  <section class="bg-gradient-to-b from-slate-50 to-white py-6">
+    <div class="max-w-7xl mx-auto px-4">
       <RecommendedTradesmen 
         tradeId={trade.id}
         tradeName={service.name}
         cityName="România"
         supabaseUrl={supabaseUrl}
         supabaseAnonKey={supabaseAnonKey}
-        maxResults={9}
-        client:only="react"
+        maxResults={6}
+        compact={true}
+        client:load
       />
+    </div>
+  </section>
 
+  <!-- Main Content -->
+  <div class="max-w-4xl mx-auto px-4 py-8 sm:py-12">
+    <div class="space-y-8 sm:space-y-10">
       <!-- Service Description -->
       <section class="bg-white rounded-lg p-6 border border-slate-200 shadow-sm">
         <h2 class="text-xl font-semibold text-slate-900 mb-6">Despre serviciul {service.name.toLowerCase()}</h2>

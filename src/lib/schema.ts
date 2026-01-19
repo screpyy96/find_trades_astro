@@ -263,6 +263,7 @@ function getServiceSchema(baseUrl: string, stats: HomepageStats, trades: Trade[]
     "aggregateRating": {
       "@type": "AggregateRating",
       "ratingValue": "4.8",
+      "ratingCount": stats.totalReviews,
       "reviewCount": stats.totalReviews,
       "bestRating": "5",
       "worstRating": "1"
@@ -345,6 +346,7 @@ function getLocalBusinessSchema(baseUrl: string, stats: HomepageStats) {
     "aggregateRating": {
       "@type": "AggregateRating",
       "ratingValue": "4.8",
+      "ratingCount": stats.totalReviews,
       "reviewCount": stats.totalReviews,
       "bestRating": "5",
       "worstRating": "1"
@@ -420,6 +422,7 @@ export function generateServiceCitySchema(params: {
         "aggregateRating": {
           "@type": "AggregateRating",
           "ratingValue": "4.8",
+          "ratingCount": 50,
           "reviewCount": 50,
           "bestRating": "5",
           "worstRating": "1"
