@@ -585,6 +585,7 @@ const faqSchema = buildFaqSchema(sanityContent?.faqSection);
 const breadcrumbSchema = {
   '@context': 'https://schema.org',
   '@type': 'BreadcrumbList',
+  name: `${service.name} ${city.name} - Breadcrumb Navigation`,
   itemListElement: [
     {
       '@type': 'ListItem',
