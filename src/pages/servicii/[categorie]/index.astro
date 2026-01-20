@@ -80,6 +80,7 @@ const categorySchema = {
 const breadcrumbSchema = {
   '@context': 'https://schema.org',
   '@type': 'BreadcrumbList',
+  name: `${categoryName} - Breadcrumb Navigation`,
   itemListElement: [
     {
       '@type': 'ListItem',
@@ -96,13 +97,14 @@ const breadcrumbSchema = {
     {
       '@type': 'ListItem',
       position: 3,
-      name: categoryName
+      name: categoryName,
+      item: `https://www.meseriaslocal.ro/servicii/${categorie}/`
     }
   ]
 };
 ---
 
-<Base title={title} description={description}>
+<Base title={title} description={description} disableDefaultBreadcrumb={true}>
   <meta slot="head" name="keywords" content={keywords} />
   <script is:inline type="application/ld+json" set:html={JSON.stringify(categorySchema)} slot="head" />
   <script is:inline type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} slot="head" />
