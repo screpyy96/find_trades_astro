@@ -279,19 +279,19 @@ const faqSchema = {
 
 <Base title={title} description={description} canonical={canonical} disableDefaultBreadcrumb={true}>
   <!-- Enhanced SEO Meta Tags -->
-  <meta name="keywords" content={keywords} />
-  <meta property="og:title" content={title} />
-  <meta property="og:description" content={description} />
-  <meta property="og:url" content={canonical} />
-  <meta property="og:type" content="website" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content={title} />
-  <meta name="twitter:description" content={description} />
+  <meta slot="head" name="keywords" content={keywords} />
+  <meta slot="head" property="og:title" content={title} />
+  <meta slot="head" property="og:description" content={description} />
+  <meta slot="head" property="og:url" content={canonical} />
+  <meta slot="head" property="og:type" content="website" />
+  <meta slot="head" name="twitter:card" content="summary_large_image" />
+  <meta slot="head" name="twitter:title" content={title} />
+  <meta slot="head" name="twitter:description" content={description} />
   
   <!-- Structured Data for Rich Snippets -->
-  <script is:inline type="application/ld+json" set:html={JSON.stringify(serviceSchema)}></script>
-  <script is:inline type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)}></script>
-  <script is:inline type="application/ld+json" set:html={JSON.stringify(faqSchema)}></script>
+  <script slot="head" is:inline type="application/ld+json" set:html={JSON.stringify(serviceSchema)}></script>
+  <script slot="head" is:inline type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)}></script>
+  <script slot="head" is:inline type="application/ld+json" set:html={JSON.stringify(faqSchema)}></script>
 
   <!-- Hero Section -->
   <section class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">

@@ -5,8 +5,8 @@ export async function GET() {
 User-agent: *
 Allow: /
 
-# Block private/dynamic user content from indexing
-Disallow: /meseriasi/
+# Block private/dynamic user content from indexing (except PRO profiles in sitemap)
+# Note: PRO tradesman profiles are included in sitemap.xml for indexing
 Disallow: /solicitari/
 
 # Block admin and dashboard areas (if any)
@@ -26,6 +26,7 @@ Disallow: /cere-oferta
 
 # Allow important resources
 Allow: /servicii/
+Allow: /meseriasi/
 Allow: /blog/
 Allow: /sitemap.xml
 Allow: /robots.txt

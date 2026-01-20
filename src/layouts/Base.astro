@@ -69,6 +69,16 @@ const GTM_ID = import.meta.env.PUBLIC_GTM_ID;
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     
+    <!-- Additional SEO Meta Tags -->
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow" />
+    <meta name="author" content="Meserias Local" />
+    <meta name="geo.region" content="RO" />
+    <meta name="geo.placename" content="Romania" />
+    <meta name="language" content="Romanian" />
+    <link rel="alternate" hreflang="ro" href={canonicalURL} />
+    <link rel="alternate" hreflang="x-default" href={canonicalURL} />
+    
     {!disableDefaultBreadcrumb && (
       <script type="application/ld+json" set:html={JSON.stringify({
         "@context": "https://schema.org",
