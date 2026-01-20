@@ -13,7 +13,6 @@ import {
   MIN_BUDGET_FOR_DISPLAY,
   CACHE_REVALIDATE_CITY
 } from '../../../../../lib/constants';
-import { HeroProfessionals } from '../../../../../components/hero/HeroProfessionals';
 import { RecommendedTradesmen } from '../../../../../components/tradesman/RecommendedTradesmen';
 
 export const prerender = false;
@@ -377,7 +376,7 @@ const heroStats = [
   (metrics.avgBudget && metrics.avgBudget >= MIN_BUDGET_FOR_DISPLAY) ? { label: 'Buget mediu acceptat', value: `${Math.round(metrics.avgBudget)} RON` } : null
 ].filter(Boolean) as Array<{ label: string; value: string }>;
 
-function createLocalBusinessSchema(params: { serviceName: string; cityName: string; canonical: string; metrics: any }) {
+function createLocalBusinessSchema(params: { serviceName: string; cityName: string; canonical: string; metrics: any; proTradesmen?: any[] }) {
   const schema: Record<string, any> = {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
@@ -437,6 +436,22 @@ function createLocalBusinessSchema(params: { serviceName: string; cityName: stri
     };
   }
 
+  // Add PRO tradesmen as employees for better SEO
+  if (params.proTradesmen && params.proTradesmen.length > 0) {
+    schema.employee = params.proTradesmen.map((worker: any) => ({
+      '@type': 'Person',
+      name: worker.name,
+      jobTitle: params.serviceName,
+      description: worker.bio ? worker.bio.substring(0, 160) : `Profesionist ${params.serviceName.toLowerCase()} verificat în ${params.cityName}`,
+      image: worker.avatar_url || undefined,
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: params.cityName,
+        addressCountry: 'RO'
+      }
+    }));
+  }
+
   return schema;
 }
 
@@ -459,6 +474,47 @@ function buildFaqSchema(faqSection: any) {
   };
 }
 
+// Fetch PRO tradesmen for this service and city for SEO schema
+let proTradesmen: any[] = [];
+if (supabase) {
+  try {
+    // Get worker IDs for this trade
+    const { data: workerTradesData } = await supabase
+      .from('worker_trades')
+      .select('profile_id')
+      .contains('trade_ids', [trade.id]);
+
+    if (workerTradesData && workerTradesData.length > 0) {
+      const workerIds = workerTradesData.map((wt: any) => wt.profile_id);
+
+      // Get PRO workers in this city
+      const { data: workersData } = await supabase
+        .from('profiles')
+        .select('id, name, avatar_url, address, bio, rating')
+        .in('id', workerIds)
+        .eq('role', 'worker')
+        .eq('is_verified', true)
+        .ilike('address', `%${city.name}%`)
+        .limit(4);
+
+      if (workersData && workersData.length > 0) {
+        // Get subscriptions
+        const { data: subscriptionsData } = await supabase
+          .from('user_subscriptions')
+          .select('user_id, plan_id')
+          .in('user_id', workersData.map((w: any) => w.id))
+          .eq('status', 'active')
+          .eq('plan_id', 'pro');
+
+        const proUserIds = new Set(subscriptionsData?.map((s: any) => s.user_id) || []);
+        proTradesmen = workersData.filter((w: any) => proUserIds.has(w.id));
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching PRO tradesmen for schema:', error);
+  }
+}
+
 // SEO and structured data
 const canonical = `https://www.meseriaslocal.ro/servicii/${categorie}/${serviciu}/${oras}/`;
 const title = sanityContent?.seoTitle || fallbackContent.title;
@@ -468,7 +524,8 @@ const localBusinessSchema = createLocalBusinessSchema({
   serviceName: service.name,
   cityName: city.name,
   canonical,
-  metrics
+  metrics,
+  proTradesmen
 });
 
 const faqSchema = buildFaqSchema(sanityContent?.faqSection);
@@ -619,7 +676,7 @@ const breadcrumbSchema = {
         cityName={city.name}
         supabaseUrl={supabaseUrl}
         supabaseAnonKey={supabaseAnonKey}
-        maxResults={6}
+        maxResults={4}
         compact={true}
         client:load
       />
@@ -627,7 +684,7 @@ const breadcrumbSchema = {
   </section>
 
   <!-- Main Content -->
-  <div class="max-w-4xl mx-auto px-4 py-16 sm:py-20">
+  <div class="max-w-7xl mx-auto px-4 py-16 sm:py-20">
     <div class="space-y-16">
       <!-- Service Description -->
       <section class="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
