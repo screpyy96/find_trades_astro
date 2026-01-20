@@ -380,13 +380,14 @@ function createLocalBusinessSchema(params: { serviceName: string; cityName: stri
   const schema: Record<string, any> = {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
+    '@id': `${params.canonical}#localbusiness`,
     name: `${params.serviceName} ${params.cityName} | Meserias Local`,
     description: `Servicii ${params.serviceName.toLowerCase()} în ${params.cityName} prin Meserias Local. Profesioniști verificați, oferte gratuite, răspuns rapid.`,
     url: params.canonical,
     telephone: '+40-XX-XXXX-XXXX',
     email: 'contact@meseriaslocal.ro',
     areaServed: {
-      '@type': 'AdministrativeArea',
+      '@type': 'City',
       name: params.cityName,
       addressCountry: 'RO'
     },
@@ -399,30 +400,49 @@ function createLocalBusinessSchema(params: { serviceName: string; cityName: stri
     serviceType: params.serviceName,
     category: params.serviceName,
     priceRange: '€€',
-    languagesSpoken: 'Romanian',
-    paymentAccepted: 'Cash, Card, Bank Transfer',
-    hoursAvailable: 'Mo-Su 00:00-23:59',
+    currenciesAccepted: 'RON',
+    paymentAccepted: ['Cash', 'Card', 'Bank Transfer'],
+    openingHours: 'Mo-Su 00:00-23:59',
+    image: 'https://www.meseriaslocal.ro/logo.svg',
+    logo: {
+      '@type': 'ImageObject',
+      url: 'https://www.meseriaslocal.ro/logo.svg'
+    },
+    sameAs: [
+      'https://www.facebook.com/localmeserias',
+      'https://www.instagram.com/MeseriasLocal'
+    ],
     offers: {
       '@type': 'Offer',
       itemOffered: {
         '@type': 'Service',
         name: params.serviceName,
-        description: `Servicii profesionale ${params.serviceName.toLowerCase()} în ${params.cityName}`
+        description: `Servicii profesionale ${params.serviceName.toLowerCase()} în ${params.cityName}`,
+        provider: {
+          '@type': 'Organization',
+          name: 'Meserias Local'
+        }
       },
       priceCurrency: 'RON',
-      availability: 'https://schema.org/InStock'
+      availability: 'https://schema.org/InStock',
+      url: params.canonical
     }
   };
 
   if (params.metrics.workerCount > 0) {
-    schema.numberOfEmployees = params.metrics.workerCount;
+    schema.numberOfEmployees = {
+      '@type': 'QuantitativeValue',
+      value: params.metrics.workerCount
+    };
   }
   
-  if (params.metrics.avgRating > 0) {
+  // Only add aggregateRating if we have real ratings
+  if (params.metrics.avgRating > 0 && params.metrics.ratedProfilesCount > 0) {
     schema.aggregateRating = {
       '@type': 'AggregateRating',
       ratingValue: params.metrics.avgRating.toFixed(1),
-      reviewCount: params.metrics.ratedProfilesCount || params.metrics.verifiedCount || params.metrics.workerCount,
+      ratingCount: params.metrics.ratedProfilesCount,
+      reviewCount: params.metrics.ratedProfilesCount,
       bestRating: '5',
       worstRating: '1'
     };
@@ -440,6 +460,7 @@ function createLocalBusinessSchema(params: { serviceName: string; cityName: stri
   if (params.proTradesmen && params.proTradesmen.length > 0) {
     schema.employee = params.proTradesmen.map((worker: any) => ({
       '@type': 'Person',
+      '@id': `https://www.meseriaslocal.ro/meseriasi/${worker.id}`,
       name: worker.name,
       jobTitle: params.serviceName,
       description: worker.bio ? worker.bio.substring(0, 160) : `Profesionist ${params.serviceName.toLowerCase()} verificat în ${params.cityName}`,
@@ -448,7 +469,8 @@ function createLocalBusinessSchema(params: { serviceName: string; cityName: stri
         '@type': 'PostalAddress',
         addressLocality: params.cityName,
         addressCountry: 'RO'
-      }
+      },
+      url: `https://www.meseriaslocal.ro/meseriasi/${worker.id}`
     }));
   }
 
@@ -528,6 +550,35 @@ const localBusinessSchema = createLocalBusinessSchema({
   proTradesmen
 });
 
+// Service schema for better SEO
+const serviceSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  '@id': `${canonical}#service`,
+  name: `${service.name} ${city.name}`,
+  description: `Servicii profesionale de ${service.name.toLowerCase()} în ${city.name}. Meseriași verificați, oferte gratuite, răspuns rapid.`,
+  provider: {
+    '@type': 'LocalBusiness',
+    '@id': `${canonical}#localbusiness`
+  },
+  areaServed: {
+    '@type': 'City',
+    name: city.name,
+    addressCountry: 'RO'
+  },
+  serviceType: service.name,
+  url: canonical,
+  availableChannel: {
+    '@type': 'ServiceChannel',
+    serviceUrl: canonical,
+    servicePhone: '+40-XX-XXXX-XXXX',
+    availableLanguage: {
+      '@type': 'Language',
+      name: 'Romanian'
+    }
+  }
+};
+
 const faqSchema = buildFaqSchema(sanityContent?.faqSection);
 
 // Breadcrumb schema
@@ -570,9 +621,10 @@ const breadcrumbSchema = {
 
 ---
 
-<Base title={title} description={description} canonical={canonical}>
+<Base title={title} description={description} canonical={canonical} disableDefaultBreadcrumb={true}>
   <!-- Structured Data -->
   <script type="application/ld+json" set:html={JSON.stringify(localBusinessSchema)} is:inline></script>
+  <script type="application/ld+json" set:html={JSON.stringify(serviceSchema)} is:inline></script>
   <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} is:inline></script>
   {faqSchema && <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} is:inline></script>}
 
