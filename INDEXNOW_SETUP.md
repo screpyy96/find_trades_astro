@@ -16,20 +16,41 @@ IndexNow este un protocol care notifică instant motoarele de căutare (Bing, Ya
 
 ### 3. Submit Script (DONE)
 - ✅ Script creat: `scripts/submit-indexnow.mjs`
+- ✅ Actualizat să submită TOATE URL-urile din sitemap (~4978 URL-uri)
+
+### 4. Site Verification (REQUIRED) ⚠️
+- ⚠️ Trebuie să verifici site-ul în Bing Webmaster Tools
+- ⚠️ Sau în Yandex Webmaster
+- Fără verificare, IndexNow returnează 403 error
 
 ## Cum să folosești
 
-### Opțiunea 1: Submit manual (recomandat pentru prima dată)
+### IMPORTANT: Verifică site-ul mai întâi! ⚠️
+
+Înainte de a submite URL-uri, trebuie să verifici site-ul în:
+
+**Bing Webmaster Tools** (recomandat):
+1. Mergi la: https://www.bing.com/webmasters
+2. Add site: `www.meseriaslocal.ro`
+3. Verifică folosind fișierul IndexNow key (deja ai `80ed490583fd4cb8b5705e6e8cb33fec.txt`)
+4. Așteaptă confirmarea (câteva minute)
+
+**SAU Yandex Webmaster**:
+1. Mergi la: https://webmaster.yandex.com
+2. Add site: `www.meseriaslocal.ro`
+3. Verifică folosind fișierul key
+4. Așteaptă confirmarea
+
+### După verificare, rulează scriptul:
 
 ```bash
 node scripts/submit-indexnow.mjs
 ```
 
-Acest script va submite automat paginile importante:
-- Homepage
-- Pagini de servicii principale
-- Pagini cu orașe importante
-- Blog
+Scriptul va:
+- Fetch automat toate URL-urile din sitemap (~4978 URL-uri)
+- Le submite în batch-uri de 10,000 (limita IndexNow)
+- Așteaptă 1 secundă între batch-uri pentru rate limiting
 
 ### Opțiunea 2: Submit prin API
 
@@ -73,11 +94,27 @@ curl -X POST https://api.indexnow.org/indexnow \
 
 ## Verificare
 
-După submit, verifică în:
-- **Bing Webmaster Tools**: https://www.bing.com/webmasters
-- **Yandex Webmaster**: https://webmaster.yandex.com
+După ce ai verificat site-ul în Bing/Yandex Webmaster Tools și ai rulat scriptul:
 
-Paginile ar trebui să apară în index în 24-48 ore.
+1. **Bing Webmaster Tools**: https://www.bing.com/webmasters
+   - Verifică în "URL Inspection" dacă paginile sunt indexate
+   - Vezi statistici de indexare în dashboard
+
+2. **Yandex Webmaster**: https://webmaster.yandex.com
+   - Verifică statusul indexării
+   - Vezi rapoarte de crawling
+
+Paginile ar trebui să apară în index în **24-48 ore**.
+
+### Statistici curente:
+- **Total URL-uri în sitemap**: ~4978
+- **Breakdown**:
+  - Static pages: 3
+  - Service categories: ~10
+  - Service pages (no city): ~50
+  - Service + City pages: ~2500
+  - Blog posts: varies
+  - PRO tradesman profiles: varies
 
 ## Motoare de căutare suportate
 
@@ -116,6 +153,15 @@ Sau în CI/CD (GitHub Actions, Vercel, etc.):
 
 ## Troubleshooting
 
+### Error: Site Verification Not Completed (403)
+**Cauză**: Site-ul nu e verificat în Bing/Yandex Webmaster Tools
+
+**Soluție**:
+1. Verifică site-ul în Bing Webmaster Tools: https://www.bing.com/webmasters
+2. Folosește fișierul key pentru verificare (`80ed490583fd4cb8b5705e6e8cb33fec.txt`)
+3. Așteaptă confirmarea (câteva minute)
+4. Rulează din nou scriptul
+
 ### Error: Key file not found
 - Verifică că `public/80ed490583fd4cb8b5705e6e8cb33fec.txt` există
 - Verifică că e accesibil la URL-ul public
@@ -128,3 +174,9 @@ Sau în CI/CD (GitHub Actions, Vercel, etc.):
 - IndexNow API poate fi lent uneori
 - Retry după câteva minute
 - Verifică că nu ai depășit limita de 10,000 URL-uri/zi
+
+### Error: Too many URLs
+- Limita IndexNow: 10,000 URL-uri per request
+- Scriptul împarte automat în batch-uri
+- Limita zilnică: 10,000 URL-uri per host
+- Dacă ai >10k URL-uri, rulează scriptul în zile consecutive
