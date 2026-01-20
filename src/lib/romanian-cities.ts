@@ -1,6 +1,9 @@
 /**
  * Top 100 orașe din România pentru SEO
  * Ordonate după populație și importanță economică
+ * 
+ * NOTE: Sectoarele Bucureștiului sunt incluse pentru SEO local granular.
+ * Fiecare sector are propria pagină pentru targeting mai precis.
  */
 export const romanianCities = [
   'București',

@@ -9,6 +9,15 @@ export interface City {
 export const cities: City[] = [
   // Reședințe de județ - ordonate după populație
   { slug: 'bucuresti', name: 'București', county: 'București', population: 1883425 },
+  
+  // Sectoare București (pentru SEO local granular)
+  { slug: 'sectorul-1', name: 'Sectorul 1', county: 'București', population: 230000 },
+  { slug: 'sectorul-2', name: 'Sectorul 2', county: 'București', population: 345000 },
+  { slug: 'sectorul-3', name: 'Sectorul 3', county: 'București', population: 385000 },
+  { slug: 'sectorul-4', name: 'Sectorul 4', county: 'București', population: 300000 },
+  { slug: 'sectorul-5', name: 'Sectorul 5', county: 'București', population: 280000 },
+  { slug: 'sectorul-6', name: 'Sectorul 6', county: 'București', population: 370000 },
+  
   { slug: 'cluj-napoca', name: 'Cluj-Napoca', county: 'Cluj', population: 324576 },
   { slug: 'timisoara', name: 'Timișoara', county: 'Timiș', population: 319279 },
   { slug: 'iasi', name: 'Iași', county: 'Iași', population: 290422 },
