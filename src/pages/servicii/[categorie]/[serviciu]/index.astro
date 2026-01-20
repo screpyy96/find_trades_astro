@@ -294,27 +294,21 @@ const faqSchema = {
   <script is:inline type="application/ld+json" set:html={JSON.stringify(faqSchema)}></script>
 
   <!-- Hero Section -->
-  <section class="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white overflow-hidden">
-    <div class="absolute inset-0 opacity-15">
-      <div style="background-image: linear-gradient(rgba(45, 51, 45, 0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(45, 51, 45, 0.4) 1px, transparent 1px); background-size: 60px 60px"></div>
-    </div>
-
-    <div class="relative z-10 max-w-7xl mx-auto px-4 py-16 sm:py-20">
+  <section class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
+    <div class="max-w-7xl mx-auto px-4 py-12 sm:py-16">
       <div class="max-w-4xl mx-auto text-center">
         <!-- Breadcrumb -->
         <nav class="flex justify-center mb-6">
-          <div class="bg-slate-800/40 backdrop-blur-md rounded-full px-4 py-2 border border-slate-700/50">
-            <ol class="flex items-center text-sm text-slate-300">
-              <li><a href="/" class="hover:text-amber-400 transition-colors">Acasă</a></li>
-              <li><span class="mx-2 text-white/40">›</span></li>
-              <li><a href="/servicii" class="hover:text-amber-400 transition-colors">Servicii</a></li>
-              <li><span class="mx-2 text-white/40">›</span></li>
-              <li><span class="text-orange-400 font-semibold">{service.name}</span></li>
-            </ol>
-          </div>
+          <ol class="flex items-center text-sm text-slate-300">
+            <li><a href="/" class="hover:text-amber-400">Acasă</a></li>
+            <li><span class="mx-2 text-white/40">›</span></li>
+            <li><a href="/servicii" class="hover:text-amber-400">Servicii</a></li>
+            <li><span class="mx-2 text-white/40">›</span></li>
+            <li><span class="text-orange-400 font-semibold">{service.name}</span></li>
+          </ol>
         </nav>
 
-        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4">
           {sanityContent?.heroTitle || `${service.name} – Profesioniști Verificați în România`}
         </h1>
         
@@ -322,18 +316,15 @@ const faqSchema = {
           {sanityContent?.heroDescription || `Găsește ${service.name.toLowerCase()} verificați în București, Cluj-Napoca, Timișoara, Iași, Constanța, Craiova, Brașov, Galați, Ploiești, Oradea și în toată România. Peste 150+ meseriași certificați, oferte gratuite în 24h.`}
         </p>
 
-        <!-- CTA Button -->
-        <div class="flex flex-wrap items-center justify-center gap-4">
-          <a 
-            href="https://app.meseriaslocal.ro/cere-oferta"
-            class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-xl hover:from-amber-600 hover:to-orange-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
-          >
-            Solicită ofertă gratuită
-            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-            </svg>
-          </a>
-        </div>
+        <a 
+          href="https://app.meseriaslocal.ro/cere-oferta"
+          class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-xl hover:from-amber-600 hover:to-orange-600 shadow-lg"
+        >
+          Solicită ofertă gratuită
+          <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+          </svg>
+        </a>
       </div>
     </div>
   </section>
