@@ -539,8 +539,8 @@ if (supabase) {
 
 // SEO and structured data
 const canonical = `https://www.meseriaslocal.ro/servicii/${categorie}/${serviciu}/${oras}/`;
-const title = sanityContent?.seoTitle || fallbackContent.title;
-const description = sanityContent?.seoDescription || fallbackContent.description;
+const title = sanityContent?.seoTitle || sanityContent?.title || fallbackContent.title;
+const description = sanityContent?.seoDescription || sanityContent?.metaDescription || fallbackContent.description;
 
 const localBusinessSchema = createLocalBusinessSchema({
   serviceName: service.name,
