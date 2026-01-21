@@ -352,8 +352,8 @@ export function RecommendedTradesmen({
     fetchRecommendedTradesmen();
   }, [supabase, tradeId, tradeName, cityName, maxResults]);
 
-  // Don't render if no workers or error
-  if (error || (!isLoading && workers.length === 0)) {
+  // Don't render if no workers, error, or still loading
+  if (error || workers.length === 0) {
     return null;
   }
 
@@ -385,25 +385,17 @@ export function RecommendedTradesmen({
       </div>
 
       <div className="p-4">
-        {isLoading ? (
-          <div className={`grid gap-2 ${compact ? 'grid-cols-2 lg:grid-cols-4' : workers.length === 1 ? 'grid-cols-1 max-w-md mx-auto' : 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3'}`}>
-            {Array.from({ length: 3 }).map((_, index) => (
-              <TradesmanCardSkeleton key={index} />
-            ))}
-          </div>
-        ) : (
-          <div className={`grid gap-2 ${compact ? 'grid-cols-2 lg:grid-cols-4' : workers.length === 1 ? 'grid-cols-1 max-w-md mx-auto' : 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3'}`}>
-            {workers.map((worker: Worker) => (
-              <div key={worker.id} className="transform hover:scale-[1.02] transition-all duration-200">
-                {compact ? (
-                  <CompactTradesmanCard worker={worker} />
-                ) : (
+        <div className={`grid gap-2 ${compact ? 'grid-cols-2 lg:grid-cols-4' : workers.length === 1 ? 'grid-cols-1 max-w-md mx-auto' : 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3'}`}>
+          {workers.map((worker: Worker) => (
+            <div key={worker.id} className="transform hover:scale-[1.02] transition-all duration-200">
+              {compact ? (
+                <CompactTradesmanCard worker={worker} />
+              ) : (
                   <TradesmanCard worker={worker} />
                 )}
               </div>
             ))}
           </div>
-        )}
 
         {workers.length > 0 && !compact && (
           <div className="mt-4 pt-4 border-t border-slate-100 text-center">

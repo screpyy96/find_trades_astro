@@ -129,13 +129,19 @@ export function ServicesSearch({ trades }: ServicesSearchProps) {
           {filteredCategories.map((category) => (
             <div key={category} className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                <a 
+                  href={`/servicii/${createCategorySlug(category)}/`}
+                  className="text-xl font-bold text-slate-900 hover:text-blue-700 flex items-center gap-2 transition-colors group"
+                >
                   <span className="text-2xl">🔧</span>
-                  {category}
+                  <span className="group-hover:underline">{category}</span>
                   <span className="text-sm font-normal text-slate-500">
                     ({filteredGrouped[category].length} servicii)
                   </span>
-                </h3>
+                  <svg className="w-4 h-4 text-slate-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </a>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
