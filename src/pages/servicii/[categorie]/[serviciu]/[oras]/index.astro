@@ -388,17 +388,13 @@ function createLocalBusinessSchema(params: { serviceName: string; cityName: stri
     email: 'contact@meseriaslocal.ro',
     areaServed: {
       '@type': 'City',
-      name: params.cityName,
-      addressCountry: 'RO'
+      name: params.cityName
     },
     address: {
       '@type': 'PostalAddress',
       addressLocality: params.cityName,
-      addressCountry: 'RO',
-      addressRegion: params.cityName
+      addressCountry: 'RO'
     },
-    serviceType: params.serviceName,
-    category: params.serviceName,
     priceRange: '€€',
     currenciesAccepted: 'RON',
     paymentAccepted: ['Cash', 'Card', 'Bank Transfer'],
@@ -563,8 +559,7 @@ const serviceSchema = {
   },
   areaServed: {
     '@type': 'City',
-    name: city.name,
-    addressCountry: 'RO'
+    name: city.name
   },
   serviceType: service.name,
   url: canonical,

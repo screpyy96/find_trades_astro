@@ -23,15 +23,13 @@ const localBusinessSchema = {
   "email": "contact@meseriaslocal.ro",
   "areaServed": {
     "@type": "City",
-    "name": "București",
-    "addressCountry": "RO"
+    "name": "București"
   },
   "address": {
     "@type": "PostalAddress",
     "addressLocality": "București",
     "addressCountry": "RO"
   },
-  "serviceType": "Electrician",
   "priceRange": "€€",
   "openingHours": "Mo-Su 00:00-23:59",
   "image": "https://www.meseriaslocal.ro/logo.svg"
@@ -103,7 +101,7 @@ const serviceSchema = {
   "name": "Electrician București",
   "description": "Servicii electrice profesionale în București - instalații, reparații, urgențe 24/7",
   "provider": { "@type": "LocalBusiness", "@id": `${canonical}#localbusiness` },
-  "areaServed": { "@type": "City", "name": "București", "addressCountry": "RO" },
+  "areaServed": { "@type": "City", "name": "București" },
   "serviceType": "Electrician",
   "url": canonical
 };
