@@ -1,0 +1,523 @@
+---
+import Base from '../layouts/Base.astro';
+import { RecommendedTradesmen } from '../components/tradesman/RecommendedTradesmen';
+import { getPublicSupabaseConfig } from '../lib/publicEnv';
+
+const { url: supabaseUrl, anonKey: supabaseAnonKey } = getPublicSupabaseConfig();
+const APP_URL = 'https://app.meseriaslocal.ro';
+
+// SEO Data
+const title = "Electrician București ⚡ Intervenții Rapide 24/7 | Prețuri de la 50 lei";
+const description = "Electricieni autorizați ANRE în București. Intervenții urgente în 30 min, prețuri transparente de la 50 lei. ✓ Verificați ✓ Garanție 2 ani ✓ Oferte gratuite";
+const canonical = "https://www.meseriaslocal.ro/electrician-bucuresti";
+
+// Structured Data - LocalBusiness
+const localBusinessSchema = {
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "@id": `${canonical}#localbusiness`,
+  "name": "Electrician București | Meserias Local",
+  "description": "Servicii electrician profesionist în București. Electricieni autorizați ANRE, intervenții urgente 24/7, prețuri de la 50 lei.",
+  "url": canonical,
+  "telephone": "+40-XXX-XXX-XXX",
+  "email": "contact@meseriaslocal.ro",
+  "areaServed": {
+    "@type": "City",
+    "name": "București",
+    "addressCountry": "RO"
+  },
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "București",
+    "addressCountry": "RO"
+  },
+  "serviceType": "Electrician",
+  "priceRange": "€€",
+  "openingHours": "Mo-Su 00:00-23:59",
+  "image": "https://www.meseriaslocal.ro/logo.svg"
+};
+
+// FAQ Schema
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Cât costă un electrician în București?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Prețurile pentru electrician în București pornesc de la 50-80 lei pentru intervenții simple (înlocuire priză, bec). Montaj tablou electric: 300-800 lei. Traseu electric nou: 25-40 lei/metru. Verificare instalație ANRE: 200-400 lei."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Cât durează să vină un electrician urgent în București?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Electricienii de urgență ajung în 30-60 minute în București, în funcție de sector și trafic. Pentru urgențe (scurtcircuit, pană de curent), timpul mediu de răspuns este sub 45 minute."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Cum verific dacă un electrician este autorizat ANRE?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Poți verifica autorizația ANRE pe site-ul oficial anre.ro sau cere electricianului să-ți arate legitimația. Toți electricienii din Meserias Local au autorizație ANRE verificată."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Ce garanție oferă electricienii pentru lucrări?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Electricienii verificați din platforma noastră oferă garanție de minim 2 ani pentru lucrări și materiale. Garanția acoperă defecte de execuție și probleme apărute din cauza instalării."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Electricianul vine și în weekend sau noaptea?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Da, avem electricieni disponibili 24/7 în București, inclusiv weekend și sărbători. Pentru intervenții în afara programului normal se poate aplica un tarif suplimentar de 20-50%."
+      }
+    }
+  ]
+};
+
+// Breadcrumb Schema
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Acasă", "item": "https://www.meseriaslocal.ro" },
+    { "@type": "ListItem", "position": 2, "name": "Servicii", "item": "https://www.meseriaslocal.ro/servicii" },
+    { "@type": "ListItem", "position": 3, "name": "Electrician București", "item": canonical }
+  ]
+};
+
+// Service Schema
+const serviceSchema = {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "name": "Electrician București",
+  "description": "Servicii electrice profesionale în București - instalații, reparații, urgențe 24/7",
+  "provider": { "@type": "LocalBusiness", "@id": `${canonical}#localbusiness` },
+  "areaServed": { "@type": "City", "name": "București", "addressCountry": "RO" },
+  "serviceType": "Electrician",
+  "url": canonical
+};
+
+// Price data
+const prices = [
+  { service: "Înlocuire priză/întrerupător", min: 30, max: 60 },
+  { service: "Montaj corp iluminat", min: 40, max: 100 },
+  { service: "Depanare urgentă", min: 80, max: 150 },
+  { service: "Montaj tablou electric", min: 300, max: 800 },
+  { service: "Traseu electric nou (per metru)", min: 25, max: 45 },
+  { service: "Verificare instalație ANRE", min: 200, max: 400 },
+  { service: "Montaj priză dedicată (cuptor, AC)", min: 100, max: 200 }
+];
+
+// Sectors data
+const sectors = [
+  { name: "Sector 1", zones: "Băneasa, Aviatorilor, Dorobanți, Floreasca, Herăstrău, Primăverii" },
+  { name: "Sector 2", zones: "Colentina, Obor, Pantelimon, Tei, Iancului, Moșilor" },
+  { name: "Sector 3", zones: "Titan, Dristor, Vitan, Dudești, Muncii, Balta Albă" },
+  { name: "Sector 4", zones: "Berceni, Tineretului, Văcărești, Olteniței, Giurgiului" },
+  { name: "Sector 5", zones: "Rahova, Ferentari, 13 Septembrie, Cotroceni, Panduri" },
+  { name: "Sector 6", zones: "Drumul Taberei, Militari, Crângași, Giulești, Lujerului" }
+];
+---
+
+<Base title={title} description={description} canonical={canonical} disableDefaultBreadcrumb={true}>
+  <!-- Structured Data -->
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(localBusinessSchema)} is:inline></script>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(faqSchema)} is:inline></script>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} is:inline></script>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(serviceSchema)} is:inline></script>
+  
+  <!-- Extra SEO meta tags -->
+  <meta slot="head" name="keywords" content="electrician bucuresti, electrician non-stop bucuresti, electrician urgente bucuresti, electrician autorizat anre bucuresti, pret electrician bucuresti, electrician sector 1, electrician sector 2, electrician sector 3, electrician sector 4, electrician sector 5, electrician sector 6" />
+  <meta slot="head" name="geo.region" content="RO-B" />
+  <meta slot="head" name="geo.placename" content="București" />
+
+  <!-- Hero Section -->
+  <section class="py-12 sm:py-16" style="background: linear-gradient(180deg, #1b1f1d 0%, #21251f 50%, #2a302b 100%)">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-4xl mx-auto text-center">
+        <!-- Breadcrumb -->
+        <nav class="flex justify-center mb-6">
+          <ol class="flex items-center space-x-2 text-slate-300 text-xs font-medium">
+            <li><a href="/" class="hover:text-white">Acasă</a></li>
+            <li><span class="mx-2 text-white/40">›</span></li>
+            <li><a href="/servicii/" class="hover:text-white">Servicii</a></li>
+            <li><span class="mx-2 text-white/40">›</span></li>
+            <li><span class="text-orange-400 font-semibold">Electrician București</span></li>
+          </ol>
+        </nav>
+
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4">
+          Electrician București – Servicii Electrice Profesionale 2026
+        </h1>
+        
+        <p class="text-xl text-slate-300 mb-4">
+          ⚡ Electricieni Autorizați ANRE • Intervenții în 30 minute • Garanție 2 ani
+        </p>
+
+        <p class="text-lg text-slate-300 mb-8 max-w-3xl mx-auto">
+          Găsește electricieni verificați în București. Intervenții urgente 24/7, montaj instalații electrice, tablouri, prize, corpuri de iluminat. Primești 3-5 oferte gratuite în maxim 2 ore. Fără comisioane!
+        </p>
+
+        <!-- Stats -->
+        <div class="flex flex-wrap items-center justify-center gap-4 mb-8">
+          <div class="bg-white/10 rounded-lg px-4 py-2">
+            <div class="text-amber-400 font-bold text-lg">24/7</div>
+            <div class="text-slate-300 text-sm">Disponibilitate</div>
+          </div>
+          <div class="bg-white/10 rounded-lg px-4 py-2">
+            <div class="text-amber-400 font-bold text-lg">30 min</div>
+            <div class="text-slate-300 text-sm">Timp răspuns</div>
+          </div>
+          <div class="bg-white/10 rounded-lg px-4 py-2">
+            <div class="text-amber-400 font-bold text-lg">2 ani</div>
+            <div class="text-slate-300 text-sm">Garanție</div>
+          </div>
+        </div>
+
+        <a href={`${APP_URL}/cere-oferta?tradeId=62&title=${encodeURIComponent('Electrician București')}`}
+          class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-xl hover:from-amber-600 hover:to-orange-600 shadow-lg">
+          Cere ofertă gratuită
+          <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRO Tradesmen Section -->
+  <section class="bg-gradient-to-b from-slate-50 to-white pt-4">
+    <div class="max-w-7xl mx-auto px-4">
+      <RecommendedTradesmen
+        tradeId={62}
+        tradeName="Electrician"
+        cityName="București"
+        supabaseUrl={supabaseUrl}
+        supabaseAnonKey={supabaseAnonKey}
+        maxResults={4}
+        compact={true}
+        client:load
+      />
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <div class="max-w-7xl mx-auto px-4 pt-4 pb-16 sm:pt-6 sm:pb-20">
+    <div class="space-y-12">
+      
+      <!-- Services Section -->
+      <section class="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
+        <h2 class="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3">
+          <div class="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center text-white">⚡</div>
+          Servicii Electrician București – Tot ce ai nevoie
+        </h2>
+        
+        <p class="text-slate-700 mb-6 leading-relaxed">
+          Electricienii noștri autorizați <strong>ANRE</strong> din București oferă servicii complete pentru locuințe, apartamente și spații comerciale. De la intervenții urgente până la proiecte complexe de instalații electrice.
+        </p>
+
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div class="flex items-start gap-3 p-4 bg-slate-50 rounded-lg">
+            <span class="text-amber-500 text-xl">⚡</span>
+            <div>
+              <h3 class="font-semibold text-slate-900">Intervenții urgente 24/7</h3>
+              <p class="text-sm text-slate-600">Scurtcircuite, pene de curent, prize defecte</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3 p-4 bg-slate-50 rounded-lg">
+            <span class="text-amber-500 text-xl">🔧</span>
+            <div>
+              <h3 class="font-semibold text-slate-900">Montaj tablouri electrice</h3>
+              <p class="text-sm text-slate-600">Cu siguranțe automate și protecție</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3 p-4 bg-slate-50 rounded-lg">
+            <span class="text-amber-500 text-xl">💡</span>
+            <div>
+              <h3 class="font-semibold text-slate-900">Instalare corpuri iluminat</h3>
+              <p class="text-sm text-slate-600">LED, lustre, spoturi, benzi LED</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3 p-4 bg-slate-50 rounded-lg">
+            <span class="text-amber-500 text-xl">✅</span>
+            <div>
+              <h3 class="font-semibold text-slate-900">Verificare ANRE</h3>
+              <p class="text-sm text-slate-600">Certificare instalații electrice</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3 p-4 bg-slate-50 rounded-lg">
+            <span class="text-amber-500 text-xl">🔌</span>
+            <div>
+              <h3 class="font-semibold text-slate-900">Prize și întrerupătoare</h3>
+              <p class="text-sm text-slate-600">Montaj, înlocuire, reparații</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3 p-4 bg-slate-50 rounded-lg">
+            <span class="text-amber-500 text-xl">☀️</span>
+            <div>
+              <h3 class="font-semibold text-slate-900">Panouri fotovoltaice</h3>
+              <p class="text-sm text-slate-600">Instalare și conectare la rețea</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Why Choose Us -->
+      <section class="bg-emerald-50 rounded-2xl p-8 border border-emerald-100">
+        <h2 class="text-2xl font-bold text-slate-900 mb-6">
+          De ce să alegi electricieni prin Meserias Local?
+        </h2>
+        
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-white flex-shrink-0">✓</div>
+            <div>
+              <h3 class="font-semibold text-slate-900">Verificați personal</h3>
+              <p class="text-sm text-slate-600">Toți electricienii au autorizație ANRE validă</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-white flex-shrink-0">⏱️</div>
+            <div>
+              <h3 class="font-semibold text-slate-900">Răspuns rapid</h3>
+              <p class="text-sm text-slate-600">Primești oferte în maxim 2 ore</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-white flex-shrink-0">💰</div>
+            <div>
+              <h3 class="font-semibold text-slate-900">Prețuri transparente</h3>
+              <p class="text-sm text-slate-600">Compari 3-5 oferte fără obligații</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-white flex-shrink-0">🛡️</div>
+            <div>
+              <h3 class="font-semibold text-slate-900">Garanție 2 ani</h3>
+              <p class="text-sm text-slate-600">Pentru toate lucrările efectuate</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-white flex-shrink-0">⭐</div>
+            <div>
+              <h3 class="font-semibold text-slate-900">Recenzii reale</h3>
+              <p class="text-sm text-slate-600">Feedback de la clienți anteriori</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-white flex-shrink-0">🆓</div>
+            <div>
+              <h3 class="font-semibold text-slate-900">Fără comisioane</h3>
+              <p class="text-sm text-slate-600">Plătești doar electricianul, direct</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Sectors Coverage -->
+      <section class="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
+        <h2 class="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3">
+          <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center text-white">📍</div>
+          Zone și sectoare acoperite în București
+        </h2>
+        
+        <p class="text-slate-700 mb-6">
+          Electricienii noștri acoperă <strong>toate cele 6 sectoare</strong> din București și zonele limitrofe. Timp mediu de deplasare: <strong>30-45 minute</strong>.
+        </p>
+
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {sectors.map(sector => (
+            <div class="p-4 bg-blue-50 rounded-lg border border-blue-100">
+              <h3 class="font-bold text-blue-900 mb-2">{sector.name}</h3>
+              <p class="text-sm text-blue-700">{sector.zones}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- Prices Section -->
+      <section class="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
+        <h2 class="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3">
+          <div class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center text-white">💰</div>
+          Prețuri orientative electrician București 2026
+        </h2>
+        
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {prices.map(price => (
+            <div class="p-4 bg-slate-50 rounded-lg border border-slate-200">
+              <h3 class="font-medium text-slate-900 mb-2">{price.service}</h3>
+              <p class="text-lg font-bold text-green-600">{price.min} - {price.max} RON</p>
+            </div>
+          ))}
+        </div>
+        
+        <p class="text-sm text-slate-500 mt-6">
+          * Prețurile sunt orientative și pot varia în funcție de complexitatea lucrării și materialele folosite. Cere ofertă personalizată pentru preț exact.
+        </p>
+      </section>
+
+      <!-- How It Works -->
+      <section class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8 border border-blue-100">
+        <h2 class="text-2xl font-bold text-slate-900 mb-6 text-center">
+          Cum funcționează procesul?
+        </h2>
+        
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="text-center">
+            <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-xl mx-auto mb-4">1</div>
+            <h3 class="font-semibold text-slate-900 mb-2">Postezi cererea</h3>
+            <p class="text-sm text-slate-600">Descrie problema în 2 minute, gratuit</p>
+          </div>
+          <div class="text-center">
+            <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-xl mx-auto mb-4">2</div>
+            <h3 class="font-semibold text-slate-900 mb-2">Primești oferte</h3>
+            <p class="text-sm text-slate-600">3-5 electricieni îți trimit prețuri în 2 ore</p>
+          </div>
+          <div class="text-center">
+            <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-xl mx-auto mb-4">3</div>
+            <h3 class="font-semibold text-slate-900 mb-2">Compari și alegi</h3>
+            <p class="text-sm text-slate-600">Vezi profiluri, recenzii, portofolii</p>
+          </div>
+          <div class="text-center">
+            <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-xl mx-auto mb-4">4</div>
+            <h3 class="font-semibold text-slate-900 mb-2">Contactezi direct</h3>
+            <p class="text-sm text-slate-600">Stabilești detalii fără intermediari</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- FAQ Section -->
+      <section class="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
+        <h2 class="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3">
+          <div class="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center text-white">❓</div>
+          Întrebări frecvente despre electricieni în București
+        </h2>
+        
+        <div class="space-y-4">
+          <details class="group bg-slate-50 rounded-lg">
+            <summary class="flex items-center justify-between p-4 cursor-pointer font-semibold text-slate-900">
+              Cât costă un electrician în București?
+              <span class="text-slate-400 group-open:rotate-180 transition-transform">▼</span>
+            </summary>
+            <div class="px-4 pb-4 text-slate-700">
+              Prețurile pentru electrician în București pornesc de la 50-80 lei pentru intervenții simple (înlocuire priză, bec). Montaj tablou electric: 300-800 lei. Traseu electric nou: 25-40 lei/metru. Verificare instalație ANRE: 200-400 lei. Prețurile variază în funcție de complexitate și materiale.
+            </div>
+          </details>
+          
+          <details class="group bg-slate-50 rounded-lg">
+            <summary class="flex items-center justify-between p-4 cursor-pointer font-semibold text-slate-900">
+              Cât durează să vină un electrician urgent în București?
+              <span class="text-slate-400 group-open:rotate-180 transition-transform">▼</span>
+            </summary>
+            <div class="px-4 pb-4 text-slate-700">
+              Electricienii de urgență din platforma noastră ajung în 30-60 minute în București, în funcție de sector și trafic. Pentru urgențe (scurtcircuit, pană de curent), timpul mediu de răspuns este sub 45 minute.
+            </div>
+          </details>
+          
+          <details class="group bg-slate-50 rounded-lg">
+            <summary class="flex items-center justify-between p-4 cursor-pointer font-semibold text-slate-900">
+              Cum verific dacă un electrician este autorizat ANRE?
+              <span class="text-slate-400 group-open:rotate-180 transition-transform">▼</span>
+            </summary>
+            <div class="px-4 pb-4 text-slate-700">
+              Poți verifica autorizația ANRE pe site-ul oficial anre.ro sau cere electricianului să-ți arate legitimația. Toți electricienii din Meserias Local au autorizație ANRE verificată și validă.
+            </div>
+          </details>
+          
+          <details class="group bg-slate-50 rounded-lg">
+            <summary class="flex items-center justify-between p-4 cursor-pointer font-semibold text-slate-900">
+              Ce garanție oferă electricienii pentru lucrări?
+              <span class="text-slate-400 group-open:rotate-180 transition-transform">▼</span>
+            </summary>
+            <div class="px-4 pb-4 text-slate-700">
+              Electricienii verificați din platforma noastră oferă garanție de minim 2 ani pentru lucrări și materiale. Garanția acoperă defecte de execuție și probleme apărute din cauza instalării.
+            </div>
+          </details>
+          
+          <details class="group bg-slate-50 rounded-lg">
+            <summary class="flex items-center justify-between p-4 cursor-pointer font-semibold text-slate-900">
+              Electricianul vine și în weekend sau noaptea?
+              <span class="text-slate-400 group-open:rotate-180 transition-transform">▼</span>
+            </summary>
+            <div class="px-4 pb-4 text-slate-700">
+              Da, avem electricieni disponibili 24/7 în București, inclusiv weekend și sărbători. Pentru intervenții în afara programului normal (după ora 18:00 sau weekend), se poate aplica un tarif suplimentar de 20-50%.
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <!-- Emergency Section -->
+      <section class="bg-red-50 rounded-2xl p-8 border border-red-200">
+        <h2 class="text-2xl font-bold text-red-900 mb-4 flex items-center gap-3">
+          <span class="text-2xl">🚨</span>
+          Când ai nevoie de electrician urgent în București?
+        </h2>
+        
+        <div class="grid sm:grid-cols-2 gap-4 mb-6">
+          <ul class="space-y-2 text-red-800">
+            <li class="flex items-center gap-2">⚠️ Scurtcircuit sau miros de ars</li>
+            <li class="flex items-center gap-2">⚠️ Pană de curent în apartament/casă</li>
+            <li class="flex items-center gap-2">⚠️ Prize sau întrerupătoare care scânteie</li>
+          </ul>
+          <ul class="space-y-2 text-red-800">
+            <li class="flex items-center gap-2">⚠️ Tablou electric care declanșează frecvent</li>
+            <li class="flex items-center gap-2">⚠️ Cabluri deteriorate sau expuse</li>
+            <li class="flex items-center gap-2">⚠️ Lipsa curent după lucrări de renovare</li>
+          </ul>
+        </div>
+        
+        <div class="bg-red-100 rounded-lg p-4 border border-red-300">
+          <p class="text-red-900 font-semibold">
+            ⚠️ Important: Nu încerca să repari singur problemele electrice! Risc de electrocutare și incendiu.
+          </p>
+        </div>
+      </section>
+
+      <!-- CTA Section -->
+      <section class="bg-gradient-to-r from-amber-500 to-orange-500 rounded-2xl p-8 text-center">
+        <h2 class="text-2xl font-bold text-white mb-4">
+          Gata să găsești un electrician de încredere?
+        </h2>
+        <p class="text-white/90 mb-6 max-w-2xl mx-auto">
+          Primește oferte gratuite de la electricieni verificați în București. Răspuns rapid în 2 ore, fără comisioane ascunse.
+        </p>
+        <a href={`${APP_URL}/cere-oferta?tradeId=62&title=${encodeURIComponent('Electrician București')}`}
+          class="inline-flex items-center px-8 py-4 bg-white text-orange-600 font-semibold rounded-xl hover:bg-slate-100 transition-all duration-200 shadow-lg">
+          Cere Ofertă Gratuită Acum
+          <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+          </svg>
+        </a>
+        
+        <div class="mt-6 flex flex-wrap items-center justify-center gap-6 text-sm text-white/80">
+          <span>✓ Fără obligații</span>
+          <span>✓ Răspuns în 2 ore</span>
+          <span>✓ 100% gratuit</span>
+        </div>
+      </section>
+
+      <!-- Related Services -->
+      <section class="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
+        <h2 class="text-xl font-bold text-slate-900 mb-4">Servicii conexe în București</h2>
+        <div class="flex flex-wrap gap-3">
+          <a href="/servicii/instalatii-utilitati/instalatii-sanitare/bucuresti/" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 text-sm transition-colors">Instalator București</a>
+          <a href="/servicii/instalatii-utilitati/montaj-ac-ventilatie/bucuresti/" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 text-sm transition-colors">Montaj AC București</a>
+          <a href="/servicii/securitate-siguranta/instalare-camere-supraveghere/bucuresti/" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 text-sm transition-colors">Camere supraveghere București</a>
+          <a href="/servicii/instalatii-utilitati/automatizari-smart-home/bucuresti/" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 text-sm transition-colors">Smart Home București</a>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</Base>

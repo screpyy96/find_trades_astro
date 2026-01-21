@@ -83,6 +83,7 @@ export async function GET() {
     { url: '/', priority: '1.0', changefreq: 'daily' },
     { url: '/servicii/', priority: '0.9', changefreq: 'daily' },
     { url: '/blog/', priority: '0.7', changefreq: 'daily' },
+    { url: '/electrician-bucuresti/', priority: '1.0', changefreq: 'weekly' },
     // NOTE: /meseriasi and /solicitari are NOT included - they're dynamic user content
   ];
 
