@@ -170,12 +170,28 @@ export default defineType({
     }),
     // SEO FIELDS
     defineField({
+      name: 'seoTitle',
+      title: 'SEO Title (pentru Google)',
+      type: 'string',
+      description: 'Titlul care apare în rezultatele Google (50-60 caractere). Ex: Zugravi București – Profesioniști Verificați | Meserias Local',
+      validation: (Rule: any) => Rule.max(70),
+    }),
+    defineField({
+      name: 'seoDescription',
+      title: 'SEO Description (pentru Google)',
+      type: 'text',
+      rows: 2,
+      description: 'Descrierea care apare în rezultatele Google (150-160 caractere)',
+      validation: (Rule: any) => Rule.max(160),
+    }),
+    defineField({
       name: 'metaDescription',
-      title: 'Meta Description (SEO)',
+      title: 'Meta Description (legacy)',
       type: 'text',
       rows: 2,
       description: 'Descriere pentru motoarele de căutare (150-160 caractere)',
       validation: (Rule: any) => Rule.max(160),
+      hidden: true,
     }),
     defineField({
       name: 'seoKeywords',
