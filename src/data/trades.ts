@@ -77,6 +77,7 @@ export const trades: Trade[] = [
   { id: 92, name: "montaj si reparatii scari exterioare", category: "constructii & structuri", slug: "scari-exterioare", description: "Construcție și reparații scări exterioare din beton, metal sau lemn" },
   { id: 93, name: "montaj si intretinere sisteme pluviale", category: "constructii & structuri", slug: "sisteme-pluviale-intretinere", description: "Montaj și curățare jgheaburi, burlane și sisteme de evacuare" },
   { id: 11, name: "turnare beton si sape", category: "constructii & structuri", slug: "turnare-beton-sape" },
+  { id: 101, name: "carotari beton", category: "constructii & structuri", slug: "carotari-beton", description: "Carotări beton și beton armat pentru instalații electrice, sanitare, ventilație și alte străpungeri." },
   { id: 78, name: "detailing auto si cosmetica", category: "auto & utilaje", slug: "detailing-auto" },
   { id: 76, name: "servicii de vulcanizare si tractari auto", category: "auto & utilaje", slug: "vulcanizare-tractari" },
   { id: 75, name: "reparatii si mecanica auto", category: "auto & utilaje", slug: "reparatii-mecanica-auto" },

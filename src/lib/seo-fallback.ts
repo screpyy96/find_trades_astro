@@ -23,6 +23,58 @@ interface FallbackContent {
   canonical: string;
 }
 
+// Category-specific data for better content
+const categoryData: Record<string, { 
+  benefits: string[]; 
+  services: string[]; 
+  tips: string[];
+  priceRange: string;
+}> = {
+  'constructii & structuri': {
+    benefits: ['Experiență în proiecte rezidențiale și comerciale', 'Materiale de calitate și echipamente profesionale', 'Respectarea normelor de siguranță și construcție', 'Garanție pentru lucrările executate'],
+    services: ['Consultanță tehnică gratuită', 'Evaluare și deviz detaliat', 'Execuție conform standardelor', 'Curățenie după finalizare'],
+    tips: ['Verifică autorizațiile necesare', 'Cere deviz detaliat înainte', 'Stabilește termene clare în contract', 'Păstrează comunicarea deschisă'],
+    priceRange: '500 - 5000+ RON'
+  },
+  'instalatii & utilitati': {
+    benefits: ['Instalatori autorizați ANRE/ISCIR', 'Intervenții rapide în caz de urgență', 'Verificări și certificate de conformitate', 'Garanție extinsă pentru lucrări'],
+    services: ['Diagnosticare și depanare', 'Montaj și înlocuire echipamente', 'Verificări periodice', 'Întreținere preventivă'],
+    tips: ['Verifică autorizația instalatorului', 'Cere certificat de garanție', 'Programează verificări periodice', 'Păstrează facturile pentru garanție'],
+    priceRange: '100 - 2000 RON'
+  },
+  'amenajari interioare': {
+    benefits: ['Design personalizat pentru spațiul tău', 'Finisaje de calitate superioară', 'Atenție la detalii și estetică', 'Transformare completă a spațiului'],
+    services: ['Consultanță design interior', 'Zugrăveli și vopsitorii', 'Montaj parchet și gresie', 'Amenajare completă'],
+    tips: ['Stabilește un buget realist', 'Alege materiale de calitate', 'Planifică în avans culorile', 'Verifică portofoliul meseriașului'],
+    priceRange: '200 - 3000 RON'
+  },
+  'amenajari exterioare & gradina': {
+    benefits: ['Proiecte personalizate pentru exterior', 'Plante și materiale de calitate', 'Sisteme de irigații eficiente', 'Întreținere sezonieră disponibilă'],
+    services: ['Amenajare peisagistică', 'Montaj pavaje și alei', 'Garduri și porți', 'Sisteme de irigații'],
+    tips: ['Planifică în funcție de sezon', 'Alege plante potrivite climei', 'Prevede sistem de drenaj', 'Întreține regulat spațiul verde'],
+    priceRange: '300 - 5000 RON'
+  },
+  'default': {
+    benefits: ['Profesioniști cu experiență dovedită', 'Prețuri competitive și transparente', 'Răspuns rapid la solicitări', 'Garanție pentru servicii'],
+    services: ['Evaluare gratuită', 'Execuție profesională', 'Materiale de calitate', 'Suport post-execuție'],
+    tips: ['Compară mai multe oferte', 'Verifică recenziile', 'Cere contract scris', 'Stabilește termene clare'],
+    priceRange: '100 - 2000 RON'
+  }
+};
+
+/**
+ * Get category data or default
+ */
+function getCategoryData(category: string) {
+  const normalizedCategory = category.toLowerCase();
+  for (const [key, data] of Object.entries(categoryData)) {
+    if (normalizedCategory.includes(key) || key.includes(normalizedCategory)) {
+      return data;
+    }
+  }
+  return categoryData['default'];
+}
+
 /**
  * Helper function to capitalize first letter of each word
  */
@@ -31,55 +83,82 @@ function capitalizeFirst(str: string): string {
 }
 
 /**
- * Generate H1 title
- * Format: {{ServiceName}} în {{CityName}} – Profesioniști Verificați
+ * Generate H1 title - optimized for SEO
  */
 function generateH1(serviceName: string, cityName: string): string {
-  return `${capitalizeFirst(serviceName)} în ${cityName} – Profesioniști Verificați`;
+  return `${capitalizeFirst(serviceName)} ${cityName} – Meseriași Verificați`;
 }
 
 /**
- * Generate Meta Title (optimized for SEO and branding)
- * Format: {{ServiceName}} {{CityName}} – Profesioniști Verificați, Oferte Rapide
+ * Generate Meta Title (50-60 characters ideal)
  */
 function generateMetaTitle(serviceName: string, cityName: string): string {
   const capitalizedService = capitalizeFirst(serviceName);
-  return `${capitalizedService} ${cityName} – Profesioniști Verificați, Oferte Rapide`;
+  return `${capitalizedService} ${cityName} | Oferte Gratuite | Meserias Local`;
 }
 
 /**
- * Generate Meta Description (130-160 characters)
- * Natural call-to-action included
+ * Generate Meta Description (150-160 characters)
  */
 function generateMetaDescription(serviceName: string, cityName: string): string {
-  return `Cauți ${serviceName.toLowerCase()} în ${cityName}? Găsește meseriași verificați pe MeseriasLocal. Prețuri reale, recenzii și contact rapid în 2–4 ore.`;
+  return `Servicii ${serviceName.toLowerCase()} în ${cityName}. ✓ Meseriași verificați ✓ Oferte gratuite în 2-4h ✓ Prețuri transparente ✓ Recenzii reale. Cere ofertă!`;
 }
 
 /**
- * Generate natural, SEO-friendly HTML content (3-5 paragraphs, 200-400 words)
+ * Generate SEO-optimized HTML content with proper structure
  */
 function generateFallbackHtml(params: FallbackContentParams): string {
-  const { serviceName, cityName, category, categorySlug, serviceSlug, citySlug, nearbyCities, similarServices } = params;
+  const { serviceName, cityName, category, categorySlug, serviceSlug } = params;
   
   const serviceLower = serviceName.toLowerCase();
-  const serviceLink = `/servicii/${categorySlug}/${serviceSlug}/`;
+  const serviceCapitalized = capitalizeFirst(serviceName);
+  const catData = getCategoryData(category);
   
-  // Intro paragraph - first mention of service is a link
-  const intro = `<p>Găsirea unui <a href="${serviceLink}" class="text-blue-600 hover:text-blue-700 font-semibold underline">${serviceLower}</a> de încredere în ${cityName} poate fi o provocare. Pe MeseriasLocal, îți oferim acces rapid la meseriași verificați care oferă servicii profesionale de ${serviceLower} în ${cityName}. Platforma noastră conectează clienții cu profesioniști locali, asigurând transparență, prețuri competitive și răspuns rapid.</p>`;
+  let html = '';
   
-  // Benefits paragraph
-  const benefits = `<p>De ce să alegi un ${serviceLower} prin MeseriasLocal? Simplu: verificăm fiecare meseriași, oferim acces la recenzii reale de la clienți din ${cityName}, și garantăm că primești oferte personalizate în maxim 2–4 ore. Nu plătești comisioane ascunse – contactezi direct meseriașul și negociezi prețul cel mai bun pentru proiectul tău.</p>`;
+  // Section 1: Introduction with H2
+  html += `<h2 class="text-2xl font-bold text-slate-900 mb-4">Servicii ${serviceCapitalized} în ${cityName}</h2>`;
+  html += `<p class="text-slate-700 mb-4 leading-relaxed">Cauți servicii profesionale de ${serviceLower} în ${cityName}? Pe Meserias Local găsești meseriași verificați, cu experiență dovedită și recenzii reale. Primești oferte personalizate în maxim 2-4 ore, compari prețuri și alegi profesionistul potrivit pentru proiectul tău.</p>`;
   
-  // How it works paragraph
-  const howItWorks = `<p>Procesul este simplu și rapid. Completezi un formular cu detaliile proiectului tău de ${serviceLower} în ${cityName}, iar meseriașii locali verificați primesc solicitarea ta. În câteva ore, vei primi oferte personalizate cu prețuri clare și detalii despre servicii. Compari ofertele, verifici recenziile, și alegi meseriașul potrivit pentru nevoile tale.</p>`;
+  // Section 2: Benefits list
+  html += `<h3 class="text-xl font-semibold text-slate-900 mt-6 mb-3">De ce să alegi profesioniști prin Meserias Local?</h3>`;
+  html += `<ul class="list-disc list-inside space-y-2 text-slate-700 mb-6">`;
+  catData.benefits.forEach(benefit => {
+    html += `<li>${benefit}</li>`;
+  });
+  html += `</ul>`;
   
-  // Quality assurance paragraph
-  const quality = `<p>Toți meseriașii de ${serviceLower} din ${cityName} de pe platformă sunt verificați și au experiență dovedită. Oferim garanție pentru serviciile prestate, materiale de calitate, și suport complet pe tot parcursul proiectului. Fie că ai nevoie de o intervenție rapidă sau un proiect complex, găsești profesioniști de încredere în ${cityName}.</p>`;
+  // Section 3: Services included
+  html += `<h3 class="text-xl font-semibold text-slate-900 mt-6 mb-3">Ce include serviciul de ${serviceLower}?</h3>`;
+  html += `<ul class="list-disc list-inside space-y-2 text-slate-700 mb-6">`;
+  catData.services.forEach(service => {
+    html += `<li>${service}</li>`;
+  });
+  html += `</ul>`;
   
-  // Call to action paragraph
-  const cta = `<p>Nu mai pierde timp căutând meseriași de ${serviceLower} în ${cityName}. <a href="https://app.meseriaslocal.ro/cere-oferta?oras=${citySlug}" class="text-blue-600 hover:text-blue-700 font-semibold underline">Cere ofertă acum</a> și primește propuneri de la profesioniști verificați în câteva ore. Serviciul este 100% gratuit, fără obligații, și îți garantăm răspuns rapid. Începe proiectul tău astăzi!</p>`;
+  // Section 4: How it works
+  html += `<h3 class="text-xl font-semibold text-slate-900 mt-6 mb-3">Cum funcționează?</h3>`;
+  html += `<ol class="list-decimal list-inside space-y-2 text-slate-700 mb-6">`;
+  html += `<li><strong>Descrie proiectul</strong> – Completezi formularul în 2 minute cu detaliile lucrării</li>`;
+  html += `<li><strong>Primești oferte</strong> – Meseriași verificați din ${cityName} îți trimit prețuri în 2-4 ore</li>`;
+  html += `<li><strong>Compari și alegi</strong> – Vezi profiluri, recenzii și portofolii, apoi contactezi direct</li>`;
+  html += `<li><strong>Lucrarea se execută</strong> – Stabilești detaliile și plătești doar la finalizare</li>`;
+  html += `</ol>`;
   
-  return `${intro}\n\n${benefits}\n\n${howItWorks}\n\n${quality}\n\n${cta}`;
+  // Section 5: Tips
+  html += `<h3 class="text-xl font-semibold text-slate-900 mt-6 mb-3">Sfaturi utile pentru ${serviceLower}</h3>`;
+  html += `<ul class="list-disc list-inside space-y-2 text-slate-700 mb-6">`;
+  catData.tips.forEach(tip => {
+    html += `<li>${tip}</li>`;
+  });
+  html += `</ul>`;
+  
+  // Section 6: CTA
+  html += `<div class="bg-emerald-50 border border-emerald-200 rounded-lg p-4 mt-6">`;
+  html += `<p class="text-slate-800 font-medium">Gata să începi? Cere ofertă gratuită pentru ${serviceLower} în ${cityName} și primește propuneri de la profesioniști verificați. Serviciul este 100% gratuit, fără obligații!</p>`;
+  html += `</div>`;
+  
+  return html;
 }
 
 /**
@@ -91,10 +170,10 @@ function generateSchema(params: FallbackContentParams): any {
   return {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
-    name: `${serviceName} ${cityName} | MeseriasLocal`,
-    description: `Servicii ${serviceName.toLowerCase()} disponibile în ${cityName} prin MeseriasLocal`,
+    name: `${serviceName} ${cityName} | Meserias Local`,
+    description: `Servicii profesionale de ${serviceName.toLowerCase()} în ${cityName}. Meseriași verificați, oferte gratuite.`,
     areaServed: {
-      '@type': 'AdministrativeArea',
+      '@type': 'City',
       name: cityName
     },
     address: {
@@ -103,12 +182,7 @@ function generateSchema(params: FallbackContentParams): any {
       addressCountry: 'RO'
     },
     url: `https://www.meseriaslocal.ro/servicii/${categorySlug}/${serviceSlug}/${citySlug}/`,
-    priceRange: '€€',
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: '4.8',
-      reviewCount: '52'
-    }
+    priceRange: '€€'
   };
 }
 
@@ -132,10 +206,8 @@ export function generateFallbackContent(params: FallbackContentParams): Fallback
  * Generate H2 section with proper capitalization
  */
 function generateH2(text: string): string {
-  // Capitalize important words
   const words = text.split(' ');
   const capitalized = words.map(word => {
-    // Don't capitalize small words unless they're the first word
     const smallWords = ['în', 'de', 'la', 'și', 'sau', 'cu', 'pe', 'din'];
     if (smallWords.includes(word.toLowerCase()) && word !== words[0]) {
       return word.toLowerCase();
@@ -158,11 +230,11 @@ export function generateRelatedServicesHtml(
   const links = similarServices
     .slice(0, 3)
     .map(service => 
-      `<li><a href="/servicii/${service.categorySlug}/${service.slug}/${citySlug}/" class="text-blue-600 hover:text-blue-700 underline">${service.name} în ${cityName}</a></li>`
+      `<li><a href="/servicii/${service.categorySlug}/${service.slug}/${citySlug}/" class="text-emerald-600 hover:text-emerald-700 underline">${service.name} în ${cityName}</a></li>`
     )
     .join('\n    ');
   
-  return `<h2>${generateH2(`Servicii Similare în ${cityName}`)}</h2>\n  <ul>\n    ${links}\n  </ul>`;
+  return `<h3 class="text-xl font-semibold text-slate-900 mt-6 mb-3">${generateH2(`Servicii Similare în ${cityName}`)}</h3>\n<ul class="list-disc list-inside space-y-2 text-slate-700">\n    ${links}\n</ul>`;
 }
 
 /**
@@ -179,9 +251,9 @@ export function generateRelatedCitiesHtml(
   const links = nearbyCities
     .slice(0, 3)
     .map(city => 
-      `<li><a href="/servicii/${categorySlug}/${serviceSlug}/${city.slug}/" class="text-blue-600 hover:text-blue-700 underline">${serviceName} în ${city.name}</a></li>`
+      `<li><a href="/servicii/${categorySlug}/${serviceSlug}/${city.slug}/" class="text-emerald-600 hover:text-emerald-700 underline">${serviceName} în ${city.name}</a></li>`
     )
     .join('\n    ');
   
-  return `<h2>${generateH2(`${serviceName} în Orașe Apropiate`)}</h2>\n  <ul>\n    ${links}\n  </ul>`;
+  return `<h3 class="text-xl font-semibold text-slate-900 mt-6 mb-3">${generateH2(`${serviceName} în Orașe Apropiate`)}</h3>\n<ul class="list-disc list-inside space-y-2 text-slate-700">\n    ${links}\n</ul>`;
 }

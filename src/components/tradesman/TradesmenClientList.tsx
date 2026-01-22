@@ -583,153 +583,270 @@ export function TradesmenClientList({
           setHasMore(false);
         }
       } else {
-        console.log('📊 No filters - using optimized pagination with database-level sorting');
+        console.log('📊 No filters - using optimized pagination with PRO users first');
         
         // Apply default verified filter for main listing
         query = query.eq('is_verified', true);
 
-        // OPTIMIZATION: Use database-level pagination instead of loading all workers
-        // Calculate offset for current page
-        const from = pageNum * ITEMS_PER_PAGE;
-        const to = from + ITEMS_PER_PAGE - 1;
+        // STRATEGY: On first page, load PRO users first, then fill with regular users
+        // On subsequent pages, load only regular users (PRO already shown)
         
-        // Apply pagination at database level
-        query = query.range(from, to);
-        
-        // Sort by rating (PRO users will be handled separately)
-        query = query.order('rating', { ascending: false, nullsFirst: false });
-
-        const { data, error: fetchError } = await query;
-
-        if (fetchError) {
-          throw new Error(fetchError.message);
-        }
-
-        console.log('📊 Optimized pagination results:', { 
-          page: pageNum,
-          from,
-          to,
-          workersLoaded: data?.length || 0
-        });
-
-        if (data && data.length > 0) {
-          // Get worker IDs from current page only
-          const workerIds = data.map((w: any) => w.id);
-
-          // Fetch worker_trades for these workers in batches
-          let workerTradesData: any[] = [];
-          const batchSize = 50;
-          for (let i = 0; i < workerIds.length; i += batchSize) {
-            const batch = workerIds.slice(i, i + batchSize);
-            const { data: batchData } = await supabase
-              .from('worker_trades')
-              .select('profile_id, trade_ids')
-              .in('profile_id', batch);
-            if (batchData) {
-              workerTradesData.push(...batchData);
-            }
-          }
-
-          // Collect all unique trade IDs
-          const allTradeIds = new Set<number>();
-          workerTradesData?.forEach((wt: any) => {
-            if (wt.trade_ids && Array.isArray(wt.trade_ids)) {
-              wt.trade_ids.forEach((id: number) => allTradeIds.add(id));
-            }
-          });
-
-          // Fetch trade details with caching and batching
-          let trades: any[] = [];
-          if (allTradeIds.size > 0) {
-            const tradesCacheKey = CacheKeys.trades();
-            let cachedTrades = (window as any).__WORKERS_CACHE?.get(tradesCacheKey);
+        if (pageNum === 0) {
+          // FIRST PAGE: Load PRO users first
+          console.log('📊 First page - loading PRO users first');
+          
+          // Step 1: Get all PRO user IDs
+          const { data: proSubscriptions } = await supabase
+            .from('user_subscriptions')
+            .select('user_id')
+            .eq('status', 'active')
+            .eq('plan_id', 'pro');
+          
+          const proUserIds = proSubscriptions?.map((s: any) => s.user_id) || [];
+          console.log('💎 Found PRO users:', proUserIds.length);
+          
+          let proWorkers: any[] = [];
+          let regularWorkers: any[] = [];
+          
+          // Step 2: Fetch PRO workers
+          if (proUserIds.length > 0) {
+            const { data: proData } = await supabase
+              .from('profiles')
+              .select('id, name, avatar_url, address, bio, rating, is_verified, is_online, phone')
+              .eq('role', 'worker')
+              .eq('is_verified', true)
+              .in('id', proUserIds)
+              .not('name', 'is', null)
+              .order('rating', { ascending: false, nullsFirst: false });
             
-            if (!cachedTrades) {
-              // Fetch trades in batches to avoid URL too long
-              const tradeIdsArray = Array.from(allTradeIds);
-              const tradeBatchSize = 100;
-              trades = [];
-              
-              for (let i = 0; i < tradeIdsArray.length; i += tradeBatchSize) {
-                const batch = tradeIdsArray.slice(i, i + tradeBatchSize);
-                const { data: tradeData } = await supabase
-                  .from('trades')
-                  .select('id, name, slug')
-                  .in('id', batch);
-                if (tradeData) {
-                  trades.push(...tradeData);
-                }
-              }
-              
-              // Cache trades data
-              if (!(window as any).__WORKERS_CACHE) {
-                (window as any).__WORKERS_CACHE = new Map();
-              }
-              (window as any).__WORKERS_CACHE.set(tradesCacheKey, trades);
-            } else {
-              trades = cachedTrades;
-            }
-          }
-
-          // Fetch user subscriptions for pro users (batched to avoid URL too long)
-          const subscriptionsData = await fetchSubscriptionsInBatches(supabase, workerIds);
-
-          console.log('💳 Subscriptions loaded:', { 
-            workerIds: workerIds.length, 
-            firstFewWorkerIds: workerIds.slice(0, 3),
-            subscriptions: subscriptionsData?.length || 0,
-            data: subscriptionsData,
-            firstSubscription: subscriptionsData?.[0] || null
-          });
-
-          // Create maps for efficient lookup
-          const tradeMap = new Map((trades || []).map((t: any) => [t.id, t]));
-          const workerTradesMap = new Map(
-            workerTradesData?.map((wt: any) => [wt.profile_id, wt.trade_ids]) || []
-          );
-          const subscriptionMap = new Map(
-            subscriptionsData?.map((sub: any) => [sub.user_id, sub.plan_id]) || []
-          );
-
-          // Map trades and subscriptions to workers (only current page)
-          let workersWithTrades = data.map((worker: any) => {
-            const tradeIds = workerTradesMap.get(worker.id) || [];
-            const workerTrades = (Array.isArray(tradeIds) ? tradeIds : []).map((id: number) => tradeMap.get(id)).filter(Boolean);
-            
-            return {
-              ...worker,
-              trades: workerTrades,
-              subscription_plan: subscriptionMap.get(worker.id) || null
-            };
-          });
-
-          // Sort current page: PRO users first, then by rating (already sorted by rating from DB)
-          workersWithTrades.sort((a: any, b: any) => {
-            const aIsPro = a.subscription_plan === 'pro';
-            const bIsPro = b.subscription_plan === 'pro';
-            
-            // PRO users first
-            if (aIsPro && !bIsPro) return -1;
-            if (!aIsPro && bIsPro) return 1;
-            
-            // Keep existing rating order from database
-            return 0;
-          });
-
-          if (reset) {
-            setWorkers(workersWithTrades as Worker[]);
-          } else {
-            setWorkers((prev: Worker[]) => [...prev, ...(workersWithTrades as Worker[])]);
+            proWorkers = proData || [];
+            console.log('💎 PRO workers loaded:', proWorkers.length);
           }
           
-          // Check if there are more results
-          setHasMore(data.length === ITEMS_PER_PAGE);
-        } else {
-          console.log('📊 No workers found in optimized pagination');
-          if (reset) {
-            setWorkers([]);
+          // Step 3: Calculate how many regular workers we need
+          const regularNeeded = ITEMS_PER_PAGE - proWorkers.length;
+          
+          if (regularNeeded > 0) {
+            // Fetch regular workers (excluding PRO)
+            let regularQuery = supabase
+              .from('profiles')
+              .select('id, name, avatar_url, address, bio, rating, is_verified, is_online, phone')
+              .eq('role', 'worker')
+              .eq('is_verified', true)
+              .not('name', 'is', null)
+              .order('rating', { ascending: false, nullsFirst: false })
+              .limit(regularNeeded);
+            
+            // Exclude PRO users if any
+            if (proUserIds.length > 0) {
+              // Use not.in to exclude PRO users
+              regularQuery = regularQuery.not('id', 'in', `(${proUserIds.join(',')})`);
+            }
+            
+            const { data: regularData } = await regularQuery;
+            regularWorkers = regularData || [];
+            console.log('📊 Regular workers loaded:', regularWorkers.length);
           }
-          setHasMore(false);
+          
+          // Combine: PRO first, then regular
+          const combinedData = [...proWorkers, ...regularWorkers];
+          
+          if (combinedData.length > 0) {
+            // Get worker IDs
+            const workerIds = combinedData.map((w: any) => w.id);
+
+            // Fetch worker_trades for these workers in batches
+            let workerTradesData: any[] = [];
+            const batchSize = 50;
+            for (let i = 0; i < workerIds.length; i += batchSize) {
+              const batch = workerIds.slice(i, i + batchSize);
+              const { data: batchData } = await supabase
+                .from('worker_trades')
+                .select('profile_id, trade_ids')
+                .in('profile_id', batch);
+              if (batchData) {
+                workerTradesData.push(...batchData);
+              }
+            }
+
+            // Collect all unique trade IDs
+            const allTradeIds = new Set<number>();
+            workerTradesData?.forEach((wt: any) => {
+              if (wt.trade_ids && Array.isArray(wt.trade_ids)) {
+                wt.trade_ids.forEach((id: number) => allTradeIds.add(id));
+              }
+            });
+
+            // Fetch trade details with caching
+            let trades: any[] = [];
+            if (allTradeIds.size > 0) {
+              const tradesCacheKey = CacheKeys.trades();
+              let cachedTrades = (window as any).__WORKERS_CACHE?.get(tradesCacheKey);
+              
+              if (!cachedTrades) {
+                const tradeIdsArray = Array.from(allTradeIds);
+                const tradeBatchSize = 100;
+                trades = [];
+                
+                for (let i = 0; i < tradeIdsArray.length; i += tradeBatchSize) {
+                  const batch = tradeIdsArray.slice(i, i + tradeBatchSize);
+                  const { data: tradeData } = await supabase
+                    .from('trades')
+                    .select('id, name, slug')
+                    .in('id', batch);
+                  if (tradeData) {
+                    trades.push(...tradeData);
+                  }
+                }
+                
+                if (!(window as any).__WORKERS_CACHE) {
+                  (window as any).__WORKERS_CACHE = new Map();
+                }
+                (window as any).__WORKERS_CACHE.set(tradesCacheKey, trades);
+              } else {
+                trades = cachedTrades;
+              }
+            }
+
+            // Create maps
+            const tradeMap = new Map((trades || []).map((t: any) => [t.id, t]));
+            const workerTradesMap = new Map(
+              workerTradesData?.map((wt: any) => [wt.profile_id, wt.trade_ids]) || []
+            );
+            const proUserIdsSet = new Set(proUserIds);
+
+            // Map trades and subscriptions to workers
+            const workersWithTrades = combinedData.map((worker: any) => {
+              const tradeIds = workerTradesMap.get(worker.id) || [];
+              const workerTrades = (Array.isArray(tradeIds) ? tradeIds : []).map((id: number) => tradeMap.get(id)).filter(Boolean);
+              
+              return {
+                ...worker,
+                trades: workerTrades,
+                subscription_plan: proUserIdsSet.has(worker.id) ? 'pro' : null
+              };
+            });
+
+            setWorkers(workersWithTrades as Worker[]);
+            setHasMore(combinedData.length === ITEMS_PER_PAGE);
+            
+            // Store PRO user IDs for subsequent pages
+            (window as any).__PRO_USER_IDS = proUserIds;
+          } else {
+            setWorkers([]);
+            setHasMore(false);
+          }
+        } else {
+          // SUBSEQUENT PAGES: Load only regular workers (PRO already shown on first page)
+          console.log('📊 Subsequent page - loading regular workers only');
+          
+          // Get PRO user IDs from first page load
+          const proUserIds = (window as any).__PRO_USER_IDS || [];
+          const proCount = proUserIds.length;
+          
+          // Calculate offset: skip PRO users and previous pages of regular users
+          const regularFrom = (pageNum - 1) * ITEMS_PER_PAGE + (ITEMS_PER_PAGE - proCount);
+          const regularTo = regularFrom + ITEMS_PER_PAGE - 1;
+          
+          let regularQuery = supabase
+            .from('profiles')
+            .select('id, name, avatar_url, address, bio, rating, is_verified, is_online, phone')
+            .eq('role', 'worker')
+            .eq('is_verified', true)
+            .not('name', 'is', null)
+            .order('rating', { ascending: false, nullsFirst: false })
+            .range(regularFrom, regularTo);
+          
+          // Exclude PRO users
+          if (proUserIds.length > 0) {
+            regularQuery = regularQuery.not('id', 'in', `(${proUserIds.join(',')})`);
+          }
+          
+          const { data, error: fetchError } = await regularQuery;
+
+          if (fetchError) {
+            throw new Error(fetchError.message);
+          }
+
+          if (data && data.length > 0) {
+            const workerIds = data.map((w: any) => w.id);
+
+            // Fetch worker_trades
+            let workerTradesData: any[] = [];
+            const batchSize = 50;
+            for (let i = 0; i < workerIds.length; i += batchSize) {
+              const batch = workerIds.slice(i, i + batchSize);
+              const { data: batchData } = await supabase
+                .from('worker_trades')
+                .select('profile_id, trade_ids')
+                .in('profile_id', batch);
+              if (batchData) {
+                workerTradesData.push(...batchData);
+              }
+            }
+
+            // Collect trade IDs
+            const allTradeIds = new Set<number>();
+            workerTradesData?.forEach((wt: any) => {
+              if (wt.trade_ids && Array.isArray(wt.trade_ids)) {
+                wt.trade_ids.forEach((id: number) => allTradeIds.add(id));
+              }
+            });
+
+            // Fetch trades with caching
+            let trades: any[] = [];
+            if (allTradeIds.size > 0) {
+              const tradesCacheKey = CacheKeys.trades();
+              let cachedTrades = (window as any).__WORKERS_CACHE?.get(tradesCacheKey);
+              
+              if (!cachedTrades) {
+                const tradeIdsArray = Array.from(allTradeIds);
+                const tradeBatchSize = 100;
+                trades = [];
+                
+                for (let i = 0; i < tradeIdsArray.length; i += tradeBatchSize) {
+                  const batch = tradeIdsArray.slice(i, i + tradeBatchSize);
+                  const { data: tradeData } = await supabase
+                    .from('trades')
+                    .select('id, name, slug')
+                    .in('id', batch);
+                  if (tradeData) {
+                    trades.push(...tradeData);
+                  }
+                }
+                
+                if (!(window as any).__WORKERS_CACHE) {
+                  (window as any).__WORKERS_CACHE = new Map();
+                }
+                (window as any).__WORKERS_CACHE.set(tradesCacheKey, trades);
+              } else {
+                trades = cachedTrades;
+              }
+            }
+
+            // Create maps
+            const tradeMap = new Map((trades || []).map((t: any) => [t.id, t]));
+            const workerTradesMap = new Map(
+              workerTradesData?.map((wt: any) => [wt.profile_id, wt.trade_ids]) || []
+            );
+
+            // Map trades to workers (no PRO on subsequent pages)
+            const workersWithTrades = data.map((worker: any) => {
+              const tradeIds = workerTradesMap.get(worker.id) || [];
+              const workerTrades = (Array.isArray(tradeIds) ? tradeIds : []).map((id: number) => tradeMap.get(id)).filter(Boolean);
+              
+              return {
+                ...worker,
+                trades: workerTrades,
+                subscription_plan: null
+              };
+            });
+
+            setWorkers((prev: Worker[]) => [...prev, ...(workersWithTrades as Worker[])]);
+            setHasMore(data.length === ITEMS_PER_PAGE);
+          } else {
+            setHasMore(false);
+          }
         }
       }
     } catch (err) {

@@ -245,8 +245,18 @@ export function RecommendedTradesmen({
           // Remove rating filter and sorting
 
         // Only filter by city if it's not "România" (national page)
+        // We need to search for both city name AND county name to catch addresses like "Vâlcea" for "Râmnicu Vâlcea"
         if (cityName !== 'România') {
-          workersQuery = workersQuery.ilike('address', `%${cityName}%`);
+          // Import cities data to get county info
+          const { cities } = await import('../../data/cities');
+          const cityData = cities.find(c => c.name === cityName);
+          
+          if (cityData && cityData.county && cityData.county !== cityData.name) {
+            // Search for city name OR county name (e.g., "Râmnicu Vâlcea" OR "Vâlcea")
+            workersQuery = workersQuery.or(`address.ilike.%${cityName}%,address.ilike.%${cityData.county}%`);
+          } else {
+            workersQuery = workersQuery.ilike('address', `%${cityName}%`);
+          }
         }
 
         const { data: workersData, error: workersError } = await workersQuery;
@@ -370,7 +380,7 @@ export function RecommendedTradesmen({
                 {compact ? 'Meseriași Premium' : `Meseriași Premium${cityName !== 'România' ? ` în ${cityName}` : ''}`}
               </h2>
               <p className="text-slate-500 text-xs">
-                {compact ? 'Profesioniști cu abonament PRO' : 'Profesioniști cu abonament PRO'}
+                {compact ? 'Meseriași recomandați' : 'Profesioniști PRO'}
               </p>
             </div>
           </div>

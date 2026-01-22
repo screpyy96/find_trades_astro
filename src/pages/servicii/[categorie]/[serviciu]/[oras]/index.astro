@@ -505,15 +505,22 @@ if (supabase) {
     if (workerTradesData && workerTradesData.length > 0) {
       const workerIds = workerTradesData.map((wt: any) => wt.profile_id);
 
-      // Get PRO workers in this city
-      const { data: workersData } = await supabase
+      // Get PRO workers in this city (search by city name OR county name)
+      let workersQuery = supabase
         .from('profiles')
         .select('id, name, avatar_url, address, bio, rating')
         .in('id', workerIds)
         .eq('role', 'worker')
-        .eq('is_verified', true)
-        .ilike('address', `%${city.name}%`)
-        .limit(4);
+        .eq('is_verified', true);
+      
+      // Search for city name OR county name to catch addresses like "Vâlcea" for "Râmnicu Vâlcea"
+      if (city.county && city.county !== city.name) {
+        workersQuery = workersQuery.or(`address.ilike.%${city.name}%,address.ilike.%${city.county}%`);
+      } else {
+        workersQuery = workersQuery.ilike('address', `%${city.name}%`);
+      }
+      
+      const { data: workersData } = await workersQuery.limit(4);
 
       if (workersData && workersData.length > 0) {
         // Get subscriptions
