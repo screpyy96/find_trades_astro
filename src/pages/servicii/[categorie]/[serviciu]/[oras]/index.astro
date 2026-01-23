@@ -16,47 +16,8 @@ import {
 } from '../../../../../lib/constants';
 import { RecommendedTradesmen } from '../../../../../components/tradesman/RecommendedTradesmen';
 
-// Static generation - pages are built at deploy time
-export const prerender = true;
-
-// Generate all static paths at build time
-export async function getStaticPaths() {
-  // Helper to slugify category names
-  const slugify = (text: string): string => {
-    return text
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .replace(/^-|-$/g, '');
-  };
-
-  const paths: { params: { categorie: string; serviciu: string; oras: string } }[] = [];
-  
-  // Get top 50 cities for static generation
-  const topCities = cities.slice(0, 50);
-  
-  // Generate paths for each trade + city combination
-  for (const trade of trades) {
-    if (!trade.category || !trade.slug) continue;
-    
-    const categorySlug = slugify(trade.category);
-    
-    for (const city of topCities) {
-      paths.push({
-        params: {
-          categorie: categorySlug,
-          serviciu: trade.slug,
-          oras: city.slug
-        }
-      });
-    }
-  }
-  
-  return paths;
-}
+// SSR with caching - pages generated on request, cached for performance
+export const prerender = false;
 
 const { categorie, serviciu, oras } = Astro.params;
 
