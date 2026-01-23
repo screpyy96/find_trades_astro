@@ -336,17 +336,24 @@ const heroStats = [
 ].filter(Boolean) as Array<{ label: string; value: string }>;
 
 function createLocalBusinessSchema(params: { serviceName: string; cityName: string; canonical: string; metrics: any }) {
-  // Map service names to more specific Schema.org types
+  // Map service names to more specific Schema.org types (subtypes of LocalBusiness)
   const serviceTypeMap: Record<string, string> = {
-    'zugrav': 'HomeAndConstructionBusiness',
+    'zugrav': 'HousePainter',
+    'zugraveli': 'HousePainter',
+    'zugraveli-vopsitorii': 'HousePainter',
     'electrician': 'Electrician',
     'instalator': 'Plumber',
     'instalatii electrice': 'Electrician',
     'instalatii sanitare': 'Plumber',
+    'instalatii termice': 'Plumber',
   };
   
   const serviceNameLower = params.serviceName.toLowerCase();
-  const businessType = serviceTypeMap[serviceNameLower] || 'HomeAndConstructionBusiness';
+  // Use array format: ["LocalBusiness", "SpecificType"] for better Google recognition
+  const specificType = serviceTypeMap[serviceNameLower];
+  const businessType = specificType 
+    ? ['LocalBusiness', specificType] 
+    : ['LocalBusiness', 'HomeAndConstructionBusiness'];
   
   const schema: Record<string, any> = {
     '@context': 'https://schema.org',
