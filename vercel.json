@@ -35,6 +35,86 @@
       "source": "/cere-oferta/",
       "destination": "https://app.meseriaslocal.ro/cere-oferta",
       "permanent": true
+    },
+    {
+      "source": "/blog/garduri-:city",
+      "destination": "/servicii/amenajari-exterioare-gradina/constructie-garduri-porti/",
+      "permanent": true
+    },
+    {
+      "source": "/blog/gresieri-:city",
+      "destination": "/servicii/amenajari-interioare/montaj-gresie-faianta-piatra/",
+      "permanent": true
+    },
+    {
+      "source": "/blog/zugraveli-:city",
+      "destination": "/servicii/amenajari-interioare/zugraveli-vopsitorii/",
+      "permanent": true
+    },
+    {
+      "source": "/blog/electrician-:city",
+      "destination": "/servicii/instalatii-utilitati/instalatii-electrice/",
+      "permanent": true
+    },
+    {
+      "source": "/blog/instalator-:city",
+      "destination": "/servicii/instalatii-utilitati/instalatii-sanitare/",
+      "permanent": true
+    },
+    {
+      "source": "/blog/parchet-:city",
+      "destination": "/servicii/amenajari-interioare/montaj-reconditionare-parchet/",
+      "permanent": true
+    },
+    {
+      "source": "/blog/rigips-:city",
+      "destination": "/servicii/amenajari-interioare/montaj-rigips-compartimentari/",
+      "permanent": true
+    },
+    {
+      "source": "/blog/acoperis-:city",
+      "destination": "/servicii/constructii-structuri/montaj-acoperisuri-pluviale/",
+      "permanent": true
+    },
+    {
+      "source": "/blog/termopan-:city",
+      "destination": "/servicii/tamplarie-mobilier/montaj-termopan/",
+      "permanent": true
+    },
+    {
+      "source": "/blog/curatenie-:city",
+      "destination": "/servicii/curatenie-igienizare/curatenie-generala/",
+      "permanent": true
+    },
+    {
+      "source": "/blog/faiantari-:city",
+      "destination": "/servicii/amenajari-interioare/montaj-gresie-faianta-piatra/",
+      "permanent": true
+    },
+    {
+      "source": "/blog/constructii-:city",
+      "destination": "/servicii/constructii-structuri/constructii-case/",
+      "permanent": true
+    },
+    {
+      "source": "/blog/renovari-:city",
+      "destination": "/servicii/amenajari-interioare/",
+      "permanent": true
+    },
+    {
+      "source": "/blog/amenajari-:city",
+      "destination": "/servicii/amenajari-interioare/",
+      "permanent": true
+    },
+    {
+      "source": "/blog/montaj-:city",
+      "destination": "/servicii/",
+      "permanent": true
+    },
+    {
+      "source": "/blog/reparatii-:city",
+      "destination": "/servicii/reparatii-diverse/",
+      "permanent": true
     }
   ]
 }

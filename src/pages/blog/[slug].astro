@@ -9,13 +9,14 @@ export const prerender = false;
 const { slug } = Astro.params;
 
 if (!slug) {
-  return Astro.redirect('/blog', 404);
+  return Astro.redirect('/blog/', 301);
 }
 
 const post = await getBlogPostBySlug(slug);
 
 if (!post) {
-  return Astro.redirect('/blog', 404);
+  // Redirect 301 to blog index if post doesn't exist (better for SEO than 404)
+  return Astro.redirect('/blog/', 301);
 }
 
 const cleanPortableText = (value: any) => {

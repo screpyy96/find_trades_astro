@@ -30,7 +30,8 @@ const { data: trade, error: tradeError } = await supabase
   .single();
 
 if (tradeError || !trade) {
-  return Astro.redirect('/404');
+  // Redirect 301 to category page if service doesn't exist (better for SEO than 404)
+  return Astro.redirect(`/servicii/${categorie}/`, 301);
 }
 
 const service = {

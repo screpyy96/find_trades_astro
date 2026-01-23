@@ -32,8 +32,9 @@ const { url: supabaseUrl, anonKey: supabaseAnonKey } = getPublicSupabaseConfig()
 
 const city = getCityBySlug(oras);
 
+// If city doesn't exist, redirect 301 to service page without city (better for SEO than 404)
 if (!city) {
-  return Astro.redirect('/404');
+  return Astro.redirect(`/servicii/${categorie}/${serviciu}/`, 301);
 }
 
 // OPTIMIZATION: Fetch service data and Sanity content in PARALLEL
@@ -336,16 +337,132 @@ const heroStats = [
 ].filter(Boolean) as Array<{ label: string; value: string }>;
 
 function createLocalBusinessSchema(params: { serviceName: string; cityName: string; canonical: string; metrics: any }) {
-  // Map service names to more specific Schema.org types (subtypes of LocalBusiness)
+  // Complete mapping of all trades to Schema.org LocalBusiness subtypes
+  // Reference: https://schema.org/LocalBusiness subtypes
   const serviceTypeMap: Record<string, string> = {
+    // Construcții & Structuri
+    'constructii case la rosu/la cheie': 'GeneralContractor',
+    'constructii case din lemn': 'GeneralContractor',
+    'constructii anexe si garaje': 'GeneralContractor',
+    'realizare fundatii': 'GeneralContractor',
+    'zidarie si tencuiala': 'GeneralContractor',
+    'montaj acoperisuri si sisteme pluviale': 'RoofingContractor',
+    'mansardari si etajari': 'GeneralContractor',
+    'consolidari si reabilitari structuri': 'GeneralContractor',
+    'demolari si decopertari': 'GeneralContractor',
+    'hidroizolatii si termoizolatii cladiri': 'GeneralContractor',
+    'turnare beton si sape': 'GeneralContractor',
+    'fierarie si confectii metalice': 'GeneralContractor',
+    'montaj si reparatii scari exterioare': 'GeneralContractor',
+    'montaj si intretinere sisteme pluviale': 'RoofingContractor',
+    'carotari beton': 'GeneralContractor',
+    
+    // Amenajări Interioare
     'zugrav': 'HousePainter',
     'zugraveli': 'HousePainter',
     'zugraveli-vopsitorii': 'HousePainter',
-    'electrician': 'Electrician',
-    'instalator': 'Plumber',
+    'aplicare vopsea decorativa / tapet': 'HousePainter',
+    'montaj gresie, faianta, piatra naturala': 'HomeAndConstructionBusiness',
+    'montaj si reconditionare parchet': 'HomeAndConstructionBusiness',
+    'montaj gips-carton (rigips) si compartimentari': 'HomeAndConstructionBusiness',
+    'montaj usi de interior': 'HomeAndConstructionBusiness',
+    'gletuire si finisare pereti': 'HousePainter',
+    'montaj tavane false / casetate / extensibile': 'HomeAndConstructionBusiness',
+    'montaj pardoseli (mocheta, linoleum, epoxidice)': 'HomeAndConstructionBusiness',
+    'constructie si finisare scari interioare': 'HomeAndConstructionBusiness',
+    'montaj seminee si cosuri de fum': 'HomeAndConstructionBusiness',
+    'montaj parchet laminat si vinil': 'HomeAndConstructionBusiness',
+    'montaj si finisare balcoane si logii': 'HomeAndConstructionBusiness',
+    
+    // Instalații & Utilități
     'instalatii electrice': 'Electrician',
+    'electrician': 'Electrician',
+    'electrician urgente': 'Electrician',
     'instalatii sanitare': 'Plumber',
-    'instalatii termice': 'Plumber',
+    'instalator': 'Plumber',
+    'instalatii termice si de incalzire': 'HVACBusiness',
+    'instalatii de gaz': 'HVACBusiness',
+    'montaj aer conditionat si sisteme de ventilatie': 'HVACBusiness',
+    'instalare panouri solare si fotovoltaice': 'Electrician',
+    'instalare pompe de caldura': 'HVACBusiness',
+    'automatizari si case inteligente (smart home)': 'Electrician',
+    'detectare si remediere scurgeri apa/gaz': 'Plumber',
+    'verificari si revizii tehnice periodice (vtp)': 'HomeAndConstructionBusiness',
+    'montaj si reparatii sisteme de drenaj': 'Plumber',
+    'montaj si intretinere sisteme de incalzire in pardoseala': 'HVACBusiness',
+    'montaj si reparatii sisteme de ventilatie industriala': 'HVACBusiness',
+    'reconditionare cada baie': 'Plumber',
+    
+    // Amenajări Exterioare & Grădină
+    'amenajare peisagistica si gradinarit': 'LandscapingBusiness',
+    'intretinere gazon si spatii verzi': 'LandscapingBusiness',
+    'toaletare arbori si pomi fructiferi': 'LandscapingBusiness',
+    'montaj pavaje si alei': 'LandscapingBusiness',
+    'constructie si montaj garduri/porti': 'HomeAndConstructionBusiness',
+    'constructie terase, foisoare si pergole': 'HomeAndConstructionBusiness',
+    'constructie si intretinere piscine': 'HomeAndConstructionBusiness',
+    'instalare sisteme de irigatii': 'LandscapingBusiness',
+    'foraje puturi si fose septice': 'Plumber',
+    'iluminat exterior si ambiental': 'Electrician',
+    'montaj si reparatii porti automate': 'HomeAndConstructionBusiness',
+    'montaj si reparatii copertine': 'HomeAndConstructionBusiness',
+    
+    // Tâmplărie & Mobilier
+    'tamplarie pvc, aluminiu si lemn': 'HomeAndConstructionBusiness',
+    'realizare mobilier la comanda': 'HomeAndConstructionBusiness',
+    'montaj si asamblare mobilier': 'HomeAndConstructionBusiness',
+    'tapiterie si reconditionare canapele/fotolii': 'HomeAndConstructionBusiness',
+    'montaj ferestre si usi termopan': 'HomeAndConstructionBusiness',
+    'montaj jaluzele si rulouri': 'HomeAndConstructionBusiness',
+    'montaj si reparatii obloane': 'HomeAndConstructionBusiness',
+    
+    // Reparații Diverse
+    'reparatii electrocasnice mari (masini de spalat, frigidere)': 'HomeAndConstructionBusiness',
+    'reparatii electronice (tv, audio)': 'HomeAndConstructionBusiness',
+    'reparatii acoperisuri si jgheaburi': 'RoofingContractor',
+    'reparatii si intretinere centrale termice': 'HVACBusiness',
+    'reparatii ferestre si usi (inclusiv termopan)': 'HomeAndConstructionBusiness',
+    'reparatii jaluzele si rulouri exterioare': 'HomeAndConstructionBusiness',
+    
+    // Curățenie & Igienizare
+    'curatenie generala si de intretinere': 'HomeAndConstructionBusiness',
+    'curatenie dupa constructor/renovare': 'HomeAndConstructionBusiness',
+    'curatare covoare, canapele si tapiterii': 'HomeAndConstructionBusiness',
+    'dezinsectie, deratizare, dezinfectie (ddd)': 'HomeAndConstructionBusiness',
+    'curatare cosuri de fum (coserit)': 'HomeAndConstructionBusiness',
+    'spalare fatade si suprafete vitrate': 'HomeAndConstructionBusiness',
+    'igienizare si curatare sisteme de climatizare': 'HVACBusiness',
+    
+    // Servicii de Urgență
+    'lacatus / deblocari usi': 'Locksmith',
+    'reparatii urgente acoperis': 'RoofingContractor',
+    
+    // Securitate & Siguranță
+    'instalare sisteme de alarma': 'Electrician',
+    'instalare camere de supraveghere': 'Electrician',
+    'montaj interfoane si videointerfoane': 'Electrician',
+    'instalare sisteme de detectie incendiu/inundatie': 'Electrician',
+    'montaj si intretinere sisteme de alarma': 'Electrician',
+    'montaj si reparatii gratii de securitate': 'HomeAndConstructionBusiness',
+    'montaj si intretinere sisteme de supraveghere video': 'Electrician',
+    
+    // Servicii Specializate & Consultanță
+    'design interior si decor': 'HomeAndConstructionBusiness',
+    'proiectare si arhitectura': 'HomeAndConstructionBusiness',
+    'consultanta in constructii si dirigentie de santier': 'HomeAndConstructionBusiness',
+    'expertize tehnice si audit energetic': 'HomeAndConstructionBusiness',
+    'servicii de topografie si cadastru': 'HomeAndConstructionBusiness',
+    'randari 3d si vizualizari arhitecturale': 'HomeAndConstructionBusiness',
+    
+    // Auto & Utilaje
+    'reparatii si mecanica auto': 'AutoRepair',
+    'servicii de vulcanizare si tractari auto': 'AutoRepair',
+    'detailing auto si cosmetica': 'AutoRepair',
+    
+    // Alte Servicii
+    'servicii de mutari si transport': 'MovingCompany',
+    'evacuare moloz si deseuri': 'HomeAndConstructionBusiness',
+    'servicii de sudura': 'HomeAndConstructionBusiness',
   };
   
   const serviceNameLower = params.serviceName.toLowerCase();

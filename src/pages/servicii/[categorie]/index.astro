@@ -45,7 +45,8 @@ const trades = categoryTrades.filter(trade =>
 );
 
 if (trades.length === 0) {
-  return Astro.redirect('/servicii');
+  // Redirect 301 to services page if category doesn't exist (better for SEO than 404)
+  return Astro.redirect('/servicii/', 301);
 }
 
 // Get the category name from the first trade
