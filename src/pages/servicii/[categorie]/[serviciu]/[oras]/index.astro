@@ -377,24 +377,43 @@ const heroStats = [
 ].filter(Boolean) as Array<{ label: string; value: string }>;
 
 function createLocalBusinessSchema(params: { serviceName: string; cityName: string; canonical: string; metrics: any; proTradesmen?: any[] }) {
+  // Map service names to more specific Schema.org types
+  const serviceTypeMap: Record<string, string> = {
+    'zugrav': 'HomeAndConstructionBusiness',
+    'electrician': 'Electrician',
+    'instalator': 'Plumber',
+    'instalatii electrice': 'Electrician',
+    'instalatii sanitare': 'Plumber',
+  };
+  
+  const serviceNameLower = params.serviceName.toLowerCase();
+  const businessType = serviceTypeMap[serviceNameLower] || 'HomeAndConstructionBusiness';
+  
   const schema: Record<string, any> = {
     '@context': 'https://schema.org',
-    '@type': 'LocalBusiness',
+    '@type': businessType,
     '@id': `${params.canonical}#localbusiness`,
     name: `${params.serviceName} ${params.cityName} | Meserias Local`,
     description: `Servicii ${params.serviceName.toLowerCase()} în ${params.cityName} prin Meserias Local. Profesioniști verificați, oferte gratuite, răspuns rapid.`,
     url: params.canonical,
-    telephone: '+40-XX-XXXX-XXXX',
+    telephone: '+40-XXX-XXX-XXX',
     email: 'contact@meseriaslocal.ro',
     areaServed: {
       '@type': 'City',
-      name: params.cityName
+      name: params.cityName,
+      '@id': `https://www.wikidata.org/wiki/Q${params.cityName === 'București' ? '19660' : ''}`
     },
     address: {
       '@type': 'PostalAddress',
       addressLocality: params.cityName,
+      addressRegion: params.cityName === 'București' ? 'București' : params.cityName,
       addressCountry: 'RO'
     },
+    geo: params.cityName === 'București' ? {
+      '@type': 'GeoCoordinates',
+      latitude: '44.4268',
+      longitude: '26.1025'
+    } : undefined,
     priceRange: '€€',
     currenciesAccepted: 'RON',
     paymentAccepted: ['Cash', 'Card', 'Bank Transfer'],
@@ -408,7 +427,7 @@ function createLocalBusinessSchema(params: { serviceName: string; cityName: stri
       'https://www.facebook.com/localmeserias',
       'https://www.instagram.com/MeseriasLocal'
     ],
-    offers: {
+    makesOffer: {
       '@type': 'Offer',
       itemOffered: {
         '@type': 'Service',
@@ -417,6 +436,10 @@ function createLocalBusinessSchema(params: { serviceName: string; cityName: stri
         provider: {
           '@type': 'Organization',
           name: 'Meserias Local'
+        },
+        areaServed: {
+          '@type': 'City',
+          name: params.cityName
         }
       },
       priceCurrency: 'RON',
@@ -470,7 +493,12 @@ function createLocalBusinessSchema(params: { serviceName: string; cityName: stri
     }));
   }
 
-  return schema;
+  // Clean up undefined values from schema
+  const cleanSchema = JSON.parse(JSON.stringify(schema, (key, value) => 
+    value === undefined ? undefined : value
+  ));
+  
+  return cleanSchema;
 }
 
 function buildFaqSchema(faqSection: any) {

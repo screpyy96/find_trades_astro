@@ -11,19 +11,10 @@ const title = "Amenajări Interioare București 2026 | Renovări Apartamente de 
 const description = "Firme amenajări interioare București ✓ Renovare apartament complet ✓ Zugrăveli, gresie, parchet, rigips ✓ Prețuri de la 150€/mp ✓ Garanție 3 ani ✓ Oferte gratuite în 2 ore";
 const canonical = "https://www.meseriaslocal.ro/amenajari-interioare-bucuresti";
 
-// Trade IDs pentru amenajări interioare
-const tradeIds = {
-  zugraveli: 12,
-  gresie: 14,
-  parchet: 15,
-  rigips: 16,
-  usiInterior: 17,
-  gletuire: 18,
-  tavane: 19,
-  pardoseli: 20,
-  scariInterioare: 21,
-  decorativa: 13
-};
+// Trade IDs pentru amenajări interioare (toate meseriile relevante pentru renovări)
+// Amenajări interioare: 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 91, 96
+// Instalații relevante: 23 (electrice), 24 (sanitare), 25 (termice)
+const amenajariInteriorTradeIds = [12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 91, 96, 23, 24, 25];
 
 // Structured Data - LocalBusiness
 const localBusinessSchema = {
@@ -215,12 +206,12 @@ const services = [
     </div>
   </section>
 
-  <!-- PRO Tradesmen Section - Zugravi -->
+  <!-- PRO Tradesmen Section - Amenajări Interioare -->
   <section class="bg-gradient-to-b from-slate-50 to-white pt-4">
     <div class="max-w-7xl mx-auto px-4">
       <RecommendedTradesmen
-        tradeId={12}
-        tradeName="Zugravi"
+        tradeIds={amenajariInteriorTradeIds}
+        tradeName="Amenajări Interioare"
         cityName="București"
         supabaseUrl={supabaseUrl}
         supabaseAnonKey={supabaseAnonKey}
@@ -254,68 +245,6 @@ const services = [
               <p class="text-sm text-slate-600 mt-1">{service.desc}</p>
             </a>
           ))}
-        </div>
-      </section>
-
-      <!-- Renovation Packages -->
-      <section class="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl p-8 border border-emerald-100">
-        <h2 class="text-2xl font-bold text-slate-900 mb-6">
-          Pachete Renovare Apartament București 2026
-        </h2>
-        
-        <div class="grid md:grid-cols-3 gap-6">
-          <!-- Basic Package -->
-          <div class="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
-            <div class="text-center mb-4">
-              <span class="text-3xl">🔧</span>
-              <h3 class="text-xl font-bold text-slate-900 mt-2">Renovare Simplă</h3>
-              <p class="text-emerald-600 font-bold text-2xl mt-2">150-200€/mp</p>
-            </div>
-            <ul class="space-y-2 text-sm text-slate-700">
-              <li class="flex items-center gap-2">✓ Zugrăveli lavabil</li>
-              <li class="flex items-center gap-2">✓ Montaj parchet laminat</li>
-              <li class="flex items-center gap-2">✓ Reparații minore</li>
-              <li class="flex items-center gap-2">✓ Curățenie finală</li>
-            </ul>
-            <p class="text-xs text-slate-500 mt-4">Ideal pentru refresh rapid</p>
-          </div>
-          
-          <!-- Standard Package -->
-          <div class="bg-white rounded-xl p-6 border-2 border-emerald-500 shadow-lg relative">
-            <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full">POPULAR</div>
-            <div class="text-center mb-4">
-              <span class="text-3xl">⭐</span>
-              <h3 class="text-xl font-bold text-slate-900 mt-2">Renovare Completă</h3>
-              <p class="text-emerald-600 font-bold text-2xl mt-2">200-300€/mp</p>
-            </div>
-            <ul class="space-y-2 text-sm text-slate-700">
-              <li class="flex items-center gap-2">✓ Tot din pachetul simplu</li>
-              <li class="flex items-center gap-2">✓ Instalații electrice noi</li>
-              <li class="flex items-center gap-2">✓ Instalații sanitare noi</li>
-              <li class="flex items-center gap-2">✓ Gresie și faianță</li>
-              <li class="flex items-center gap-2">✓ Uși interior noi</li>
-              <li class="flex items-center gap-2">✓ Rigips decorativ</li>
-            </ul>
-            <p class="text-xs text-slate-500 mt-4">Cel mai ales pachet</p>
-          </div>
-          
-          <!-- Premium Package -->
-          <div class="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
-            <div class="text-center mb-4">
-              <span class="text-3xl">💎</span>
-              <h3 class="text-xl font-bold text-slate-900 mt-2">Renovare Premium</h3>
-              <p class="text-emerald-600 font-bold text-2xl mt-2">300-400€/mp</p>
-            </div>
-            <ul class="space-y-2 text-sm text-slate-700">
-              <li class="flex items-center gap-2">✓ Tot din pachetul complet</li>
-              <li class="flex items-center gap-2">✓ Parchet masiv/stratificat</li>
-              <li class="flex items-center gap-2">✓ Vopsea decorativă</li>
-              <li class="flex items-center gap-2">✓ Mobilier la comandă</li>
-              <li class="flex items-center gap-2">✓ Smart home basic</li>
-              <li class="flex items-center gap-2">✓ Design interior inclus</li>
-            </ul>
-            <p class="text-xs text-slate-500 mt-4">Pentru finisaje de lux</p>
-          </div>
         </div>
       </section>
 

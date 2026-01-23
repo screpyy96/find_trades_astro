@@ -139,6 +139,7 @@ function CompactTradesmanCard({ worker }: { worker: Worker }) {
 
 interface RecommendedTradesmenProps {
   tradeId?: number;
+  tradeIds?: number[];  // Support for multiple trade IDs (e.g., all trades in a category)
   tradeName?: string;
   cityName: string;
   categoryName?: string;
@@ -150,6 +151,7 @@ interface RecommendedTradesmenProps {
 
 export function RecommendedTradesmen({
   tradeId,
+  tradeIds,
   tradeName,
   cityName,
   supabaseUrl: supabaseUrlProp,
@@ -198,12 +200,14 @@ export function RecommendedTradesmen({
       try {
         let workerIds: string[] = [];
 
-        if (tradeId) {
-          // Specific trade filtering
+        // Determine which trade IDs to search for
+        const searchTradeIds = tradeIds || (tradeId ? [tradeId] : null);
+
+        if (searchTradeIds && searchTradeIds.length > 0) {
+          // Specific trade(s) filtering - find workers who have ANY of the specified trades
           const { data: workerTradesData, error: workerTradesError } = await supabase
             .from('worker_trades')
-            .select('profile_id, trade_ids')
-            .contains('trade_ids', [tradeId]);
+            .select('profile_id, trade_ids');
 
           if (workerTradesError) {
             throw new Error(workerTradesError.message);
@@ -215,7 +219,13 @@ export function RecommendedTradesmen({
             return;
           }
 
-          workerIds = workerTradesData.map((wt: any) => wt.profile_id);
+          // Filter workers who have at least one of the specified trade IDs
+          const matchingWorkers = workerTradesData.filter((wt: any) => {
+            if (!wt.trade_ids || !Array.isArray(wt.trade_ids)) return false;
+            return wt.trade_ids.some((tid: number) => searchTradeIds.includes(tid));
+          });
+
+          workerIds = matchingWorkers.map((wt: any) => wt.profile_id);
         } else {
           // Category-based filtering - get all workers with any trade
           const { data: allWorkerTrades, error: allWorkerTradesError } = await supabase
@@ -360,7 +370,7 @@ export function RecommendedTradesmen({
     };
 
     fetchRecommendedTradesmen();
-  }, [supabase, tradeId, tradeName, cityName, maxResults]);
+  }, [supabase, tradeId, tradeIds, tradeName, cityName, maxResults]);
 
   // Don't render if no workers, error, or still loading
   if (error || workers.length === 0) {
