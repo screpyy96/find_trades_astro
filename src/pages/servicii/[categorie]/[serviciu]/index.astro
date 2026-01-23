@@ -2,13 +2,42 @@
 import Base from '../../../../layouts/Base.astro';
 import { getServicePage } from '../../../../lib/sanity';
 import { supabase } from '../../../../lib/supabase';
+import { trades } from '../../../../data/trades';
 
-export const prerender = false;
-export const config = { revalidate: 1800 };
+// Static generation - all pages built at deploy time
+export const prerender = true;
 
-// Set headers for proper indexing
-Astro.response.headers.set('X-Robots-Tag', 'index, follow');
-Astro.response.headers.set('Cache-Control', 'public, max-age=1800, s-maxage=1800, stale-while-revalidate=86400');
+// Generate all static paths at build time
+export async function getStaticPaths() {
+  // Helper to slugify category names
+  const slugify = (text: string): string => {
+    return text
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '');
+  };
+
+  const paths: { params: { categorie: string; serviciu: string } }[] = [];
+  
+  for (const trade of trades) {
+    if (!trade.category || !trade.slug) continue;
+    
+    const categorySlug = slugify(trade.category);
+    
+    paths.push({
+      params: {
+        categorie: categorySlug,
+        serviciu: trade.slug
+      }
+    });
+  }
+  
+  return paths;
+}
 
 const { categorie, serviciu } = Astro.params;
 
