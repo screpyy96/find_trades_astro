@@ -71,10 +71,28 @@ const categorySchema = {
   name: categoryName,
   description: description,
   url: `https://www.meseriaslocal.ro/servicii/${categorie}/`,
+  inLanguage: 'ro-RO',
+  isPartOf: {
+    '@type': 'WebSite',
+    name: 'Meserias Local',
+    url: 'https://www.meseriaslocal.ro'
+  },
   provider: {
     '@type': 'Organization',
     name: 'Meserias Local',
-    url: 'https://www.meseriaslocal.ro'
+    url: 'https://www.meseriaslocal.ro',
+    logo: 'https://www.meseriaslocal.ro/icon-192.png'
+  },
+  mainEntity: {
+    '@type': 'ItemList',
+    name: `Servicii ${categoryName}`,
+    numberOfItems: trades.length,
+    itemListElement: trades.slice(0, 10).map((trade, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: trade.name,
+      url: `https://www.meseriaslocal.ro/servicii/${categorie}/${trade.slug}/`
+    }))
   }
 };
 
@@ -103,12 +121,49 @@ const breadcrumbSchema = {
     }
   ]
 };
+
+// Service schema for rich results
+const serviceSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  name: `Servicii ${categoryName}`,
+  description: description,
+  url: `https://www.meseriaslocal.ro/servicii/${categorie}/`,
+  areaServed: {
+    '@type': 'Country',
+    name: 'România'
+  },
+  provider: {
+    '@type': 'Organization',
+    name: 'Meserias Local',
+    url: 'https://www.meseriaslocal.ro',
+    logo: 'https://www.meseriaslocal.ro/icon-192.png',
+    address: {
+      '@type': 'PostalAddress',
+      addressCountry: 'RO'
+    }
+  },
+  serviceType: categoryName,
+  hasOfferCatalog: {
+    '@type': 'OfferCatalog',
+    name: `Servicii ${categoryName}`,
+    itemListElement: trades.slice(0, 5).map(trade => ({
+      '@type': 'Offer',
+      itemOffered: {
+        '@type': 'Service',
+        name: trade.name,
+        description: trade.description || `Servicii profesionale de ${trade.name.toLowerCase()}`
+      }
+    }))
+  }
+};
 ---
 
 <Base title={title} description={description} disableDefaultBreadcrumb={true}>
   <meta slot="head" name="keywords" content={keywords} />
   <script is:inline type="application/ld+json" set:html={JSON.stringify(categorySchema)} slot="head" />
   <script is:inline type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} slot="head" />
+  <script is:inline type="application/ld+json" set:html={JSON.stringify(serviceSchema)} slot="head" />
 
   <!-- Hero Section -->
   <section 
