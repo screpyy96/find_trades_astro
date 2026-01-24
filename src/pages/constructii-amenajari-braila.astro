@@ -1,0 +1,408 @@
+---
+import Base from '../layouts/Base.astro';
+import { RecommendedTradesmen } from '../components/tradesman/RecommendedTradesmen';
+import { getPublicSupabaseConfig } from '../lib/publicEnv';
+
+const { url: supabaseUrl, anonKey: supabaseAnonKey } = getPublicSupabaseConfig();
+const APP_URL = 'https://app.meseriaslocal.ro';
+
+const title = "Constructii si Amenajari Braila | Faianta, Gresie, Rigips, Instalatii - Preturi 2026";
+const description = "Firme constructii Braila: faianta, gresie, parchet, rigips, zugraveli, glet, instalatii sanitare si electrice, tencuiala decorativa, garduri metalice. Echipe verificate, garantie 3 ani.";
+const canonical = "https://www.meseriaslocal.ro/constructii-amenajari-braila";
+
+const localBusinessSchema = {
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "@id": `${canonical}#localbusiness`,
+  "name": "Constructii si Amenajari Braila | Meserias Local",
+  "description": description,
+  "url": canonical,
+  "areaServed": [
+    { "@type": "City", "name": "Braila" },
+    { "@type": "AdministrativeArea", "name": "Braila" }
+  ],
+  "address": { "@type": "PostalAddress", "addressLocality": "Braila", "addressRegion": "Braila", "addressCountry": "RO" },
+  "priceRange": "$",
+  "image": "https://www.meseriaslocal.ro/logo.svg"
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "Cat costa montaj faianta si gresie in Braila?", "acceptedAnswer": { "@type": "Answer", "text": "Montaj faianta/gresie in Braila: 35-60 lei/mp manopera. Pretul variaza in functie de dimensiunea placilor si complexitatea lucrarii." }},
+    { "@type": "Question", "name": "Cat costa renovarea unui apartament in Braila?", "acceptedAnswer": { "@type": "Answer", "text": "Renovare completa apartament Braila: 150-350 lei/mp manopera. Pentru 50mp, buget orientativ 7.500-17.500 lei." }},
+    { "@type": "Question", "name": "Cat dureaza o renovare completa?", "acceptedAnswer": { "@type": "Answer", "text": "Renovare apartament 2 camere: 3-6 saptamani. Depinde de amploarea lucrarilor si disponibilitatea materialelor." }},
+    { "@type": "Question", "name": "Lucrati si in localitatile din jurul Brailei?", "acceptedAnswer": { "@type": "Answer", "text": "Da, acoperim Ianca, Insuratei, Faurei, Viziru, Maxineni si alte localitati din judetul Braila." }}
+  ]
+};
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Acasa", "item": "https://www.meseriaslocal.ro" },
+    { "@type": "ListItem", "position": 2, "name": "Servicii", "item": "https://www.meseriaslocal.ro/servicii" },
+    { "@type": "ListItem", "position": 3, "name": "Constructii Braila", "item": canonical }
+  ]
+};
+
+const serviceSchema = {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "name": "Constructii si Amenajari Braila",
+  "description": "Servicii complete constructii si amenajari interioare/exterioare in Braila",
+  "provider": { "@type": "LocalBusiness", "@id": `${canonical}#localbusiness` },
+  "areaServed": { "@type": "City", "name": "Braila" },
+  "serviceType": ["Montaj faianta gresie", "Montaj parchet", "Rigips", "Zugraveli", "Instalatii sanitare", "Instalatii electrice", "Tencuiala decorativa", "Garduri metalice"],
+  "url": canonical
+};
+
+const prices = {
+  interioare: [
+    { service: "Montaj faianta/gresie", price: "35-60 lei/mp" },
+    { service: "Montaj parchet laminat", price: "20-40 lei/mp" },
+    { service: "Montaj usi interioare", price: "80-150 lei/buc" },
+    { service: "Rigips pereti/tavane", price: "45-70 lei/mp" },
+    { service: "Zugraveli lavabil", price: "15-25 lei/mp" },
+    { service: "Glet fin/decorativ", price: "20-35 lei/mp" }
+  ],
+  instalatii: [
+    { service: "Instalatie sanitara baie", price: "800-1500 lei" },
+    { service: "Instalatie sanitara bucatarie", price: "500-1000 lei" },
+    { service: "Instalatie electrica completa", price: "25-40 lei/mp" },
+    { service: "Instalatie electrica partiala", price: "15-25 lei/punct" },
+    { service: "Montaj dus/cada", price: "150-300 lei" },
+    { service: "Montaj WC/chiuveta", price: "100-200 lei" }
+  ],
+  exterioare: [
+    { service: "Placare polistiren", price: "40-60 lei/mp" },
+    { service: "Tencuiala decorativa", price: "50-80 lei/mp" },
+    { service: "Garduri metalice", price: "150-300 lei/ml" },
+    { service: "Porti metalice", price: "800-2000 lei/buc" }
+  ]
+};
+
+const zones = ["Braila centru", "Chercea", "Lacu Dulce", "Hipodrom", "Viziru", "Radu Negru", "Calarasi", "Apollo", "Dorobanti", "Obor", "Pisc", "Garii"];
+---
+
+<Base title={title} description={description} canonical={canonical} disableDefaultBreadcrumb={true}>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(localBusinessSchema)} is:inline></script>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(faqSchema)} is:inline></script>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} is:inline></script>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(serviceSchema)} is:inline></script>
+  
+  <meta slot="head" name="keywords" content="constructii braila, amenajari braila, faianta gresie braila, parchet braila, rigips braila, zugraveli braila, instalatii sanitare braila, instalatii electrice braila, tencuiala decorativa braila, garduri metalice braila" />
+  <meta slot="head" name="geo.region" content="RO-BR" />
+  <meta slot="head" name="geo.placename" content="Braila" />
+
+  <!-- Hero Section -->
+  <section class="py-12 sm:py-16" style="background: linear-gradient(180deg, #1a1d2e 0%, #1e2235 50%, #252a3d 100%)">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-4xl mx-auto text-center">
+        <nav class="flex justify-center mb-6">
+          <ol class="flex items-center space-x-2 text-slate-300 text-xs font-medium">
+            <li><a href="/" class="hover:text-white">Acasa</a></li>
+            <li><span class="mx-2 text-white/40">/</span></li>
+            <li><a href="/servicii/" class="hover:text-white">Servicii</a></li>
+            <li><span class="mx-2 text-white/40">/</span></li>
+            <li><span class="text-amber-400 font-semibold">Constructii Braila</span></li>
+          </ol>
+        </nav>
+
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">
+          Constructii si Amenajari Braila – Echipe Profesioniste 2026
+        </h1>
+        
+        <p class="text-xl text-slate-300 mb-4">
+          Amenajari interioare: faianta, gresie, parchet, rigips, zugraveli, glet | Instalatii sanitare si electrice | Exterioare: tencuiala decorativa, garduri metal
+        </p>
+
+        <p class="text-lg text-slate-300 mb-8 max-w-3xl mx-auto leading-relaxed">
+          Gaseste echipe verificate pentru lucrari de constructii in Braila si judet. 
+          De la montaj faianta si parchet pana la instalatii complete si amenajari exterioare. 
+          Oferte gratuite in 24h, fara comisioane.
+        </p>
+
+        <div class="flex flex-wrap items-center justify-center gap-4 mb-8">
+          <div class="bg-white/10 rounded-lg px-4 py-2">
+            <div class="text-amber-400 font-bold text-lg">3 ani</div>
+            <div class="text-slate-300 text-sm">Garantie lucrari</div>
+          </div>
+          <div class="bg-white/10 rounded-lg px-4 py-2">
+            <div class="text-amber-400 font-bold text-lg">24h</div>
+            <div class="text-slate-300 text-sm">Oferte gratuite</div>
+          </div>
+          <div class="bg-white/10 rounded-lg px-4 py-2">
+            <div class="text-amber-400 font-bold text-lg">100%</div>
+            <div class="text-slate-300 text-sm">Echipe verificate</div>
+          </div>
+        </div>
+
+        <a href={`${APP_URL}/cere-oferta?title=${encodeURIComponent('Constructii Braila')}`}
+          class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold rounded-xl hover:from-amber-600 hover:to-orange-600 shadow-lg text-lg">
+          Cere oferta gratuita
+          <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRO Tradesmen -->
+  <section class="bg-gradient-to-b from-slate-50 to-white pt-4">
+    <div class="max-w-7xl mx-auto px-4">
+      <RecommendedTradesmen
+        tradeIds={[1, 6, 7, 8, 10, 12, 14, 15, 16, 50]}
+        tradeName="Constructii"
+        cityName="Braila"
+        supabaseUrl={supabaseUrl}
+        supabaseAnonKey={supabaseAnonKey}
+        maxResults={4}
+        compact={true}
+        client:load
+      />
+    </div>
+  </section>
+
+  <div class="max-w-7xl mx-auto px-4 pt-4 pb-16 sm:pt-6 sm:pb-20">
+    <div class="space-y-12">
+      
+      <!-- Amenajari Interioare -->
+      <section class="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
+        <h2 class="text-2xl font-bold text-slate-900 mb-6">
+          Amenajari Interioare Braila – Finisaje Complete
+        </h2>
+        
+        <p class="text-slate-700 mb-6 leading-relaxed">
+          Echipele noastre din Braila executa <strong>amenajari interioare complete</strong>: montaj faianta si gresie pentru bai si bucatarii, parchet laminat sau stratificat, pereti si tavane din rigips, zugraveli profesionale si aplicare glet. Lucram cu materiale de calitate si oferim garantie pentru toate lucrarile.
+        </p>
+
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+          <div class="p-4 bg-slate-50 rounded-lg border border-slate-200">
+            <h3 class="font-semibold text-slate-900 mb-2">Faianta si gresie</h3>
+            <p class="text-sm text-slate-600">Bai, bucatarii, holuri, balcoane, rosturi epoxidice</p>
+          </div>
+          <div class="p-4 bg-slate-50 rounded-lg border border-slate-200">
+            <h3 class="font-semibold text-slate-900 mb-2">Parchet si pardoseli</h3>
+            <p class="text-sm text-slate-600">Laminat, stratificat, vinil LVT, mocheta</p>
+          </div>
+          <div class="p-4 bg-slate-50 rounded-lg border border-slate-200">
+            <h3 class="font-semibold text-slate-900 mb-2">Montaj usi</h3>
+            <p class="text-sm text-slate-600">Usi interioare, usi glisante, tocuri, balamale</p>
+          </div>
+          <div class="p-4 bg-slate-50 rounded-lg border border-slate-200">
+            <h3 class="font-semibold text-slate-900 mb-2">Rigips</h3>
+            <p class="text-sm text-slate-600">Pereti despartitori, tavane false, nise decorative</p>
+          </div>
+          <div class="p-4 bg-slate-50 rounded-lg border border-slate-200">
+            <h3 class="font-semibold text-slate-900 mb-2">Zugraveli</h3>
+            <p class="text-sm text-slate-600">Lavabil, vopsea decorativa, stucco, tapet</p>
+          </div>
+          <div class="p-4 bg-slate-50 rounded-lg border border-slate-200">
+            <h3 class="font-semibold text-slate-900 mb-2">Glet</h3>
+            <p class="text-sm text-slate-600">Glet fin, glet decorativ, pregatire pereti</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Instalatii -->
+      <section class="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
+        <h2 class="text-2xl font-bold text-slate-900 mb-6">
+          Instalatii Sanitare si Electrice Braila
+        </h2>
+        
+        <p class="text-slate-700 mb-6 leading-relaxed">
+          Executam <strong>instalatii sanitare complete</strong> pentru bai si bucatarii: apa calda si rece, canalizare, montaj obiecte sanitare. De asemenea, <strong>instalatii electrice</strong> totale sau partiale: tablouri, prize, intrerupatoare, iluminat.
+        </p>
+
+        <div class="grid sm:grid-cols-2 gap-6 mb-6">
+          <div>
+            <h3 class="font-bold text-slate-900 mb-4">Instalatii sanitare</h3>
+            <ul class="space-y-2 text-slate-700">
+              <li class="flex items-start gap-2"><span class="text-green-600 mt-1">&#10003;</span><span>Instalatie apa calda si rece</span></li>
+              <li class="flex items-start gap-2"><span class="text-green-600 mt-1">&#10003;</span><span>Montaj cabina dus, cada</span></li>
+              <li class="flex items-start gap-2"><span class="text-green-600 mt-1">&#10003;</span><span>Montaj mobilier baie</span></li>
+              <li class="flex items-start gap-2"><span class="text-green-600 mt-1">&#10003;</span><span>Montaj WC, chiuveta, baterii</span></li>
+              <li class="flex items-start gap-2"><span class="text-green-600 mt-1">&#10003;</span><span>Racordari la retea</span></li>
+            </ul>
+          </div>
+          <div>
+            <h3 class="font-bold text-slate-900 mb-4">Instalatii electrice</h3>
+            <ul class="space-y-2 text-slate-700">
+              <li class="flex items-start gap-2"><span class="text-green-600 mt-1">&#10003;</span><span>Instalatie electrica completa</span></li>
+              <li class="flex items-start gap-2"><span class="text-green-600 mt-1">&#10003;</span><span>Instalatie partiala/extindere</span></li>
+              <li class="flex items-start gap-2"><span class="text-green-600 mt-1">&#10003;</span><span>Tablouri electrice</span></li>
+              <li class="flex items-start gap-2"><span class="text-green-600 mt-1">&#10003;</span><span>Prize, intrerupatoare</span></li>
+              <li class="flex items-start gap-2"><span class="text-green-600 mt-1">&#10003;</span><span>Iluminat LED interior/exterior</span></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Amenajari Exterioare -->
+      <section class="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
+        <h2 class="text-2xl font-bold text-slate-900 mb-6">
+          Amenajari Exterioare Braila – Fatade si Garduri
+        </h2>
+        
+        <p class="text-slate-700 mb-6 leading-relaxed">
+          Servicii de <strong>amenajari exterioare</strong> in Braila: placare polistiren pentru izolatie termica, tencuiala decorativa in diverse texturi si culori, garduri si porti din metal. Lucrari de calitate cu garantie.
+        </p>
+
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="p-4 bg-slate-50 rounded-lg border border-slate-200 text-center">
+            <h3 class="font-semibold text-slate-900 mb-2">Polistiren</h3>
+            <p class="text-sm text-slate-600">Placare fatade, izolatie termica</p>
+          </div>
+          <div class="p-4 bg-slate-50 rounded-lg border border-slate-200 text-center">
+            <h3 class="font-semibold text-slate-900 mb-2">Tencuiala decorativa</h3>
+            <p class="text-sm text-slate-600">Diverse texturi si culori</p>
+          </div>
+          <div class="p-4 bg-slate-50 rounded-lg border border-slate-200 text-center">
+            <h3 class="font-semibold text-slate-900 mb-2">Garduri metal</h3>
+            <p class="text-sm text-slate-600">Fier forjat, tabla, plasa</p>
+          </div>
+          <div class="p-4 bg-slate-50 rounded-lg border border-slate-200 text-center">
+            <h3 class="font-semibold text-slate-900 mb-2">Porti</h3>
+            <p class="text-sm text-slate-600">Porti auto, pietonale</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Prices Section -->
+      <section class="bg-slate-50 rounded-2xl p-8 border border-slate-200">
+        <h2 class="text-2xl font-bold text-slate-900 mb-6">
+          Preturi Constructii si Amenajari Braila 2026
+        </h2>
+        
+        <div class="grid lg:grid-cols-3 gap-8">
+          <div>
+            <h3 class="font-bold text-slate-900 mb-4 text-lg">Amenajari interioare</h3>
+            <div class="space-y-3">
+              {prices.interioare.map(item => (
+                <div class="flex justify-between items-center p-3 bg-white rounded-lg border border-slate-200">
+                  <span class="text-slate-700 text-sm">{item.service}</span>
+                  <span class="font-bold text-green-600 text-sm">{item.price}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div>
+            <h3 class="font-bold text-slate-900 mb-4 text-lg">Instalatii</h3>
+            <div class="space-y-3">
+              {prices.instalatii.map(item => (
+                <div class="flex justify-between items-center p-3 bg-white rounded-lg border border-slate-200">
+                  <span class="text-slate-700 text-sm">{item.service}</span>
+                  <span class="font-bold text-green-600 text-sm">{item.price}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div>
+            <h3 class="font-bold text-slate-900 mb-4 text-lg">Exterioare</h3>
+            <div class="space-y-3">
+              {prices.exterioare.map(item => (
+                <div class="flex justify-between items-center p-3 bg-white rounded-lg border border-slate-200">
+                  <span class="text-slate-700 text-sm">{item.service}</span>
+                  <span class="font-bold text-green-600 text-sm">{item.price}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        
+        <p class="text-sm text-slate-500 mt-6">
+          Preturile sunt orientative pentru zona Braila. Solicita oferta personalizata pentru pret exact.
+        </p>
+      </section>
+
+      <!-- Zones Section -->
+      <section class="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
+        <h2 class="text-2xl font-bold text-slate-900 mb-6">
+          Zone Acoperite in Braila si Judet
+        </h2>
+        
+        <div class="flex flex-wrap gap-2 mb-4">
+          {zones.map(zone => (
+            <span class="px-3 py-1.5 bg-blue-50 text-blue-800 rounded-lg text-sm font-medium border border-blue-200">
+              {zone}
+            </span>
+          ))}
+        </div>
+        
+        <p class="text-slate-600 text-sm">
+          De asemenea: Ianca, Insuratei, Faurei, Maxineni, Movila Miresii si alte localitati din judet.
+        </p>
+      </section>
+
+      <!-- FAQ Section -->
+      <section class="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
+        <h2 class="text-2xl font-bold text-slate-900 mb-6">
+          Intrebari frecvente despre constructii in Braila
+        </h2>
+        
+        <div class="space-y-4">
+          <details class="group bg-slate-50 rounded-lg">
+            <summary class="flex items-center justify-between p-4 cursor-pointer font-semibold text-slate-900">
+              Cat costa montaj faianta si gresie in Braila?
+              <span class="text-slate-400 group-open:rotate-180 transition-transform">&#9660;</span>
+            </summary>
+            <div class="px-4 pb-4 text-slate-700">
+              Montaj faianta/gresie in Braila: 35-60 lei/mp manopera. Pretul variaza in functie de dimensiunea placilor, tipul de montaj (drept sau diagonal) si complexitatea lucrarii.
+            </div>
+          </details>
+          
+          <details class="group bg-slate-50 rounded-lg">
+            <summary class="flex items-center justify-between p-4 cursor-pointer font-semibold text-slate-900">
+              Cat costa renovarea completa a unui apartament?
+              <span class="text-slate-400 group-open:rotate-180 transition-transform">&#9660;</span>
+            </summary>
+            <div class="px-4 pb-4 text-slate-700">
+              Renovare completa apartament in Braila: 150-350 lei/mp pentru manopera. Pentru un apartament de 50mp, bugetul orientativ este 7.500-17.500 lei, in functie de complexitate si finisaje.
+            </div>
+          </details>
+          
+          <details class="group bg-slate-50 rounded-lg">
+            <summary class="flex items-center justify-between p-4 cursor-pointer font-semibold text-slate-900">
+              Cat dureaza o renovare completa?
+              <span class="text-slate-400 group-open:rotate-180 transition-transform">&#9660;</span>
+            </summary>
+            <div class="px-4 pb-4 text-slate-700">
+              Renovare apartament 2 camere: 3-6 saptamani. Durata depinde de amploarea lucrarilor, disponibilitatea materialelor si numarul de echipe implicate.
+            </div>
+          </details>
+          
+          <details class="group bg-slate-50 rounded-lg">
+            <summary class="flex items-center justify-between p-4 cursor-pointer font-semibold text-slate-900">
+              Oferiti garantie pentru lucrari?
+              <span class="text-slate-400 group-open:rotate-180 transition-transform">&#9660;</span>
+            </summary>
+            <div class="px-4 pb-4 text-slate-700">
+              Da, toate lucrarile beneficiaza de garantie intre 1-5 ani in functie de tipul serviciului. Garantia acopera defecte de executie si probleme aparute din cauza manoperei.
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <!-- CTA Section -->
+      <section class="bg-gradient-to-r from-amber-500 to-orange-500 rounded-2xl p-8 text-center">
+        <h2 class="text-2xl font-bold text-white mb-4">
+          Ai nevoie de lucrari de constructii in Braila?
+        </h2>
+        <p class="text-white/90 mb-6 max-w-2xl mx-auto">
+          Primeste oferte gratuite de la echipe verificate. Raspuns in 24 ore, fara comisioane.
+        </p>
+        <a href={`${APP_URL}/cere-oferta?title=${encodeURIComponent('Constructii Braila')}`}
+          class="inline-flex items-center px-8 py-4 bg-white text-orange-600 font-bold rounded-xl hover:bg-slate-100 transition-all duration-200 shadow-lg text-lg">
+          Cere Oferta Gratuita
+          <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+          </svg>
+        </a>
+      </section>
+
+    </div>
+  </div>
+</Base>

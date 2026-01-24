@@ -87,6 +87,7 @@ export async function GET() {
     { url: '/electrician-bucuresti/', priority: '1.0', changefreq: 'weekly' },
     { url: '/amenajari-interioare-bucuresti/', priority: '1.0', changefreq: 'weekly' },
     { url: '/renovari-acoperisuri-deva/', priority: '1.0', changefreq: 'weekly' },
+    { url: '/constructii-amenajari-braila/', priority: '1.0', changefreq: 'weekly' },
     // NOTE: /meseriasi and /solicitari are NOT included - they're dynamic user content
   ];
 
