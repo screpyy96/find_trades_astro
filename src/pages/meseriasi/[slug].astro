@@ -11,7 +11,7 @@ const { slug } = Astro.params;
 const { url: supabaseUrl, anonKey: supabaseAnonKey } = getPublicSupabaseConfig();
 
 if (!slug) {
-  return Astro.redirect('/meseriasi', 404);
+  return Astro.redirect('/meseriasi/');
 }
 
 // Check if it's a full UUID and redirect to SEO-friendly URL
@@ -19,7 +19,7 @@ const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 if (isUuid) {
   if (!supabase) {
-    return Astro.redirect('/meseriasi', 500);
+    return Astro.redirect('/meseriasi/');
   }
 
   // Fetch worker data for redirect
@@ -31,7 +31,7 @@ if (isUuid) {
     .single();
 
   if (workerError || !worker) {
-    return Astro.redirect('/meseriasi', 404);
+    return Astro.redirect('/meseriasi/');
   }
 
   // Fetch trades
@@ -57,7 +57,7 @@ if (isUuid) {
 }
 
 if (!supabase) {
-  return Astro.redirect('/meseriasi', 500);
+  return Astro.redirect('/meseriasi/');
 }
 
 // Extract short ID from slug (last 8 characters after last hyphen)
@@ -71,7 +71,7 @@ console.log('Extracted shortId:', shortId);
 const shortIdRegex = /^[0-9a-f]{8}$/i;
 if (!shortIdRegex.test(shortId)) {
   console.log('Invalid shortId format, redirecting');
-  return Astro.redirect('/meseriasi', 404);
+  return Astro.redirect('/meseriasi/');
 }
 
 // Find worker by matching last 8 characters of UUID
@@ -98,7 +98,7 @@ if (searchError || !workers || workers.length === 0) {
   
   if (!workerId) {
     console.log('Worker not found, redirecting to /meseriasi');
-    return Astro.redirect('/meseriasi', 404);
+    return Astro.redirect('/meseriasi/');
   }
 } else {
   workerId = workers[0].id;
@@ -167,7 +167,7 @@ const [
 
 const { data: worker, error } = workerResult;
 if (error || !worker) {
-  return Astro.redirect('/meseriasi', 404);
+  return Astro.redirect('/meseriasi/');
 }
 
 // Get trades data

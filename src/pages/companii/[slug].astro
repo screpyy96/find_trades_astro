@@ -11,11 +11,11 @@ const { slug } = Astro.params;
 const { url: supabaseUrl, anonKey: supabaseAnonKey } = getPublicSupabaseConfig();
 
 if (!slug) {
-  return Astro.redirect('/companii', 404);
+  return Astro.redirect('/companii/');
 }
 
 if (!supabase) {
-  return Astro.redirect('/companii', 500);
+  return Astro.redirect('/companii/');
 }
 
 // Check if it's a full UUID and redirect to SEO-friendly URL
@@ -31,7 +31,7 @@ if (isUuid) {
     .single();
 
   if (companyError || !company) {
-    return Astro.redirect('/companii', 404);
+    return Astro.redirect('/companii/');
   }
 
   // Verify it's an enterprise company (using ilike to handle whitespace issues)
@@ -44,7 +44,7 @@ if (isUuid) {
     .single();
 
   if (!subscription) {
-    return Astro.redirect('/companii', 404);
+    return Astro.redirect('/companii/');
   }
 
   // Fetch trades for SEO URL
@@ -76,7 +76,7 @@ const shortId = slugParts[slugParts.length - 1];
 // Validate short ID (should be 8 hex characters)
 const shortIdRegex = /^[0-9a-f]{8}$/i;
 if (!shortIdRegex.test(shortId)) {
-  return Astro.redirect('/companii', 404);
+  return Astro.redirect('/companii/');
 }
 
 // Find company by matching last 8 characters of UUID
@@ -100,7 +100,7 @@ if (searchError || !companies || companies.length === 0) {
   }
   
   if (!companyId) {
-    return Astro.redirect('/companii', 404);
+    return Astro.redirect('/companii/');
   }
 } else {
   companyId = companies[0].id;
@@ -169,7 +169,7 @@ const [
 
 const { data: company, error } = companyResult;
 if (error || !company) {
-  return Astro.redirect('/companii', 404);
+  return Astro.redirect('/companii/');
 }
 
 // Get trades data and extract unique categories

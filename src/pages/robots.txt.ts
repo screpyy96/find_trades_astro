@@ -20,14 +20,20 @@ Disallow: /api/
 Disallow: /login
 Disallow: /register
 Disallow: /auth/
+Disallow: /login?redirectTo=
 
-# Block form pages (not useful for SEO)
+# Block form pages and query parameters (not useful for SEO)
 Disallow: /cere-oferta
+Disallow: /cere-oferta?
+
+# Block app subdomain paths if crawled here
+Disallow: /app.meseriaslocal.ro/
 
 # Allow important resources
 Allow: /servicii/
 Allow: /meseriasi/
 Allow: /blog/
+Allow: /companii/
 Allow: /sitemap.xml
 Allow: /robots.txt
 
