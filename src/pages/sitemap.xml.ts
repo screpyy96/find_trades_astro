@@ -82,6 +82,7 @@ export async function GET() {
   const staticPages = [
     { url: '/', priority: '1.0', changefreq: 'daily' },
     { url: '/servicii/', priority: '0.9', changefreq: 'daily' },
+    { url: '/companii/', priority: '0.8', changefreq: 'daily' },
     { url: '/blog/', priority: '0.7', changefreq: 'daily' },
     { url: '/electrician-bucuresti/', priority: '1.0', changefreq: 'weekly' },
     { url: '/amenajari-interioare-bucuresti/', priority: '1.0', changefreq: 'weekly' },
@@ -342,7 +343,91 @@ export async function GET() {
   // - /login, /register - Auth pages (noindex)
 
   // ========================================
-  // 5️⃣ GENERATE SITEMAP
+  // 5️⃣ ENTERPRISE COMPANY PROFILES (PUBLIC SEO PAGES)
+  // ========================================
+  try {
+    const { createClient } = await import('@supabase/supabase-js');
+    const { generateWorkerSeoSlug } = await import('../utils/seo-urls.js');
+    
+    const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+    const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+    
+    if (supabaseUrl && supabaseKey) {
+      const supabaseClient = createClient(supabaseUrl, supabaseKey);
+      
+      // Get Enterprise users with active subscriptions (using ilike to handle whitespace)
+      const { data: enterpriseSubscriptions } = await supabaseClient
+        .from('user_subscriptions')
+        .select('user_id')
+        .eq('status', 'active')
+        .ilike('plan_id', 'enterprise%');
+      
+      if (enterpriseSubscriptions && enterpriseSubscriptions.length > 0) {
+        const enterpriseUserIds = enterpriseSubscriptions.map(sub => sub.user_id);
+        
+        const { data: enterpriseCompanies } = await supabaseClient
+          .from('profiles')
+          .select('id, name, address')
+          .in('id', enterpriseUserIds)
+          .eq('role', 'worker')
+          .not('name', 'is', null);
+        
+        if (enterpriseCompanies && enterpriseCompanies.length > 0) {
+          const companyIds = enterpriseCompanies.map(c => c.id);
+          
+          const { data: companyTradesData } = await supabaseClient
+            .from('worker_trades')
+            .select('profile_id, trade_ids')
+            .in('profile_id', companyIds);
+          
+          const allTradeIds = new Set<number>();
+          companyTradesData?.forEach(ct => {
+            if (ct.trade_ids && Array.isArray(ct.trade_ids)) {
+              ct.trade_ids.forEach(id => allTradeIds.add(id));
+            }
+          });
+          
+          let tradesData: any[] = [];
+          if (allTradeIds.size > 0) {
+            const { data: trades } = await supabaseClient
+              .from('trades')
+              .select('id, name, slug')
+              .in('id', Array.from(allTradeIds));
+            tradesData = trades || [];
+          }
+          
+          const tradeMap = new Map(tradesData.map(t => [t.id, t]));
+          const companyTradesMap = new Map(
+            companyTradesData?.map(ct => [ct.profile_id, ct.trade_ids]) || []
+          );
+          
+          enterpriseCompanies.forEach(company => {
+            if (company.name && company.name.trim()) {
+              const tradeIds = companyTradesMap.get(company.id) || [];
+              const companyTrades = (Array.isArray(tradeIds) ? tradeIds : [])
+                .map(id => tradeMap.get(id))
+                .filter(Boolean);
+              
+              const seoSlug = generateWorkerSeoSlug(company, companyTrades);
+              const loc = ensureTrailingSlash(`${baseUrl}/companii/${seoSlug}`);
+              
+              urls.push(`  <url>
+    <loc>${xmlEscape(loc)}</loc>
+    <lastmod>${currentDate}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>`);
+            }
+          });
+        }
+      }
+    }
+  } catch (error) {
+    console.error('❌ Error fetching Enterprise companies for sitemap:', error);
+  }
+
+  // ========================================
+  // 6️⃣ GENERATE SITEMAP
   // ========================================
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

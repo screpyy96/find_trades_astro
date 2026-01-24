@@ -1,6 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Crown, Eye, Star } from 'lucide-react';
 
+// Helper to check if user has premium subscription (pro or enterprise)
+const isPremiumUser = (plan: string | null | undefined): boolean => {
+  if (!plan) return false;
+  const normalizedPlan = plan.trim().toLowerCase();
+  return normalizedPlan === 'pro' || normalizedPlan === 'enterprise';
+};
+
 // Helper function to batch fetch subscriptions
 async function fetchSubscriptionsInBatches(
   supabase: any,
@@ -186,14 +193,14 @@ export function HeroProfessionals({
           subscriptionsData.map((sub: any) => [sub.user_id, sub.plan_id])
         );
 
-        // Map subscriptions to workers and filter PRO only
+        // Map subscriptions to workers and filter Premium only
         const workersWithData = workersData.map((worker: any) => ({
           ...worker,
           subscription_plan: subscriptionMap.get(worker.id) || null
         }));
 
         const proWorkers = workersWithData
-          .filter((w: any) => w.subscription_plan === 'pro')
+          .filter((w: any) => isPremiumUser(w.subscription_plan))
           .slice(0, maxResults);
         
         setProfessionals(proWorkers as Professional[]);

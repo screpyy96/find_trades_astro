@@ -120,4 +120,8 @@ export const romanianCities = [
   'Popești-Leordeni',
   'Pantelimon',
   'Chitila',
+  'Ilfov',
+  'Bragadiru',
+  'Otopeni',
+  'Măgurele',
 ];

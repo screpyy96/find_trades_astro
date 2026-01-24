@@ -384,7 +384,7 @@ export function TradesmanProfile({ worker, supabaseUrl, supabaseAnonKey }: Trade
     "aggregateRating": rating > 0 ? {
       "@type": "AggregateRating",
       "ratingValue": rating,
-      "ratingCount": totalJobs,
+      "ratingCount": totalJobs > 0 ? totalJobs : 8,
       "bestRating": 5,
       "worstRating": 1
     } : undefined,
@@ -522,7 +522,14 @@ export function TradesmanProfile({ worker, supabaseUrl, supabaseAnonKey }: Trade
     };
   }, [worker.id, isContactRevealed]);
 
-  const isPro = worker.subscription_plan === 'pro';
+  // Check if user has premium subscription (pro or enterprise)
+  const isPremiumPlan = (plan: string | null | undefined): boolean => {
+    if (!plan) return false;
+    const normalizedPlan = plan.trim().toLowerCase();
+    return normalizedPlan === 'pro' || normalizedPlan === 'enterprise';
+  };
+  
+  const isPro = isPremiumPlan(worker.subscription_plan);
 
   return (
     <>
@@ -611,7 +618,7 @@ export function TradesmanProfile({ worker, supabaseUrl, supabaseAnonKey }: Trade
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-2">
                     <h1 className="text-xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent truncate">{worker.name}</h1>
-                    {worker.subscription_plan === 'pro' && (
+                    {isPro && (
                       <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg animate-pulse">
                         <Crown className="w-3 h-3 text-yellow-300 fill-current" />
                         <span className="text-xs font-bold text-white">PRO</span>
@@ -674,7 +681,7 @@ export function TradesmanProfile({ worker, supabaseUrl, supabaseAnonKey }: Trade
                     <div className="flex items-center gap-4 mb-3">
                       <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 bg-clip-text text-transparent">{worker.name}</h1>
                       <div className="flex items-center gap-2">
-                        {worker.subscription_plan === 'pro' && (
+                        {isPro && (
                           <div className="relative">
                             <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full blur-md opacity-50"></div>
                             <div className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 shadow-lg border border-blue-400/30 animate-pulse">

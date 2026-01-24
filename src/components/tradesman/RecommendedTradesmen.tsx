@@ -3,6 +3,13 @@ import { Crown, MapPin } from 'lucide-react';
 import { TradesmanCard } from './TradesmanCard';
 import { TradesmanCardSkeleton } from './TradesmanCardSkeleton';
 
+// Helper to check if user has premium subscription (pro or enterprise)
+const isPremiumUser = (plan: string | null | undefined): boolean => {
+  if (!plan) return false;
+  const normalizedPlan = plan.trim().toLowerCase();
+  return normalizedPlan === 'pro' || normalizedPlan === 'enterprise';
+};
+
 // Helper function to batch fetch subscriptions to avoid URL too long errors
 async function fetchSubscriptionsInBatches(
   supabase: any,
@@ -82,8 +89,8 @@ function CompactTradesmanCard({ worker }: { worker: Worker }) {
           </div>
         )}
         
-        {/* PRO Badge - Top Right */}
-        {worker.subscription_plan === 'pro' && (
+        {/* PRO/Enterprise Badge - Top Right */}
+        {isPremiumUser(worker.subscription_plan) && (
           <div className="absolute top-1.5 right-1.5 flex items-center gap-0.5 px-1.5 py-0.5 bg-amber-500 rounded shadow-lg">
             <Crown className="w-2.5 h-2.5 text-white" />
             <span className="text-[10px] font-bold text-white">PRO</span>
@@ -342,22 +349,22 @@ export function RecommendedTradesmen({
           };
         });
 
-        // Prioritize PRO users only (no rating sorting needed)
+        // Prioritize Premium users (PRO and Enterprise)
         workersWithData.sort((a: any, b: any) => {
-          const aIsPro = a.subscription_plan === 'pro';
-          const bIsPro = b.subscription_plan === 'pro';
+          const aIsPremium = isPremiumUser(a.subscription_plan);
+          const bIsPremium = isPremiumUser(b.subscription_plan);
           
-          // PRO users first
-          if (aIsPro && !bIsPro) return -1;
-          if (!aIsPro && bIsPro) return 1;
+          // Premium users first
+          if (aIsPremium && !bIsPremium) return -1;
+          if (!aIsPremium && bIsPremium) return 1;
           
           // No additional sorting needed
           return 0;
         });
 
-        // Limit results and filter for PRO users only
-        const proWorkers = workersWithData.filter((w: any) => w.subscription_plan === 'pro');
-        const finalWorkers = proWorkers.slice(0, maxResults);
+        // Limit results and filter for Premium users only
+        const premiumWorkers = workersWithData.filter((w: any) => isPremiumUser(w.subscription_plan));
+        const finalWorkers = premiumWorkers.slice(0, maxResults);
         
         setWorkers(finalWorkers as Worker[]);
       } catch (err) {
@@ -395,7 +402,7 @@ export function RecommendedTradesmen({
             </div>
           </div>
           
-          {workers.some(w => w.subscription_plan === 'pro') && (
+          {workers.some(w => isPremiumUser(w.subscription_plan)) && (
             <div className="flex items-center gap-1 px-2 py-1 bg-amber-50 border border-amber-200 rounded-md">
               <Crown className="w-3 h-3 text-amber-600" />
               <span className="text-xs font-medium text-amber-700">PRO</span>

@@ -61,18 +61,12 @@ export const TradesmanCard = memo(({ worker }: { worker: WorkerProfile }) => {
   const trades = useMemo(() => worker.trades || [], [worker.trades]);
   const [isPhoneRevealed, setIsPhoneRevealed] = useState(false);
   
-  // Check if worker has pro subscription
+  // Check if worker has premium subscription (pro, premium, or enterprise)
   const isPro = worker.subscription_plan && (
     worker.subscription_plan.toLowerCase().includes('pro') || 
-    worker.subscription_plan.toLowerCase().includes('premium')
+    worker.subscription_plan.toLowerCase().includes('premium') ||
+    worker.subscription_plan.toLowerCase().includes('enterprise')
   );
-  
-  // Debug: log subscription info
-  console.log('👑 Worker subscription:', worker.name, { 
-    subscription_plan: worker.subscription_plan,
-    subscription_plan_type: typeof worker.subscription_plan,
-    isPro 
-  });
   
   // Generate profile URL with SEO-friendly slug
   const profileUrl = useMemo(() => {

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Home, Search, Menu, X, PlusCircle, LogIn, Briefcase, FileText, Info, Mail, BookOpen } from 'lucide-react';
+import { Home, Search, Menu, X, PlusCircle, LogIn, Briefcase, FileText, Info, Mail, BookOpen, Building2 } from 'lucide-react';
 
 interface MobileNavbarProps {
   currentPath: string;
@@ -66,6 +66,7 @@ export function MobileNavbar({ currentPath, appUrl = '', webUrl = '' }: MobileNa
 
   const publicLinks = [
     { icon: <Search className="w-5 h-5" />, label: 'Meșeriași', href: `${webUrl}/meseriasi` },
+    { icon: <Building2 className="w-5 h-5" />, label: 'Companii', href: `${webUrl}/companii` },
     { icon: <Briefcase className="w-5 h-5" />, label: 'Solicitări', href: `${webUrl}/solicitari` },
     { icon: <FileText className="w-5 h-5" />, label: 'Servicii', href: `${webUrl}/servicii` },
   ];

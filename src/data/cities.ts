@@ -59,6 +59,17 @@ export const cities: City[] = [
   { slug: 'slobozia', name: 'Slobozia', county: 'Ialomița', population: 45891 },
   { slug: 'miercurea-ciuc', name: 'Miercurea Ciuc', county: 'Harghita', population: 38966 },
   
+  // Județul Ilfov (zona metropolitană București)
+  { slug: 'ilfov', name: 'Ilfov', county: 'Ilfov', population: 450000 },
+  { slug: 'voluntari', name: 'Voluntari', county: 'Ilfov', population: 42944 },
+  { slug: 'buftea', name: 'Buftea', county: 'Ilfov', population: 22178 },
+  { slug: 'popesti-leordeni', name: 'Popești-Leordeni', county: 'Ilfov', population: 57945 },
+  { slug: 'pantelimon', name: 'Pantelimon', county: 'Ilfov', population: 27487 },
+  { slug: 'chitila', name: 'Chitila', county: 'Ilfov', population: 15009 },
+  { slug: 'bragadiru', name: 'Bragadiru', county: 'Ilfov', population: 18861 },
+  { slug: 'otopeni', name: 'Otopeni', county: 'Ilfov', population: 17585 },
+  { slug: 'magurele', name: 'Măgurele', county: 'Ilfov', population: 11065 },
+  
   // Alte orașe importante
   { slug: 'turda', name: 'Turda', county: 'Cluj', population: 47744 },
   { slug: 'medias', name: 'Mediaș', county: 'Sibiu', population: 47204 },

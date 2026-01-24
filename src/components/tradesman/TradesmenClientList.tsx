@@ -6,6 +6,13 @@ import { useInView } from 'react-intersection-observer';
 import { ServicePageCache, CacheKeys } from '../../lib/cache';
 import { trades } from '../../data';
 
+// Helper to check if user has premium subscription (pro or enterprise)
+const isPremiumUser = (plan: string | null | undefined): boolean => {
+  if (!plan) return false;
+  const normalizedPlan = plan.trim().toLowerCase();
+  return normalizedPlan === 'pro' || normalizedPlan === 'enterprise';
+};
+
 // Helper function to batch fetch subscriptions to avoid URL too long errors
 async function fetchSubscriptionsInBatches(
   supabase: any,
@@ -493,7 +500,7 @@ export function TradesmenClientList({
 
           console.log('💼 Workers mapped with subscriptions:', {
             total: workersWithTrades.length,
-            proCount: workersWithTrades.filter((w: any) => w.subscription_plan === 'pro').length,
+            premiumCount: workersWithTrades.filter((w: any) => isPremiumUser(w.subscription_plan)).length,
             firstFew: workersWithTrades.slice(0, 3).map((w: any) => ({
               name: w.name,
               subscription: w.subscription_plan
@@ -510,14 +517,14 @@ export function TradesmenClientList({
           const needsClientSidePagination = effectiveTrade;
 
           if (needsClientSidePagination) {
-            // Sort: PRO users first, then by rating
+            // Sort: PRO/Enterprise users first, then by rating
             workersWithTrades.sort((a: any, b: any) => {
-              const aIsPro = a.subscription_plan === 'pro';
-              const bIsPro = b.subscription_plan === 'pro';
+              const aIsPremium = isPremiumUser(a.subscription_plan);
+              const bIsPremium = isPremiumUser(b.subscription_plan);
               
-              // PRO users first
-              if (aIsPro && !bIsPro) return -1;
-              if (!aIsPro && bIsPro) return 1;
+              // Premium users first
+              if (aIsPremium && !bIsPremium) return -1;
+              if (!aIsPremium && bIsPremium) return 1;
               
               // Then by rating
               return (b.rating || 0) - (a.rating || 0);
@@ -525,7 +532,7 @@ export function TradesmenClientList({
 
             console.log('🔄 After sorting:', {
               total: workersWithTrades.length,
-              proCount: workersWithTrades.filter((w: any) => w.subscription_plan === 'pro').length,
+              premiumCount: workersWithTrades.filter((w: any) => isPremiumUser(w.subscription_plan)).length,
               firstFive: workersWithTrades.slice(0, 5).map((w: any) => ({
                 name: w.name,
                 subscription: w.subscription_plan,
@@ -544,7 +551,7 @@ export function TradesmenClientList({
               from, 
               to,
               itemsOnPage: paginatedWorkers.length,
-              proInPage: paginatedWorkers.filter((w: any) => w.subscription_plan === 'pro').length
+              premiumInPage: paginatedWorkers.filter((w: any) => isPremiumUser(w.subscription_plan)).length
             });
 
             if (reset) {
@@ -555,14 +562,14 @@ export function TradesmenClientList({
             setHasMore(workersWithTrades.length > to);
           } else {
             // Database-level pagination was already applied
-            // Just sort PRO users first within current page
+            // Just sort Premium users first within current page
             workersWithTrades.sort((a: any, b: any) => {
-              const aIsPro = a.subscription_plan === 'pro';
-              const bIsPro = b.subscription_plan === 'pro';
+              const aIsPremium = isPremiumUser(a.subscription_plan);
+              const bIsPremium = isPremiumUser(b.subscription_plan);
               
-              // PRO users first
-              if (aIsPro && !bIsPro) return -1;
-              if (!aIsPro && bIsPro) return 1;
+              // Premium users first
+              if (aIsPremium && !bIsPremium) return -1;
+              if (!aIsPremium && bIsPremium) return 1;
               
               // Keep database rating order
               return 0;
@@ -595,15 +602,16 @@ export function TradesmenClientList({
           // FIRST PAGE: Load PRO users first
           console.log('📊 First page - loading PRO users first');
           
-          // Step 1: Get all PRO user IDs
+          // Step 1: Get all PRO and Enterprise user IDs
           const { data: proSubscriptions } = await supabase
             .from('user_subscriptions')
-            .select('user_id')
+            .select('user_id, plan_id')
             .eq('status', 'active')
-            .eq('plan_id', 'pro');
+            .or('plan_id.eq.pro,plan_id.ilike.enterprise%');
           
           const proUserIds = proSubscriptions?.map((s: any) => s.user_id) || [];
-          console.log('💎 Found PRO users:', proUserIds.length);
+          const subscriptionMap = new Map(proSubscriptions?.map((s: any) => [s.user_id, s.plan_id?.trim()]) || []);
+          console.log('💎 Found PRO/Enterprise users:', proUserIds.length);
           
           let proWorkers: any[] = [];
           let regularWorkers: any[] = [];
@@ -723,7 +731,7 @@ export function TradesmenClientList({
               return {
                 ...worker,
                 trades: workerTrades,
-                subscription_plan: proUserIdsSet.has(worker.id) ? 'pro' : null
+                subscription_plan: subscriptionMap.get(worker.id) || null
               };
             });
 

@@ -1,6 +1,13 @@
 import { useState, useEffect } from 'react';
 import { MapPin } from 'lucide-react';
 
+// Helper to check if user has premium subscription (pro or enterprise)
+const isPremiumUser = (plan: string | null | undefined): boolean => {
+  if (!plan) return false;
+  const normalizedPlan = plan.trim().toLowerCase();
+  return normalizedPlan === 'pro' || normalizedPlan === 'enterprise';
+};
+
 // Helper function to batch fetch subscriptions to avoid URL too long errors
 async function fetchSubscriptionsInBatches(
   supabase: any,
@@ -171,13 +178,13 @@ export function CompactTradesmenList({
           subscription_plan: subscriptionMap.get(worker.id) || null
         }));
 
-        // Sort: PRO users first, then others
+        // Sort: Premium users first, then others
         workersWithData.sort((a: any, b: any) => {
-          const aIsPro = a.subscription_plan === 'pro';
-          const bIsPro = b.subscription_plan === 'pro';
+          const aIsPremium = isPremiumUser(a.subscription_plan);
+          const bIsPremium = isPremiumUser(b.subscription_plan);
           
-          if (aIsPro && !bIsPro) return -1;
-          if (!aIsPro && bIsPro) return 1;
+          if (aIsPremium && !bIsPremium) return -1;
+          if (!aIsPremium && bIsPremium) return 1;
           
           return 0;
         });
@@ -230,8 +237,8 @@ export function CompactTradesmenList({
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {workers.map((worker: Worker) => (
               <div key={worker.id} className="bg-white rounded-lg p-4 border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200 relative">
-                {/* PRO Badge */}
-                {worker.subscription_plan === 'pro' && (
+                {/* PRO/Enterprise Badge */}
+                {isPremiumUser(worker.subscription_plan) && (
                   <div className="absolute -top-2 -right-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
                     PRO
                   </div>

@@ -164,7 +164,8 @@ export function Navbar({
           <div className="flex items-center gap-2">
             <NavLink href={webUrl || '/'} onDark={isTransparent} isActive={isPathActive('/')}>Acasă</NavLink>
             <NavLink href={`${webUrl}/servicii`} onDark={isTransparent} isActive={isPathActive('/servicii')}>Servicii</NavLink>
-            <NavLink href={`${webUrl}/meseriasi`} onDark={isTransparent} isActive={isPathActive('/meseriasi')}>Caută meșeriași</NavLink>
+            <NavLink href={`${webUrl}/meseriasi`} onDark={isTransparent} isActive={isPathActive('/meseriasi')}>Meșeriași</NavLink>
+            <NavLink href={`${webUrl}/companii`} onDark={isTransparent} isActive={isPathActive('/companii')}>Companii</NavLink>
             <NavLink href={`${webUrl}/solicitari`} onDark={isTransparent} isActive={isPathActive('/solicitari')}>Solicitări</NavLink>
             <NavLink href={`${webUrl}/blog`} onDark={isTransparent} isActive={isPathActive('/blog')}>Blog</NavLink>
           </div>
