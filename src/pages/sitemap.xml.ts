@@ -1,4 +1,3 @@
-import { romanianCities } from '../lib/romanian-cities.js';
 import { trades } from '../data/trades.js';
 import { createClient } from '@sanity/client';
 import groq from 'groq';
@@ -96,6 +95,7 @@ export async function GET() {
     { url: '/montaj-gresie-faianta-salaj/', priority: '1.0', changefreq: 'weekly' },
     { url: '/montaj-parchet-valcea/', priority: '1.0', changefreq: 'weekly' },
     { url: '/amenajari-finisaje-valcea/', priority: '1.0', changefreq: 'weekly' },
+    { url: '/acoperisuri-giurgiu/', priority: '1.0', changefreq: 'weekly' },
     // NOTE: /meseriasi and /solicitari are NOT included - they're dynamic user content
   ];
 
@@ -176,35 +176,8 @@ export async function GET() {
   </url>`);
     });
 
-    // Service + City combinations (Top 50 cities - HIGHEST PRIORITY for long-tail SEO)
-    const priorityCities = romanianCities.slice(0, 50);
-    const seenUrls = new Set<string>();
-
-    trades.forEach(trade => {
-      if (!trade.category || !trade.category.trim()) return;
-
-      const categorySlug = slugify(trade.category).toLowerCase();
-      const slugToUse = trade.slug && trade.slug.trim() ? trade.slug : slugify(trade.name);
-      const tradeSlug = slugToUse.toLowerCase();
-
-      if (!categorySlug || !tradeSlug) return;
-
-      priorityCities.forEach((city: string) => {
-        const citySlug = slugify(city).toLowerCase();
-        if (!citySlug) return;
-
-        const url = ensureTrailingSlash(`${baseUrl}/servicii/${categorySlug}/${tradeSlug}/${citySlug}`);
-        if (seenUrls.has(url)) return;
-        seenUrls.add(url);
-
-        urls.push(`  <url>
-    <loc>${xmlEscape(url)}</loc>
-    <lastmod>${currentDate}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.95</priority>
-  </url>`);
-      });
-    });
+    // NOTE: Service + City combinations are now in sitemap-cities.xml
+    // This keeps the main sitemap smaller and allows separate indexing in GSC
   }
 
   // ========================================
