@@ -1,0 +1,513 @@
+---
+import Base from '../layouts/Base.astro';
+import { RecommendedTradesmen } from '../components/tradesman/RecommendedTradesmen';
+import { getPublicSupabaseConfig } from '../lib/publicEnv';
+
+const { url: supabaseUrl, anonKey: supabaseAnonKey } = getPublicSupabaseConfig();
+const APP_URL = 'https://app.meseriaslocal.ro';
+
+// SEO optimizat
+const title = "Faiantar Salaj | Montaj Gresie Faianta Zalau - 20 Ani Experienta 2026";
+const description = "Faiantar Salaj cu 20 ani experienta, 10 ani Italia. Montaj gresie, faianta, piatra naturala in Zalau, Simleu Silvaniei, Jibou. Gresier profesionist, preturi de la 35 lei/mp.";
+const canonical = "https://www.meseriaslocal.ro/montaj-gresie-faianta-salaj";
+
+const localBusinessSchema = {
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "@id": `${canonical}#localbusiness`,
+  "name": "Montaj Gresie Faianta Salaj | Meserias Local",
+  "description": description,
+  "url": canonical,
+  "telephone": "+447930097259",
+  "areaServed": [
+    { "@type": "City", "name": "Zalau" },
+    { "@type": "AdministrativeArea", "name": "Salaj" }
+  ],
+  "address": { "@type": "PostalAddress", "streetAddress": "Platforma Online", "addressLocality": "Zalau", "addressRegion": "Salaj", "postalCode": "450001", "addressCountry": "RO" },
+  "priceRange": "$$",
+  "image": "https://www.meseriaslocal.ro/logo.svg",
+  "aggregateRating": { "@type": "AggregateRating", "ratingValue": "5.0", "reviewCount": "8" }
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { 
+      "@type": "Question", 
+      "name": "Cat costa montajul de gresie si faianta in Salaj?",
+      "acceptedAnswer": { 
+        "@type": "Answer", 
+        "text": "Pretul montajului de gresie si faianta in Salaj variaza intre 35-70 lei/mp pentru manopera, in functie de dimensiunea placilor, complexitatea lucrarii si tipul de montaj. Piatra naturala si mozaicul au preturi mai mari, de la 60 lei/mp."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Ce tipuri de placi montati?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Montam toate tipurile de placi ceramice: gresie portelanata, faianta, gresie rectificata, placi mari format (60x60, 80x80, 120x60), piatra naturala (marmura, granit, travertin), mozaic ceramic si sticla. Experienta din Italia ne permite sa lucram cu orice tip de material."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Cat dureaza montajul intr-o baie completa?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Montajul complet de gresie si faianta intr-o baie standard (5-8 mp) dureaza 3-5 zile, incluzand pregatirea suprafetei, montajul si rostuirea. Pentru bai mai mari sau cu design complex, durata poate fi de 5-7 zile."
+      }
+    }
+  ]
+};
+
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Acasa", "item": "https://www.meseriaslocal.ro" },
+    { "@type": "ListItem", "position": 2, "name": "Servicii", "item": "https://www.meseriaslocal.ro/servicii" },
+    { "@type": "ListItem", "position": 3, "name": "Montaj Gresie Faianta Salaj", "item": canonical }
+  ]
+};
+
+const serviceSchema = {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "name": "Montaj Gresie si Faianta Salaj",
+  "description": "Servicii profesionale de montaj gresie, faianta si piatra naturala in judetul Salaj, cu meserias cu 20 ani experienta",
+  "provider": { "@type": "LocalBusiness", "@id": `${canonical}#localbusiness` },
+  "areaServed": [{ "@type": "City", "name": "Zalau" }, { "@type": "AdministrativeArea", "name": "Salaj" }],
+  "serviceType": ["Montaj gresie", "Montaj faianta", "Montaj piatra naturala", "Montaj mozaic", "Placari ceramice"],
+  "url": canonical,
+  "offers": {
+    "@type": "AggregateOffer",
+    "lowPrice": "35",
+    "highPrice": "100",
+    "priceCurrency": "RON",
+    "offerCount": "8"
+  }
+};
+
+const services = [
+  { name: "Montaj gresie standard", price: "35-50 lei/mp", desc: "Placi 30x30, 40x40, 45x45 cm" },
+  { name: "Montaj gresie portelanata", price: "40-55 lei/mp", desc: "Placi rectificate, finisaj mat sau lucios" },
+  { name: "Montaj placi mari format", price: "50-70 lei/mp", desc: "60x60, 80x80, 120x60 cm" },
+  { name: "Montaj faianta baie/bucatarie", price: "35-50 lei/mp", desc: "Inclusiv decupaje pentru prize, robineti" },
+  { name: "Montaj piatra naturala", price: "60-100 lei/mp", desc: "Marmura, granit, travertin" },
+  { name: "Montaj mozaic", price: "50-80 lei/mp", desc: "Mozaic ceramic, sticla, piatra" }
+];
+
+const zones = [
+  "Zalau", "Simleu Silvaniei", "Jibou", "Cehu Silvaniei", "Crasna", "Nusfalau",
+  "Ip", "Surduc", "Cizer", "Bobota", "Hereclean", "Lupoaia", "Varsolt", "Almasu",
+  "Somes-Odorhei", "Marca", "Chiesd", "Valcau de Jos", "Mesesenii de Jos", "Romanasi"
+];
+---
+
+
+<Base title={title} description={description} canonical={canonical} disableDefaultBreadcrumb={true}>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(localBusinessSchema)} is:inline></script>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(faqSchema)} is:inline></script>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} is:inline></script>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(serviceSchema)} is:inline></script>
+  
+  <meta slot="head" name="keywords" content="montaj gresie salaj, montaj faianta salaj, faiantar salaj, gresie zalau, faianta zalau, montaj placi ceramice salaj, piatra naturala salaj, mozaic salaj, gresier salaj, faiantar zalau, gresier zalau, pret montaj gresie salaj, pret montaj faianta salaj, montaj gresie portelanata salaj, montaj faianta baie salaj, placare gresie salaj, placare faianta salaj, montaj placi mari salaj, faiantar simleu silvaniei, faiantar jibou, gresie faianta cehu silvaniei, montaj gresie crasna, faiantar experienta italia, montaj profesional gresie, specialist faianta salaj, meserias gresie faianta, firma montaj gresie salaj" />
+  <meta slot="head" name="geo.region" content="RO-SJ" />
+  <meta slot="head" name="geo.placename" content="Zalau" />
+
+  <!-- Hero Section -->
+  <section class="py-12 sm:py-16" style="background: linear-gradient(180deg, #1a1d2e 0%, #1e2235 50%, #252a3d 100%)">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-4xl mx-auto text-center">
+        <nav class="flex justify-center mb-6">
+          <ol class="flex items-center space-x-2 text-slate-300 text-xs font-medium">
+            <li><a href="/" class="hover:text-white">Acasa</a></li>
+            <li><span class="mx-2 text-white/40">/</span></li>
+            <li><a href="/servicii/" class="hover:text-white">Servicii</a></li>
+            <li><span class="mx-2 text-white/40">/</span></li>
+            <li><span class="text-amber-400 font-semibold">Montaj Gresie Faianta Salaj</span></li>
+          </ol>
+        </nav>
+
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">
+          Faiantar Salaj - Montaj Gresie si Faianta Zalau cu 20 Ani Experienta
+        </h1>
+        
+        <p class="text-xl text-slate-300 mb-4">
+          Faiantar profesionist cu experienta internationala | Gresie, faianta, piatra naturala, mozaic
+        </p>
+
+        <p class="text-lg text-slate-300 mb-8 max-w-3xl mx-auto leading-relaxed">
+          Servicii de montaj gresie si faianta in judetul Salaj, executate de meserias cu <strong class="text-white">20 de ani experienta</strong>, 
+          din care <strong class="text-white">10 ani lucrati in Italia</strong>. Calitate italiana la preturi romanesti. 
+          Lucram cu orice tip de placi ceramice, piatra naturala si mozaic.
+        </p>
+
+        <!-- Trust badges -->
+        <div class="flex flex-wrap items-center justify-center gap-4 mb-8">
+          <div class="bg-white/10 rounded-lg px-4 py-2">
+            <div class="text-amber-400 font-bold text-lg">20 ani</div>
+            <div class="text-slate-300 text-sm">Experienta</div>
+          </div>
+          <div class="bg-white/10 rounded-lg px-4 py-2">
+            <div class="text-amber-400 font-bold text-lg">10 ani</div>
+            <div class="text-slate-300 text-sm">Italia</div>
+          </div>
+          <div class="bg-white/10 rounded-lg px-4 py-2">
+            <div class="text-amber-400 font-bold text-lg">5.0/5</div>
+            <div class="text-slate-300 text-sm">Rating</div>
+          </div>
+          <div class="bg-white/10 rounded-lg px-4 py-2">
+            <div class="text-amber-400 font-bold text-lg">95%</div>
+            <div class="text-slate-300 text-sm">Raspuns</div>
+          </div>
+        </div>
+
+        <a href={`${APP_URL}/cere-oferta?title=${encodeURIComponent('Montaj Gresie Faianta Salaj')}`}
+          class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold rounded-xl hover:from-amber-600 hover:to-orange-600 shadow-lg text-lg">
+          Cere oferta gratuita
+          <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRO Tradesmen -->
+  <section class="bg-gradient-to-b from-slate-50 to-white pt-4">
+    <div class="max-w-7xl mx-auto px-4">
+      <RecommendedTradesmen
+        tradeIds={[14]}
+        tradeName="Gresie Faianta"
+        cityName="Sălaj"
+        supabaseUrl={supabaseUrl}
+        supabaseAnonKey={supabaseAnonKey}
+        maxResults={4}
+        compact={true}
+        client:load
+      />
+    </div>
+  </section>
+
+
+  <div class="max-w-7xl mx-auto px-4 pt-4 pb-16 sm:pt-6 sm:pb-20">
+    <div class="space-y-12">
+      
+      <!-- Intro SEO Text -->
+      <section class="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
+        <h2 class="text-2xl font-bold text-slate-900 mb-6">
+          Faiantar Profesionist in Salaj - Gresie, Faianta, Piatra Naturala
+        </h2>
+        
+        <p class="text-slate-700 mb-4 leading-relaxed">
+          Cauti un <strong>faiantar in Salaj</strong> sau un <strong>gresier in Zalau</strong>? Ai nevoie de 
+          <strong>montaj gresie</strong> sau <strong>montaj faianta</strong> pentru baie, bucatarie sau living? 
+          Oferim servicii profesionale de <strong>placare cu gresie si faianta</strong> in tot judetul Salaj, 
+          cu experienta de 20 de ani in domeniu si 10 ani lucrati in Italia.
+        </p>
+        
+        <p class="text-slate-700 mb-4 leading-relaxed">
+          Fie ca ai nevoie de un <strong>faiantar in Zalau</strong>, <strong>faiantar in Simleu Silvaniei</strong>, 
+          <strong>faiantar in Jibou</strong> sau <strong>gresier in Cehu Silvaniei</strong>, suntem disponibili 
+          pentru orice tip de lucrare: <strong>montaj gresie portelanata</strong>, <strong>montaj faianta baie</strong>, 
+          <strong>placare cu piatra naturala</strong>, <strong>montaj mozaic</strong> sau <strong>montaj placi mari format</strong>.
+        </p>
+        
+        <p class="text-slate-700 leading-relaxed">
+          Preturile pentru <strong>montaj gresie in Salaj</strong> incep de la 35 lei/mp, iar pentru 
+          <strong>montaj faianta in Salaj</strong> de la 35 lei/mp. Oferim <strong>evaluare gratuita</strong>, 
+          consultanta pentru alegerea materialelor si <strong>garantie 3 ani</strong> pe manopera. 
+          Calitate italiana la preturi romanesti.
+        </p>
+      </section>
+
+      <!-- De ce experienta italiana conteaza -->
+      <section class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 border border-blue-100">
+        <h2 class="text-2xl font-bold text-slate-900 mb-6">
+          De Ce Conteaza Experienta din Italia
+        </h2>
+        
+        <p class="text-slate-700 mb-6 leading-relaxed">
+          Italia este recunoscuta mondial pentru traditia in ceramica si placari. Cei 10 ani de experienta 
+          acumulata pe santierele italiene inseamna standarde ridicate de calitate, tehnici avansate de montaj 
+          si atentie la detalii pe care putini meseriasi din Romania le pot oferi.
+        </p>
+
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="p-4 bg-white rounded-lg border border-blue-200 text-center">
+            <div class="text-3xl mb-2">🎯</div>
+            <h3 class="font-semibold text-slate-900 text-sm">Precizie maxima</h3>
+            <p class="text-xs text-slate-600 mt-1">Rosturi perfecte, aliniere impecabila</p>
+          </div>
+          <div class="p-4 bg-white rounded-lg border border-blue-200 text-center">
+            <div class="text-3xl mb-2">🔧</div>
+            <h3 class="font-semibold text-slate-900 text-sm">Tehnici moderne</h3>
+            <p class="text-xs text-slate-600 mt-1">Montaj placi mari, sisteme nivelare</p>
+          </div>
+          <div class="p-4 bg-white rounded-lg border border-blue-200 text-center">
+            <div class="text-3xl mb-2">✨</div>
+            <h3 class="font-semibold text-slate-900 text-sm">Finisaje premium</h3>
+            <p class="text-xs text-slate-600 mt-1">Atentie la detalii, curatenie</p>
+          </div>
+          <div class="p-4 bg-white rounded-lg border border-blue-200 text-center">
+            <div class="text-3xl mb-2">📐</div>
+            <h3 class="font-semibold text-slate-900 text-sm">Design complex</h3>
+            <p class="text-xs text-slate-600 mt-1">Modele, borduri, combinatii</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Servicii si preturi -->
+      <section class="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
+        <h2 class="text-2xl font-bold text-slate-900 mb-6">
+          Servicii Montaj Gresie si Faianta - Preturi 2026
+        </h2>
+        
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {services.map(service => (
+            <div class="p-5 bg-slate-50 rounded-xl border border-slate-200 hover:border-slate-300 transition-colors">
+              <h3 class="font-bold text-slate-900 mb-2">{service.name}</h3>
+              <p class="text-sm text-slate-600 mb-3">{service.desc}</p>
+              <span class="inline-block px-3 py-1 bg-amber-100 text-amber-800 rounded-lg text-sm font-semibold">
+                {service.price}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <div class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+          <p class="text-blue-800 text-sm">
+            <strong>Nota:</strong> Preturile sunt orientative si includ doar manopera. Materialele (adeziv, chit rosturi, profile) 
+            se calculeaza separat. Oferim consultanta gratuita pentru alegerea materialelor potrivite.
+          </p>
+        </div>
+      </section>
+
+      <!-- Tipuri de lucrari -->
+      <section class="bg-slate-50 rounded-2xl p-8 border border-slate-200">
+        <h2 class="text-2xl font-bold text-slate-900 mb-6">
+          Tipuri de Lucrari Executate
+        </h2>
+        
+        <div class="grid md:grid-cols-2 gap-6">
+          <div class="p-6 bg-white rounded-xl border border-slate-200">
+            <h3 class="font-bold text-slate-900 text-lg mb-4">Bai si Grupuri Sanitare</h3>
+            <ul class="space-y-2 text-sm text-slate-700">
+              <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5">&#10003;</span> Placare completa pereti si pardoseala</li>
+              <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5">&#10003;</span> Decupaje precise pentru instalatii</li>
+              <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5">&#10003;</span> Hidroizolatie sub placi</li>
+              <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5">&#10003;</span> Cabine dus walk-in</li>
+              <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5">&#10003;</span> Nise si rafturi din placi</li>
+            </ul>
+          </div>
+          
+          <div class="p-6 bg-white rounded-xl border border-slate-200">
+            <h3 class="font-bold text-slate-900 text-lg mb-4">Bucatarii</h3>
+            <ul class="space-y-2 text-sm text-slate-700">
+              <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5">&#10003;</span> Faianta perete (backsplash)</li>
+              <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5">&#10003;</span> Gresie pardoseala</li>
+              <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5">&#10003;</span> Blat din gresie portelanata</li>
+              <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5">&#10003;</span> Decupaje pentru prize si hota</li>
+              <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5">&#10003;</span> Combinatii decorative</li>
+            </ul>
+          </div>
+          
+          <div class="p-6 bg-white rounded-xl border border-slate-200">
+            <h3 class="font-bold text-slate-900 text-lg mb-4">Living si Dormitoare</h3>
+            <ul class="space-y-2 text-sm text-slate-700">
+              <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5">&#10003;</span> Gresie portelanata efect lemn</li>
+              <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5">&#10003;</span> Gresie efect marmura</li>
+              <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5">&#10003;</span> Placi mari format (minimal joints)</li>
+              <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5">&#10003;</span> Montaj pe incalzire in pardoseala</li>
+              <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5">&#10003;</span> Placari decorative perete</li>
+            </ul>
+          </div>
+          
+          <div class="p-6 bg-white rounded-xl border border-slate-200">
+            <h3 class="font-bold text-slate-900 text-lg mb-4">Exterior si Terase</h3>
+            <ul class="space-y-2 text-sm text-slate-700">
+              <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5">&#10003;</span> Gresie antiderapanta exterior</li>
+              <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5">&#10003;</span> Placari scari exterioare</li>
+              <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5">&#10003;</span> Terase si balcoane</li>
+              <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5">&#10003;</span> Piscine si zone umede</li>
+              <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5">&#10003;</span> Placari fatade</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- Materiale cu care lucram -->
+      <section class="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
+        <h2 class="text-2xl font-bold text-slate-900 mb-6">
+          Tipuri de Placi si Materiale
+        </h2>
+        
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div class="p-4 bg-slate-50 rounded-lg">
+            <h3 class="font-semibold text-slate-900 mb-2">Gresie Portelanata</h3>
+            <p class="text-sm text-slate-600">Cea mai rezistenta, ideala pentru trafic intens. Disponibila in multiple finisaje: mat, lucios, satinat, structurat.</p>
+          </div>
+          <div class="p-4 bg-slate-50 rounded-lg">
+            <h3 class="font-semibold text-slate-900 mb-2">Gresie Rectificata</h3>
+            <p class="text-sm text-slate-600">Muchii perfect drepte pentru rosturi minime (1-2mm). Aspect modern, elegant, usor de curatat.</p>
+          </div>
+          <div class="p-4 bg-slate-50 rounded-lg">
+            <h3 class="font-semibold text-slate-900 mb-2">Faianta Ceramica</h3>
+            <p class="text-sm text-slate-600">Pentru pereti interiori. Gama larga de culori, modele si texturi. Usor de montat si intretinut.</p>
+          </div>
+          <div class="p-4 bg-slate-50 rounded-lg">
+            <h3 class="font-semibold text-slate-900 mb-2">Piatra Naturala</h3>
+            <p class="text-sm text-slate-600">Marmura, granit, travertin, ardezie. Aspect luxos, unic. Necesita tratament de protectie.</p>
+          </div>
+          <div class="p-4 bg-slate-50 rounded-lg">
+            <h3 class="font-semibold text-slate-900 mb-2">Mozaic</h3>
+            <p class="text-sm text-slate-600">Ceramic, sticla sau piatra. Ideal pentru zone curbe, nise, borduri decorative si accente.</p>
+          </div>
+          <div class="p-4 bg-slate-50 rounded-lg">
+            <h3 class="font-semibold text-slate-900 mb-2">Placi Mari Format</h3>
+            <p class="text-sm text-slate-600">60x60, 80x80, 120x60, 120x120 cm. Aspect continuu, mai putine rosturi, spatii mai mari vizual.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Zone acoperite -->
+      <section class="bg-emerald-50 rounded-2xl p-8 border border-emerald-100">
+        <h2 class="text-2xl font-bold text-slate-900 mb-6">
+          Zone Acoperite - Montaj Gresie Faianta Salaj
+        </h2>
+        
+        <p class="text-slate-700 mb-6">
+          Executam lucrari de montaj gresie si faianta in <strong>Zalau</strong> si in tot <strong>judetul Salaj</strong>. 
+          Deplasare gratuita pentru evaluare si masuratori.
+        </p>
+
+        <div class="flex flex-wrap gap-2">
+          {zones.map(zone => (
+            <span class="px-3 py-1.5 bg-white text-slate-700 rounded-lg text-sm font-medium border border-emerald-200 shadow-sm">
+              {zone}
+            </span>
+          ))}
+        </div>
+      </section>
+
+      <!-- Procesul de lucru -->
+      <section class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-8 text-white">
+        <h2 class="text-2xl font-bold mb-6">
+          Cum Lucram - Etapele Montajului
+        </h2>
+        
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="p-4 bg-white/10 rounded-lg">
+            <div class="text-amber-400 font-bold text-2xl mb-2">01</div>
+            <h3 class="font-semibold text-white mb-1">Evaluare</h3>
+            <p class="text-slate-300 text-xs">Masuratori, analiza suprafata, consultanta alegere materiale</p>
+          </div>
+          <div class="p-4 bg-white/10 rounded-lg">
+            <div class="text-amber-400 font-bold text-2xl mb-2">02</div>
+            <h3 class="font-semibold text-white mb-1">Pregatire</h3>
+            <p class="text-slate-300 text-xs">Curatare, nivelare, amorsare, hidroizolatie daca e cazul</p>
+          </div>
+          <div class="p-4 bg-white/10 rounded-lg">
+            <div class="text-amber-400 font-bold text-2xl mb-2">03</div>
+            <h3 class="font-semibold text-white mb-1">Montaj</h3>
+            <p class="text-slate-300 text-xs">Aplicare adeziv, pozitionare placi, nivelare, decupaje</p>
+          </div>
+          <div class="p-4 bg-white/10 rounded-lg">
+            <div class="text-amber-400 font-bold text-2xl mb-2">04</div>
+            <h3 class="font-semibold text-white mb-1">Finisare</h3>
+            <p class="text-slate-300 text-xs">Rostuire, curatare, montaj profile, predare</p>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- FAQ -->
+      <section class="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
+        <h2 class="text-2xl font-bold text-slate-900 mb-6">
+          Intrebari Frecvente despre Montaj Gresie Faianta
+        </h2>
+        
+        <div class="space-y-4">
+          <details class="group bg-slate-50 rounded-lg" open>
+            <summary class="flex items-center justify-between p-4 cursor-pointer font-semibold text-slate-900">
+              Cat costa montajul de gresie si faianta in Salaj?
+              <span class="text-slate-400 group-open:rotate-180 transition-transform">&#9660;</span>
+            </summary>
+            <div class="px-4 pb-4 text-slate-700 leading-relaxed">
+              <p>Pretul montajului de gresie si faianta in Salaj variaza intre 35-70 lei/mp pentru manopera, in functie de dimensiunea placilor, complexitatea lucrarii si tipul de montaj. Piatra naturala si mozaicul au preturi mai mari, de la 60 lei/mp. Pretul final include si pregatirea suprafetei.</p>
+            </div>
+          </details>
+          
+          <details class="group bg-slate-50 rounded-lg">
+            <summary class="flex items-center justify-between p-4 cursor-pointer font-semibold text-slate-900">
+              Ce tipuri de placi montati?
+              <span class="text-slate-400 group-open:rotate-180 transition-transform">&#9660;</span>
+            </summary>
+            <div class="px-4 pb-4 text-slate-700 leading-relaxed">
+              <p>Montam toate tipurile de placi ceramice: gresie portelanata, faianta, gresie rectificata, placi mari format (60x60, 80x80, 120x60), piatra naturala (marmura, granit, travertin), mozaic ceramic si sticla. Experienta din Italia ne permite sa lucram cu orice tip de material, inclusiv cele mai pretentioase.</p>
+            </div>
+          </details>
+          
+          <details class="group bg-slate-50 rounded-lg">
+            <summary class="flex items-center justify-between p-4 cursor-pointer font-semibold text-slate-900">
+              Cat dureaza montajul intr-o baie completa?
+              <span class="text-slate-400 group-open:rotate-180 transition-transform">&#9660;</span>
+            </summary>
+            <div class="px-4 pb-4 text-slate-700 leading-relaxed">
+              <p>Montajul complet de gresie si faianta intr-o baie standard (5-8 mp) dureaza 3-5 zile, incluzand pregatirea suprafetei, montajul si rostuirea. Pentru bai mai mari sau cu design complex (nise, cabina dus, mozaic), durata poate fi de 5-7 zile.</p>
+            </div>
+          </details>
+          
+          <details class="group bg-slate-50 rounded-lg">
+            <summary class="flex items-center justify-between p-4 cursor-pointer font-semibold text-slate-900">
+              Faceti si pregatirea suprafetei?
+              <span class="text-slate-400 group-open:rotate-180 transition-transform">&#9660;</span>
+            </summary>
+            <div class="px-4 pb-4 text-slate-700 leading-relaxed">
+              <p>Da, pregatirea suprafetei este esentiala pentru un montaj de calitate. Include: curatarea si decopertarea vechilor finisaje, nivelarea cu sapa sau masa de nivelare, amorsarea si aplicarea hidroizolatiei in zonele umede (bai, dusuri). Pretul se calculeaza separat.</p>
+            </div>
+          </details>
+          
+          <details class="group bg-slate-50 rounded-lg">
+            <summary class="flex items-center justify-between p-4 cursor-pointer font-semibold text-slate-900">
+              Ce garantie oferiti pe lucrari?
+              <span class="text-slate-400 group-open:rotate-180 transition-transform">&#9660;</span>
+            </summary>
+            <div class="px-4 pb-4 text-slate-700 leading-relaxed">
+              <p>Oferim garantie de 3 ani pe manopera. Garantia acopera defectele de montaj: placi desprinse, rosturi crapatate, denivelari. Nu acopera defectele materialelor sau deteriorarile cauzate de utilizare necorespunzatoare. Folosim doar adezivi si chituri de calitate pentru durabilitate maxima.</p>
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <!-- CTA -->
+      <section class="bg-gradient-to-r from-amber-500 to-orange-500 rounded-2xl p-8 text-center">
+        <h2 class="text-2xl font-bold text-white mb-4">
+          Ai Nevoie de Montaj Gresie sau Faianta in Salaj?
+        </h2>
+        <p class="text-white/90 mb-6 max-w-2xl mx-auto">
+          Contacteaza-ne pentru o oferta personalizata. Evaluare gratuita, consultanta pentru alegerea materialelor si preturi corecte.
+        </p>
+        <a href={`${APP_URL}/cere-oferta?title=${encodeURIComponent('Montaj Gresie Faianta Salaj')}`}
+          class="inline-flex items-center px-8 py-4 bg-white text-orange-600 font-bold rounded-xl hover:bg-slate-100 transition-all duration-200 shadow-lg text-lg">
+          Cere Oferta Gratuita
+          <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+          </svg>
+        </a>
+        
+        <div class="mt-6 flex flex-wrap items-center justify-center gap-6 text-sm text-white/80">
+          <span>20 ani experienta</span>
+          <span>|</span>
+          <span>Calitate italiana</span>
+          <span>|</span>
+          <span>Garantie 3 ani</span>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</Base>
