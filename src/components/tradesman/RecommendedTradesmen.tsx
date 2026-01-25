@@ -6,8 +6,9 @@ import { TradesmanCardSkeleton } from './TradesmanCardSkeleton';
 // Helper to check if user has premium subscription (pro or enterprise)
 const isPremiumUser = (plan: string | null | undefined): boolean => {
   if (!plan) return false;
-  const normalizedPlan = plan.trim().toLowerCase();
-  return normalizedPlan === 'pro' || normalizedPlan === 'enterprise';
+  // Normalize: trim whitespace, remove newlines, lowercase
+  const normalizedPlan = plan.replace(/[\r\n]/g, '').trim().toLowerCase();
+  return normalizedPlan === 'pro' || normalizedPlan.startsWith('enterprise');
 };
 
 // Helper function to batch fetch subscriptions to avoid URL too long errors
@@ -426,11 +427,25 @@ export function RecommendedTradesmen({
             .map((id: number) => tradeMap.get(id))
             .filter(Boolean);
           
+          const plan = subscriptionMap.get(worker.id) || null;
+          
           return {
             ...worker,
             trades: workerTrades,
-            subscription_plan: subscriptionMap.get(worker.id) || null
+            subscription_plan: plan
           };
+        });
+
+        // Debug logging
+        console.log('🔍 RecommendedTradesmen Debug:', {
+          totalWorkers: workersWithData.length,
+          subscriptionsFound: subscriptionsData.length,
+          subscriptionPlans: subscriptionsData.map((s: any) => ({ user_id: s.user_id, plan: s.plan_id })),
+          workersWithPlans: workersWithData.filter((w: any) => w.subscription_plan).map((w: any) => ({ 
+            name: w.name, 
+            plan: w.subscription_plan,
+            isPremium: isPremiumUser(w.subscription_plan)
+          }))
         });
 
         // Prioritize Premium users (PRO and Enterprise)

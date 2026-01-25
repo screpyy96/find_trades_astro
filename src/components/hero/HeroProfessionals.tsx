@@ -4,8 +4,9 @@ import { Crown, Eye, Star } from 'lucide-react';
 // Helper to check if user has premium subscription (pro or enterprise)
 const isPremiumUser = (plan: string | null | undefined): boolean => {
   if (!plan) return false;
-  const normalizedPlan = plan.trim().toLowerCase();
-  return normalizedPlan === 'pro' || normalizedPlan === 'enterprise';
+  // Normalize: trim whitespace, remove newlines, lowercase
+  const normalizedPlan = plan.replace(/[\r\n]/g, '').trim().toLowerCase();
+  return normalizedPlan === 'pro' || normalizedPlan.startsWith('enterprise');
 };
 
 // Helper function to batch fetch subscriptions
