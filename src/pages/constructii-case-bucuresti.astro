@@ -1,0 +1,594 @@
+---
+import Base from '../layouts/Base.astro';
+import { RecommendedTradesmen } from '../components/tradesman/RecommendedTradesmen';
+import { getPublicSupabaseConfig } from '../lib/publicEnv';
+
+const { url: supabaseUrl, anonKey: supabaseAnonKey } = getPublicSupabaseConfig();
+const APP_URL = 'https://app.meseriaslocal.ro';
+
+// SEO optimizat
+const title = "Constructii Case Bucuresti Ilfov | La Rosu, La Cheie - Preturi 2026";
+const description = "Constructii case la rosu si la cheie in Bucuresti si Ilfov. Case din lemn, instalatii electrice si sanitare complete. Echipe verificate, garantie, preturi de la 350 euro/mp.";
+const canonical = "https://www.meseriaslocal.ro/constructii-case-bucuresti";
+
+const localBusinessSchema = {
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "@id": `${canonical}#localbusiness`,
+  "name": "Constructii Case Bucuresti | Meserias Local",
+  "description": description,
+  "url": canonical,
+  "telephone": "+447930097259",
+  "areaServed": [
+    { "@type": "City", "name": "Bucuresti" },
+    { "@type": "AdministrativeArea", "name": "Ilfov" }
+  ],
+  "address": { "@type": "PostalAddress", "streetAddress": "Platforma Online", "addressLocality": "Bucuresti", "addressRegion": "Ilfov", "postalCode": "010001", "addressCountry": "RO" },
+  "priceRange": "$$",
+  "image": "https://www.meseriaslocal.ro/logo.svg",
+  "aggregateRating": { "@type": "AggregateRating", "ratingValue": "5.0", "reviewCount": "8" }
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { 
+      "@type": "Question", 
+      "name": "Cat costa constructia unei case la rosu in Bucuresti?",
+      "acceptedAnswer": { 
+        "@type": "Answer", 
+        "text": "Pretul pentru o casa la rosu in Bucuresti si Ilfov variaza intre 350-500 euro/mp, in functie de complexitate, materiale si teren. O casa de 120mp la rosu costa orientativ 42.000-60.000 euro. Pretul include fundatie, structura, acoperis si inchideri exterioare."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Care este diferenta dintre casa la rosu si casa la cheie?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Casa la rosu include fundatia, structura de rezistenta, acoperisul si inchiderile exterioare. Casa la cheie include in plus toate finisajele interioare si exterioare, instalatiile complete, tamplaria si este gata de locuit. Diferenta de pret este de aproximativ 40-60%."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Cat dureaza constructia unei case in Bucuresti?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Durata constructiei depinde de tipul casei: casa la rosu dureaza 3-5 luni, casa la cheie 6-12 luni. Casele din lemn pot fi finalizate mai rapid, in 2-4 luni pentru structura. Timpul efectiv depinde de conditiile meteo si complexitatea proiectului."
+      }
+    }
+  ]
+};
+
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Acasa", "item": "https://www.meseriaslocal.ro" },
+    { "@type": "ListItem", "position": 2, "name": "Servicii", "item": "https://www.meseriaslocal.ro/servicii" },
+    { "@type": "ListItem", "position": 3, "name": "Constructii Case Bucuresti", "item": canonical }
+  ]
+};
+
+const serviceSchema = {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "name": "Constructii Case Bucuresti si Ilfov",
+  "description": "Servicii complete constructii case la rosu si la cheie, case din lemn, instalatii electrice si sanitare in Bucuresti si Ilfov",
+  "provider": { "@type": "LocalBusiness", "@id": `${canonical}#localbusiness` },
+  "areaServed": [{ "@type": "City", "name": "Bucuresti" }, { "@type": "AdministrativeArea", "name": "Ilfov" }],
+  "serviceType": ["Constructii case la rosu", "Constructii case la cheie", "Case din lemn", "Instalatii electrice", "Instalatii sanitare"],
+  "url": canonical,
+  "offers": {
+    "@type": "AggregateOffer",
+    "lowPrice": "350",
+    "highPrice": "800",
+    "priceCurrency": "EUR",
+    "offerCount": "5"
+  }
+};
+
+const services = [
+  { 
+    name: "Constructii Case la Rosu", 
+    desc: "Fundatie, structura rezistenta, acoperis, zidarie exterioara",
+    price: "350-500 euro/mp",
+    duration: "3-5 luni"
+  },
+  { 
+    name: "Constructii Case la Cheie", 
+    desc: "Casa completa cu finisaje, instalatii, tamplarie, gata de locuit",
+    price: "600-800 euro/mp",
+    duration: "6-12 luni"
+  },
+  { 
+    name: "Case din Lemn", 
+    desc: "Structura lemn masiv sau cadru, ecologice, eficiente energetic",
+    price: "400-600 euro/mp",
+    duration: "2-4 luni"
+  },
+  { 
+    name: "Instalatii Electrice Complete", 
+    desc: "Tablou electric, cablare, prize, intrerupatoare, iluminat",
+    price: "25-45 lei/mp",
+    duration: "1-3 saptamani"
+  },
+  { 
+    name: "Instalatii Sanitare Complete", 
+    desc: "Alimentare apa, canalizare, obiecte sanitare, incalzire",
+    price: "30-50 lei/mp",
+    duration: "1-3 saptamani"
+  }
+];
+
+const zones = [
+  "Bucuresti Sector 1", "Sector 2", "Sector 3", "Sector 4", "Sector 5", "Sector 6",
+  "Voluntari", "Popesti-Leordeni", "Bragadiru", "Chiajna", "Otopeni", "Tunari",
+  "Pantelimon", "Buftea", "Chitila", "Magurele", "Cornetu", "Domnesti"
+];
+---
+
+
+<Base title={title} description={description} canonical={canonical} disableDefaultBreadcrumb={true}>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(localBusinessSchema)} is:inline></script>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(faqSchema)} is:inline></script>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} is:inline></script>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(serviceSchema)} is:inline></script>
+  
+  <meta slot="head" name="keywords" content="constructii case bucuresti, case la rosu bucuresti, case la cheie bucuresti, constructii case ilfov, case din lemn bucuresti, instalatii electrice bucuresti, instalatii sanitare bucuresti, constructor case bucuresti" />
+  <meta slot="head" name="geo.region" content="RO-B" />
+  <meta slot="head" name="geo.placename" content="Bucuresti" />
+
+  <!-- Hero Section -->
+  <section class="py-12 sm:py-16" style="background: linear-gradient(180deg, #1a1d2e 0%, #1e2235 50%, #252a3d 100%)">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-4xl mx-auto text-center">
+        <nav class="flex justify-center mb-6">
+          <ol class="flex items-center space-x-2 text-slate-300 text-xs font-medium">
+            <li><a href="/" class="hover:text-white">Acasa</a></li>
+            <li><span class="mx-2 text-white/40">/</span></li>
+            <li><a href="/servicii/" class="hover:text-white">Servicii</a></li>
+            <li><span class="mx-2 text-white/40">/</span></li>
+            <li><span class="text-amber-400 font-semibold">Constructii Case Bucuresti</span></li>
+          </ol>
+        </nav>
+
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">
+          Constructii Case Bucuresti si Ilfov - La Rosu si La Cheie 2026
+        </h1>
+        
+        <p class="text-xl text-slate-300 mb-4">
+          Case la rosu, case la cheie, case din lemn | Instalatii electrice si sanitare complete
+        </p>
+
+        <p class="text-lg text-slate-300 mb-8 max-w-3xl mx-auto leading-relaxed">
+          Servicii complete de constructii case in Bucuresti si judetul Ilfov. De la fundatie pana la cheie, 
+          cu instalatii electrice si sanitare profesionale. Echipe verificate cu experienta, materiale de calitate, 
+          garantie pe lucrari. <strong class="text-white">Seriozitate, calitate si respectarea termenelor.</strong>
+        </p>
+
+        <!-- Trust badges -->
+        <div class="flex flex-wrap items-center justify-center gap-4 mb-8">
+          <div class="bg-white/10 rounded-lg px-4 py-2">
+            <div class="text-amber-400 font-bold text-lg">5.0/5</div>
+            <div class="text-slate-300 text-sm">Rating</div>
+          </div>
+          <div class="bg-white/10 rounded-lg px-4 py-2">
+            <div class="text-amber-400 font-bold text-lg">95%</div>
+            <div class="text-slate-300 text-sm">Rata raspuns</div>
+          </div>
+          <div class="bg-white/10 rounded-lg px-4 py-2">
+            <div class="text-amber-400 font-bold text-lg">8+</div>
+            <div class="text-slate-300 text-sm">Recenzii</div>
+          </div>
+          <div class="bg-white/10 rounded-lg px-4 py-2">
+            <div class="text-amber-400 font-bold text-lg">3 ani</div>
+            <div class="text-slate-300 text-sm">Garantie</div>
+          </div>
+        </div>
+
+        <a href={`${APP_URL}/cere-oferta?title=${encodeURIComponent('Constructii Case Bucuresti')}`}
+          class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold rounded-xl hover:from-amber-600 hover:to-orange-600 shadow-lg text-lg">
+          Cere oferta gratuita
+          <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+          </svg>
+        </a>
+        
+        <div class="mt-6 flex flex-wrap items-center justify-center gap-4 text-sm text-slate-400">
+          <span class="flex items-center gap-1"><span class="w-5 h-5 bg-amber-500 rounded-full text-white text-xs flex items-center justify-center">1</span> Descrii proiectul</span>
+          <span class="flex items-center gap-1"><span class="w-5 h-5 bg-amber-500 rounded-full text-white text-xs flex items-center justify-center">2</span> Primesti oferta detaliata</span>
+          <span class="flex items-center gap-1"><span class="w-5 h-5 bg-amber-500 rounded-full text-white text-xs flex items-center justify-center">3</span> Incepem constructia</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRO Tradesmen -->
+  <section class="bg-gradient-to-b from-slate-50 to-white pt-4">
+    <div class="max-w-7xl mx-auto px-4">
+      <RecommendedTradesmen
+        tradeIds={[1, 2, 23, 24]}
+        tradeName="Constructii"
+        cityName="București"
+        supabaseUrl={supabaseUrl}
+        supabaseAnonKey={supabaseAnonKey}
+        maxResults={4}
+        compact={true}
+        client:load
+      />
+    </div>
+  </section>
+
+
+  <div class="max-w-7xl mx-auto px-4 pt-4 pb-16 sm:pt-6 sm:pb-20">
+    <div class="space-y-12">
+      
+      <!-- Servicii oferite -->
+      <section class="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
+        <h2 class="text-2xl font-bold text-slate-900 mb-6">
+          Servicii Complete de Constructii Case in Bucuresti
+        </h2>
+        
+        <p class="text-slate-700 mb-6 leading-relaxed">
+          Oferim servicii complete in domeniul constructiilor, de la case la rosu pana la case la cheie, 
+          inclusiv instalatii electrice si sanitare. Fiecare proiect este tratat cu seriozitate, 
+          punand accent pe calitate, durabilitate si respectarea termenelor stabilite.
+        </p>
+
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {services.map(service => (
+            <div class="p-5 bg-slate-50 rounded-xl border border-slate-200 hover:border-slate-300 transition-colors">
+              <h3 class="font-bold text-slate-900 mb-2">{service.name}</h3>
+              <p class="text-sm text-slate-600 mb-3">{service.desc}</p>
+              <div class="flex items-center justify-between text-xs">
+                <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded font-medium">{service.price}</span>
+                <span class="text-slate-500">{service.duration}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- Case la Rosu vs La Cheie -->
+      <section class="bg-slate-50 rounded-2xl p-8 border border-slate-200">
+        <h2 class="text-2xl font-bold text-slate-900 mb-6">
+          Casa la Rosu vs Casa la Cheie - Ce Alegi?
+        </h2>
+        
+        <div class="grid md:grid-cols-2 gap-6">
+          <div class="p-6 bg-white rounded-xl border border-slate-200">
+            <h3 class="font-bold text-slate-900 text-lg mb-4 flex items-center gap-2">
+              <span class="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-white text-sm">1</span>
+              Casa la Rosu
+            </h3>
+            <p class="text-slate-600 mb-4">
+              Varianta ideala daca vrei sa economisesti si sa faci singur finisajele sau sa le faci in timp.
+            </p>
+            <ul class="space-y-2 text-sm text-slate-700">
+              <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5">&#10003;</span> Fundatie completa (radier sau continua)</li>
+              <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5">&#10003;</span> Structura de rezistenta (stalpi, grinzi, plansee)</li>
+              <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5">&#10003;</span> Zidarie exterioara completa</li>
+              <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5">&#10003;</span> Acoperis cu invelitoare</li>
+              <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5">&#10003;</span> Tamplarie exterioara (optional)</li>
+            </ul>
+            <div class="mt-4 p-3 bg-red-50 rounded-lg">
+              <span class="text-red-800 font-semibold">350-500 euro/mp</span>
+            </div>
+          </div>
+          
+          <div class="p-6 bg-white rounded-xl border border-slate-200">
+            <h3 class="font-bold text-slate-900 text-lg mb-4 flex items-center gap-2">
+              <span class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white text-sm">2</span>
+              Casa la Cheie
+            </h3>
+            <p class="text-slate-600 mb-4">
+              Solutia completa - te muti direct. Include tot ce ai nevoie pentru o locuinta functionala.
+            </p>
+            <ul class="space-y-2 text-sm text-slate-700">
+              <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5">&#10003;</span> Tot ce include casa la rosu</li>
+              <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5">&#10003;</span> Instalatii electrice complete</li>
+              <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5">&#10003;</span> Instalatii sanitare si incalzire</li>
+              <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5">&#10003;</span> Finisaje interioare (tencuieli, glet, vopsea)</li>
+              <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5">&#10003;</span> Pardoseli, usi, tamplarie completa</li>
+            </ul>
+            <div class="mt-4 p-3 bg-green-50 rounded-lg">
+              <span class="text-green-800 font-semibold">600-800 euro/mp</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- Case din Lemn -->
+      <section class="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
+        <h2 class="text-2xl font-bold text-slate-900 mb-6">
+          Case din Lemn Bucuresti - Constructii Ecologice
+        </h2>
+        
+        <p class="text-slate-700 mb-6 leading-relaxed">
+          Casele din lemn reprezinta o alternativa moderna, ecologica si eficienta energetic. 
+          Construim atat case cu structura din lemn masiv, cat si case cu cadru din lemn (timber frame), 
+          adaptate climatului din zona Bucuresti-Ilfov.
+        </p>
+
+        <div class="grid sm:grid-cols-2 gap-6">
+          <div class="p-5 bg-amber-50 rounded-xl border border-amber-200">
+            <h3 class="font-bold text-amber-900 mb-3">Avantaje Case din Lemn</h3>
+            <ul class="space-y-2 text-amber-800 text-sm">
+              <li class="flex items-start gap-2"><span class="text-amber-500 mt-0.5">&#10003;</span> Constructie rapida (2-4 luni)</li>
+              <li class="flex items-start gap-2"><span class="text-amber-500 mt-0.5">&#10003;</span> Izolatie termica excelenta</li>
+              <li class="flex items-start gap-2"><span class="text-amber-500 mt-0.5">&#10003;</span> Material ecologic si sustenabil</li>
+              <li class="flex items-start gap-2"><span class="text-amber-500 mt-0.5">&#10003;</span> Costuri reduse cu incalzirea</li>
+              <li class="flex items-start gap-2"><span class="text-amber-500 mt-0.5">&#10003;</span> Rezistenta la cutremure</li>
+            </ul>
+          </div>
+          <div class="p-5 bg-blue-50 rounded-xl border border-blue-200">
+            <h3 class="font-bold text-blue-900 mb-3">Tipuri de Case din Lemn</h3>
+            <ul class="space-y-2 text-blue-800 text-sm">
+              <li class="flex items-start gap-2"><span class="text-blue-500 mt-0.5">&#10003;</span> Case cu busteni (log house)</li>
+              <li class="flex items-start gap-2"><span class="text-blue-500 mt-0.5">&#10003;</span> Case cu cadru lemn (timber frame)</li>
+              <li class="flex items-start gap-2"><span class="text-blue-500 mt-0.5">&#10003;</span> Case modulare prefabricate</li>
+              <li class="flex items-start gap-2"><span class="text-blue-500 mt-0.5">&#10003;</span> Case pasive din lemn</li>
+              <li class="flex items-start gap-2"><span class="text-blue-500 mt-0.5">&#10003;</span> Cabane si case de vacanta</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Instalatii -->
+      <section class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-8 text-white">
+        <h2 class="text-2xl font-bold mb-6">
+          Instalatii Electrice si Sanitare Complete
+        </h2>
+        
+        <p class="text-slate-300 mb-6 leading-relaxed">
+          Pe langa constructii, oferim servicii complete de instalatii electrice si sanitare, 
+          atat pentru case noi cat si pentru renovari. Lucram conform normativelor in vigoare, 
+          cu materiale de calitate si garantie pe lucrari.
+        </p>
+
+        <div class="grid md:grid-cols-2 gap-6">
+          <div class="p-5 bg-white/10 rounded-xl">
+            <h3 class="font-bold text-white mb-3">Instalatii Electrice</h3>
+            <ul class="space-y-2 text-slate-300 text-sm">
+              <li>&#8226; Tablouri electrice si automatizari</li>
+              <li>&#8226; Cablare structurata (cupru/aluminiu)</li>
+              <li>&#8226; Prize, intrerupatoare, comutatoare</li>
+              <li>&#8226; Iluminat interior si exterior</li>
+              <li>&#8226; Instalatii trifazate</li>
+              <li>&#8226; Sisteme smart home</li>
+            </ul>
+            <div class="mt-4 text-amber-400 font-semibold">25-45 lei/mp</div>
+          </div>
+          <div class="p-5 bg-white/10 rounded-xl">
+            <h3 class="font-bold text-white mb-3">Instalatii Sanitare</h3>
+            <ul class="space-y-2 text-slate-300 text-sm">
+              <li>&#8226; Alimentare apa rece si calda</li>
+              <li>&#8226; Canalizare interioara si exterioara</li>
+              <li>&#8226; Montaj obiecte sanitare</li>
+              <li>&#8226; Instalatii incalzire (calorifere, pardoseala)</li>
+              <li>&#8226; Centrale termice si boilere</li>
+              <li>&#8226; Pompe recirculare</li>
+            </ul>
+            <div class="mt-4 text-amber-400 font-semibold">30-50 lei/mp</div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- Etapele constructiei -->
+      <section class="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
+        <h2 class="text-2xl font-bold text-slate-900 mb-6">
+          Etapele Constructiei unei Case
+        </h2>
+        
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="p-4 bg-slate-50 rounded-lg border-l-4 border-blue-500">
+            <div class="text-blue-600 font-bold text-2xl mb-2">01</div>
+            <h3 class="font-semibold text-slate-900 mb-1">Proiectare</h3>
+            <p class="text-xs text-slate-600">Analiza teren, proiect tehnic, autorizatii</p>
+          </div>
+          <div class="p-4 bg-slate-50 rounded-lg border-l-4 border-amber-500">
+            <div class="text-amber-600 font-bold text-2xl mb-2">02</div>
+            <h3 class="font-semibold text-slate-900 mb-1">Fundatie</h3>
+            <p class="text-xs text-slate-600">Sapatura, armare, turnare beton</p>
+          </div>
+          <div class="p-4 bg-slate-50 rounded-lg border-l-4 border-green-500">
+            <div class="text-green-600 font-bold text-2xl mb-2">03</div>
+            <h3 class="font-semibold text-slate-900 mb-1">Structura</h3>
+            <p class="text-xs text-slate-600">Stalpi, grinzi, plansee, zidarie</p>
+          </div>
+          <div class="p-4 bg-slate-50 rounded-lg border-l-4 border-purple-500">
+            <div class="text-purple-600 font-bold text-2xl mb-2">04</div>
+            <h3 class="font-semibold text-slate-900 mb-1">Finalizare</h3>
+            <p class="text-xs text-slate-600">Acoperis, instalatii, finisaje</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Zone acoperite -->
+      <section class="bg-slate-50 rounded-2xl p-8 border border-slate-200">
+        <h2 class="text-2xl font-bold text-slate-900 mb-6">
+          Zone Acoperite - Constructii Bucuresti si Ilfov
+        </h2>
+        
+        <p class="text-slate-700 mb-6">
+          Executam lucrari de constructii in <strong>Bucuresti</strong> (toate sectoarele) si in 
+          <strong>judetul Ilfov</strong>. Deplasare gratuita pentru evaluare si ofertare.
+        </p>
+
+        <div class="flex flex-wrap gap-2">
+          {zones.map(zone => (
+            <span class="px-3 py-1.5 bg-white text-slate-700 rounded-lg text-sm font-medium border border-slate-200 shadow-sm">
+              {zone}
+            </span>
+          ))}
+        </div>
+      </section>
+
+      <!-- De ce noi -->
+      <section class="bg-emerald-50 rounded-2xl p-8 border border-emerald-100">
+        <h2 class="text-2xl font-bold text-slate-900 mb-6">
+          De Ce Sa Alegi Serviciile Noastre
+        </h2>
+        
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-white flex-shrink-0">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-semibold text-slate-900">Seriozitate</h3>
+              <p class="text-sm text-slate-600">Respectam termenele si angajamentele asumate</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-white flex-shrink-0">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-semibold text-slate-900">Calitate</h3>
+              <p class="text-sm text-slate-600">Materiale premium si executie profesionala</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-white flex-shrink-0">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-semibold text-slate-900">Punctualitate</h3>
+              <p class="text-sm text-slate-600">Livrare la termen, fara intarzieri</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-white flex-shrink-0">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-semibold text-slate-900">Garantie 3 ani</h3>
+              <p class="text-sm text-slate-600">Garantie extinsa pe toate lucrarile</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-white flex-shrink-0">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-semibold text-slate-900">Echipa completa</h3>
+              <p class="text-sm text-slate-600">Constructori, electricieni, instalatori</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-white flex-shrink-0">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-semibold text-slate-900">Preturi corecte</h3>
+              <p class="text-sm text-slate-600">Oferte detaliate, fara costuri ascunse</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- FAQ -->
+      <section class="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
+        <h2 class="text-2xl font-bold text-slate-900 mb-6">
+          Intrebari Frecvente despre Constructii Case Bucuresti
+        </h2>
+        
+        <div class="space-y-4">
+          <details class="group bg-slate-50 rounded-lg" open>
+            <summary class="flex items-center justify-between p-4 cursor-pointer font-semibold text-slate-900">
+              Cat costa constructia unei case la rosu in Bucuresti?
+              <span class="text-slate-400 group-open:rotate-180 transition-transform">&#9660;</span>
+            </summary>
+            <div class="px-4 pb-4 text-slate-700 leading-relaxed">
+              <p>Pretul pentru o casa la rosu in Bucuresti si Ilfov variaza intre 350-500 euro/mp, in functie de complexitate, materiale si teren. O casa de 120mp la rosu costa orientativ 42.000-60.000 euro. Pretul include fundatie, structura, acoperis si inchideri exterioare.</p>
+            </div>
+          </details>
+          
+          <details class="group bg-slate-50 rounded-lg">
+            <summary class="flex items-center justify-between p-4 cursor-pointer font-semibold text-slate-900">
+              Care este diferenta dintre casa la rosu si casa la cheie?
+              <span class="text-slate-400 group-open:rotate-180 transition-transform">&#9660;</span>
+            </summary>
+            <div class="px-4 pb-4 text-slate-700 leading-relaxed">
+              <p>Casa la rosu include fundatia, structura de rezistenta, acoperisul si inchiderile exterioare. Casa la cheie include in plus toate finisajele interioare si exterioare, instalatiile complete, tamplaria si este gata de locuit. Diferenta de pret este de aproximativ 40-60%.</p>
+            </div>
+          </details>
+          
+          <details class="group bg-slate-50 rounded-lg">
+            <summary class="flex items-center justify-between p-4 cursor-pointer font-semibold text-slate-900">
+              Cat dureaza constructia unei case in Bucuresti?
+              <span class="text-slate-400 group-open:rotate-180 transition-transform">&#9660;</span>
+            </summary>
+            <div class="px-4 pb-4 text-slate-700 leading-relaxed">
+              <p>Durata constructiei depinde de tipul casei: casa la rosu dureaza 3-5 luni, casa la cheie 6-12 luni. Casele din lemn pot fi finalizate mai rapid, in 2-4 luni pentru structura. Timpul efectiv depinde de conditiile meteo si complexitatea proiectului.</p>
+            </div>
+          </details>
+          
+          <details class="group bg-slate-50 rounded-lg">
+            <summary class="flex items-center justify-between p-4 cursor-pointer font-semibold text-slate-900">
+              Ce acte sunt necesare pentru constructia unei case?
+              <span class="text-slate-400 group-open:rotate-180 transition-transform">&#9660;</span>
+            </summary>
+            <div class="px-4 pb-4 text-slate-700 leading-relaxed">
+              <p>Pentru constructia unei case ai nevoie de: certificat de urbanism, proiect tehnic vizat, avize utilitati (apa, gaz, electric), autorizatie de construire. Procesul dureaza 2-4 luni. Te putem ajuta cu intocmirea documentatiei necesare.</p>
+            </div>
+          </details>
+          
+          <details class="group bg-slate-50 rounded-lg">
+            <summary class="flex items-center justify-between p-4 cursor-pointer font-semibold text-slate-900">
+              Oferiti garantie pe lucrarile de constructii?
+              <span class="text-slate-400 group-open:rotate-180 transition-transform">&#9660;</span>
+            </summary>
+            <div class="px-4 pb-4 text-slate-700 leading-relaxed">
+              <p>Da, oferim garantie de 3 ani pe toate lucrarile de constructii, instalatii electrice si sanitare. Garantia acopera defectele de executie si materialele folosite. In plus, structura de rezistenta beneficiaza de garantie extinsa conform legii.</p>
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <!-- CTA -->
+      <section class="bg-gradient-to-r from-amber-500 to-orange-500 rounded-2xl p-8 text-center">
+        <h2 class="text-2xl font-bold text-white mb-4">
+          Vrei sa Construiesti o Casa in Bucuresti sau Ilfov?
+        </h2>
+        <p class="text-white/90 mb-6 max-w-2xl mx-auto">
+          Contacteaza-ne pentru o oferta personalizata. Evaluare gratuita, consultanta tehnica si preturi competitive.
+        </p>
+        <a href={`${APP_URL}/cere-oferta?title=${encodeURIComponent('Constructii Case Bucuresti')}`}
+          class="inline-flex items-center px-8 py-4 bg-white text-orange-600 font-bold rounded-xl hover:bg-slate-100 transition-all duration-200 shadow-lg text-lg">
+          Cere Oferta Gratuita
+          <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+          </svg>
+        </a>
+        
+        <div class="mt-6 flex flex-wrap items-center justify-center gap-6 text-sm text-white/80">
+          <span>Garantie 3 ani</span>
+          <span>|</span>
+          <span>Echipa completa</span>
+          <span>|</span>
+          <span>Preturi corecte</span>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</Base>
