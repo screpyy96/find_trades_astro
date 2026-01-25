@@ -94,6 +94,8 @@ export async function GET() {
     { url: '/carotare-timisoara/', priority: '1.0', changefreq: 'weekly' },
     { url: '/constructii-case-bucuresti/', priority: '1.0', changefreq: 'weekly' },
     { url: '/montaj-gresie-faianta-salaj/', priority: '1.0', changefreq: 'weekly' },
+    { url: '/montaj-parchet-valcea/', priority: '1.0', changefreq: 'weekly' },
+    { url: '/amenajari-finisaje-valcea/', priority: '1.0', changefreq: 'weekly' },
     // NOTE: /meseriasi and /solicitari are NOT included - they're dynamic user content
   ];
 

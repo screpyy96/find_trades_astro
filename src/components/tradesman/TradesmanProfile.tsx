@@ -286,9 +286,9 @@ function PortfolioModal({ item, onClose }: { item: any; onClose: () => void }) {
                 <span className="text-emerald-600 font-medium text-sm">Client</span>
                 <p className="font-bold text-emerald-900">{item.client_name || 'Confidențial'}</p>
               </div>
-              <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-2xl border border-purple-200">
-                <span className="text-purple-600 font-medium text-sm">Locație</span>
-                <p className="font-bold text-purple-900">{item.location || 'N/A'}</p>
+              <div className="bg-gradient-to-r from-slate-50 to-gray-50 p-4 rounded-2xl border border-slate-200">
+                <span className="text-orange-600 font-medium text-sm">Locație</span>
+                <p className="font-bold text-slate-900">{item.location || 'N/A'}</p>
               </div>
               <div className="bg-gradient-to-r from-amber-50 to-orange-50 p-4 rounded-2xl border border-amber-200">
                 <span className="text-amber-600 font-medium text-sm">Data Finalizării</span>
@@ -355,6 +355,8 @@ export function TradesmanProfile({ worker, supabaseUrl, supabaseAnonKey }: Trade
     ).join(' ') : '';
   const rating = worker.rating || 0;
   const totalJobs = (worker as any).total_jobs || 0;
+  const reviews = (worker as any).reviews || [];
+  const reviewCount = reviews.length;
 
   // Capitalize worker name properly
   const capitalizedWorkerName = worker.name ?
@@ -384,7 +386,7 @@ export function TradesmanProfile({ worker, supabaseUrl, supabaseAnonKey }: Trade
     "aggregateRating": rating > 0 ? {
       "@type": "AggregateRating",
       "ratingValue": rating,
-      "ratingCount": totalJobs > 0 ? totalJobs : 8,
+      "ratingCount": reviewCount > 0 ? reviewCount : (totalJobs > 0 ? totalJobs : 1),
       "bestRating": 5,
       "worstRating": 1
     } : undefined,
@@ -410,7 +412,6 @@ export function TradesmanProfile({ worker, supabaseUrl, supabaseAnonKey }: Trade
 
   const trades = (worker as any).trades || [];
   const portfolioItems = (worker as any).portfolio_items || [];
-  const reviews = (worker as any).reviews || [];
   const certifications = (worker as any).certifications || [];
 
   // Calculate average rating from reviews
