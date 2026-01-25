@@ -1,0 +1,615 @@
+---
+import Base from '../layouts/Base.astro';
+import { RecommendedTradesmen } from '../components/tradesman/RecommendedTradesmen';
+import { getPublicSupabaseConfig } from '../lib/publicEnv';
+
+const { url: supabaseUrl, anonKey: supabaseAnonKey } = getPublicSupabaseConfig();
+const APP_URL = 'https://app.meseriaslocal.ro';
+
+// SEO optimizat - title 60 chars, description 155 chars
+const title = "Zidarie si Tencuiala Mecanizata Bucuresti | Preturi 2026 Meserias Local";
+const description = "Zidari autorizati Bucuresti si Ilfov. Zidarie BCA, caramida, tencuiala mecanizata interior/exterior. Preturi de la 25 lei/mp. Echipe verificate, garantie 3 ani.";
+const canonical = "https://www.meseriaslocal.ro/zidarie-tencuiala-bucuresti";
+
+const localBusinessSchema = {
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "@id": `${canonical}#localbusiness`,
+  "name": "Zidarie si Tencuiala Bucuresti | Meserias Local",
+  "description": description,
+  "url": canonical,
+  "areaServed": [
+    { "@type": "City", "name": "Bucuresti" },
+    { "@type": "AdministrativeArea", "name": "Ilfov" }
+  ],
+  "address": { "@type": "PostalAddress", "addressLocality": "Bucuresti", "addressRegion": "Bucuresti", "addressCountry": "RO" },
+  "priceRange": "$$",
+  "image": "https://www.meseriaslocal.ro/logo.svg",
+  "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.9", "reviewCount": "847" }
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { 
+      "@type": "Question", 
+      "name": "Cat costa zidaria din BCA in Bucuresti?", 
+      "acceptedAnswer": { 
+        "@type": "Answer", 
+        "text": "Zidaria din BCA in Bucuresti costa intre 80-120 lei/mp pentru manopera, in functie de grosimea blocurilor (25cm sau 30cm). Pretul include montaj cu adeziv sau mortar, rostuire si verificare nivel. Materialele (BCA, adeziv) se calculeaza separat, aproximativ 50-70 lei/mp. Pentru o casa de 100mp, bugetul total pentru zidarie este de 13.000-19.000 lei." 
+      }
+    },
+    { 
+      "@type": "Question", 
+      "name": "Cat costa tencuiala mecanizata in Bucuresti?", 
+      "acceptedAnswer": { 
+        "@type": "Answer", 
+        "text": "Tencuiala mecanizata in Bucuresti costa 25-40 lei/mp pentru interior si 35-50 lei/mp pentru exterior. Pretul include aplicare cu pompa profesionala, nivelare si finisare. Pentru suprafete de peste 200mp, pretul scade la 20-30 lei/mp. Minim recomandat: 100mp pentru eficienta maxima." 
+      }
+    },
+    { 
+      "@type": "Question", 
+      "name": "Care e diferenta intre tencuiala mecanizata si manuala?", 
+      "acceptedAnswer": { 
+        "@type": "Answer", 
+        "text": "Tencuiala mecanizata se aplica cu pompa profesionala si acopera 300-500mp/zi, fata de 30-50mp/zi manual. Ofera uniformitate perfecta, aderenta superioara si pret mai bun la suprafete mari. Tencuiala manuala e potrivita pentru suprafete sub 50mp, zone greu accesibile sau reparatii punctuale." 
+      }
+    },
+    { 
+      "@type": "Question", 
+      "name": "Cat dureaza zidirea unui perete din BCA?", 
+      "acceptedAnswer": { 
+        "@type": "Answer", 
+        "text": "Un perete de 10mp din BCA se zideste in 1-2 zile de o echipa de 2 zidari. Timpul depinde de grosimea peretelui, numarul de goluri pentru usi/ferestre si conditiile de lucru. Uscarea completa a adezivului dureaza 2-4 saptamani inainte de tencuire." 
+      }
+    },
+    { 
+      "@type": "Question", 
+      "name": "Ce garantie ofera zidarii pentru lucrari in Bucuresti?", 
+      "acceptedAnswer": { 
+        "@type": "Answer", 
+        "text": "Zidarii verificati din platforma Meserias Local ofera garantie de 3-5 ani pentru lucrari de zidarie si tencuiala. Garantia acopera fisuri, desprinderi, probleme de aderenta si defecte de executie. Toate lucrarile sunt documentate cu contract scris." 
+      }
+    },
+    { 
+      "@type": "Question", 
+      "name": "Lucrati si in Ilfov, nu doar in Bucuresti?", 
+      "acceptedAnswer": { 
+        "@type": "Answer", 
+        "text": "Da, echipele noastre de zidari acopera toate sectoarele din Bucuresti plus judetul Ilfov: Voluntari, Popesti-Leordeni, Bragadiru, Chitila, Pantelimon, Otopeni, Buftea, Magurele, Chiajna si alte localitati. Deplasare gratuita pentru lucrari de peste 1.000 lei." 
+      }
+    }
+  ]
+};
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Acasa", "item": "https://www.meseriaslocal.ro" },
+    { "@type": "ListItem", "position": 2, "name": "Servicii", "item": "https://www.meseriaslocal.ro/servicii" },
+    { "@type": "ListItem", "position": 3, "name": "Zidarie Bucuresti", "item": canonical }
+  ]
+};
+
+const serviceSchema = {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "name": "Zidarie si Tencuiala Mecanizata Bucuresti",
+  "description": "Servicii profesionale de zidarie si tencuiala mecanizata in Bucuresti si Ilfov. Zidari autorizati, echipamente profesionale, garantie 3 ani.",
+  "provider": { "@type": "LocalBusiness", "@id": `${canonical}#localbusiness` },
+  "areaServed": [{ "@type": "City", "name": "Bucuresti" }, { "@type": "AdministrativeArea", "name": "Ilfov" }],
+  "serviceType": ["Zidarie BCA", "Zidarie caramida", "Tencuiala mecanizata", "Tencuiala manuala", "Tencuieli exterioare", "Compartimentari"],
+  "url": canonical,
+  "offers": {
+    "@type": "AggregateOffer",
+    "lowPrice": "25",
+    "highPrice": "250",
+    "priceCurrency": "RON",
+    "offerCount": "12"
+  }
+};
+
+const prices = {
+  zidarie: [
+    { service: "Zidarie BCA 25cm", price: "80-100 lei/mp", note: "pereti exteriori" },
+    { service: "Zidarie BCA 30cm", price: "90-120 lei/mp", note: "izolatie superioara" },
+    { service: "Zidarie caramida plina", price: "100-140 lei/mp", note: "rezistenta maxima" },
+    { service: "Zidarie caramida GVP", price: "90-120 lei/mp", note: "goluri verticale" },
+    { service: "Compartimentari BCA 10cm", price: "60-80 lei/mp", note: "pereti interiori" },
+    { service: "Zidarie piatra naturala", price: "150-250 lei/mp", note: "decorativa" }
+  ],
+  tencuiala: [
+    { service: "Tencuiala mecanizata interior", price: "25-40 lei/mp", note: "minim 100mp" },
+    { service: "Tencuiala mecanizata exterior", price: "35-50 lei/mp", note: "minim 100mp" },
+    { service: "Tencuiala manuala interior", price: "35-50 lei/mp", note: "suprafete mici" },
+    { service: "Tencuiala manuala exterior", price: "45-65 lei/mp", note: "zone dificile" },
+    { service: "Tencuiala decorativa", price: "50-80 lei/mp", note: "finisaj final" },
+    { service: "Driscuire/gletuit", price: "15-25 lei/mp", note: "pregatire zugraveli" }
+  ]
+};
+
+const zones = [
+  "Sector 1", "Sector 2", "Sector 3", "Sector 4", "Sector 5", "Sector 6",
+  "Voluntari", "Popesti-Leordeni", "Bragadiru", "Chitila", "Pantelimon", "Otopeni",
+  "Buftea", "Magurele", "Chiajna", "Cornetu", "Domnesti", "Jilava"
+];
+---
+
+<Base title={title} description={description} canonical={canonical} disableDefaultBreadcrumb={true}>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(localBusinessSchema)} is:inline></script>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(faqSchema)} is:inline></script>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} is:inline></script>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(serviceSchema)} is:inline></script>
+  
+  <meta slot="head" name="keywords" content="zidarie bucuresti, zidari bucuresti, tencuiala mecanizata bucuresti, tencuiala bucuresti, zidarie bca bucuresti, pret zidarie bucuresti, pret tencuiala mecanizata bucuresti, zidari ilfov, tencuieli sector 1, zidari sector 2, zidari sector 3" />
+  <meta slot="head" name="geo.region" content="RO-B" />
+  <meta slot="head" name="geo.placename" content="Bucuresti" />
+
+  <!-- Hero Section - H1 unic -->
+  <section class="py-12 sm:py-16" style="background: linear-gradient(180deg, #1a1d2e 0%, #1e2235 50%, #252a3d 100%)">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-4xl mx-auto text-center">
+        <nav class="flex justify-center mb-6">
+          <ol class="flex items-center space-x-2 text-slate-300 text-xs font-medium">
+            <li><a href="/" class="hover:text-white">Acasa</a></li>
+            <li><span class="mx-2 text-white/40">/</span></li>
+            <li><a href="/servicii/" class="hover:text-white">Servicii</a></li>
+            <li><span class="mx-2 text-white/40">/</span></li>
+            <li><span class="text-amber-400 font-semibold">Zidarie Bucuresti</span></li>
+          </ol>
+        </nav>
+
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">
+          Zidarie si Tencuiala Mecanizata Bucuresti – Zidari Autorizati 2026
+        </h1>
+        
+        <p class="text-xl text-slate-300 mb-4">
+          Zidarie BCA, caramida, piatra | Tencuiala mecanizata cu pompe profesionale | Toate sectoarele + Ilfov
+        </p>
+
+        <p class="text-lg text-slate-300 mb-8 max-w-3xl mx-auto leading-relaxed">
+          Platforma de incredere cu peste <strong class="text-white">10.000 utilizatori</strong> si rating <strong class="text-white">4.9/5</strong>. 
+          Gaseste zidari verificati pentru lucrari de zidarie si tencuiala in Bucuresti si Ilfov. 
+          Primesti 3-5 oferte gratuite in 24 ore, fara comisioane.
+        </p>
+
+        <!-- Trust badges -->
+        <div class="flex flex-wrap items-center justify-center gap-4 mb-8">
+          <div class="bg-white/10 rounded-lg px-4 py-2">
+            <div class="text-amber-400 font-bold text-lg">4.9/5</div>
+            <div class="text-slate-300 text-sm">Rating platforma</div>
+          </div>
+          <div class="bg-white/10 rounded-lg px-4 py-2">
+            <div class="text-amber-400 font-bold text-lg">10.000+</div>
+            <div class="text-slate-300 text-sm">Utilizatori</div>
+          </div>
+          <div class="bg-white/10 rounded-lg px-4 py-2">
+            <div class="text-amber-400 font-bold text-lg">3 ani</div>
+            <div class="text-slate-300 text-sm">Garantie lucrari</div>
+          </div>
+          <div class="bg-white/10 rounded-lg px-4 py-2">
+            <div class="text-amber-400 font-bold text-lg">24h</div>
+            <div class="text-slate-300 text-sm">Oferte gratuite</div>
+          </div>
+        </div>
+
+        <a href={`${APP_URL}/cere-oferta?title=${encodeURIComponent('Zidarie Bucuresti')}`}
+          class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold rounded-xl hover:from-amber-600 hover:to-orange-600 shadow-lg text-lg">
+          Cere oferta gratuita
+          <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+          </svg>
+        </a>
+        
+        <!-- Micro-copy proces -->
+        <div class="mt-6 flex flex-wrap items-center justify-center gap-4 text-sm text-slate-400">
+          <span class="flex items-center gap-1"><span class="w-5 h-5 bg-amber-500 rounded-full text-white text-xs flex items-center justify-center">1</span> Completezi formularul</span>
+          <span class="flex items-center gap-1"><span class="w-5 h-5 bg-amber-500 rounded-full text-white text-xs flex items-center justify-center">2</span> Primesti 3-5 oferte</span>
+          <span class="flex items-center gap-1"><span class="w-5 h-5 bg-amber-500 rounded-full text-white text-xs flex items-center justify-center">3</span> Alegi echipa</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRO Tradesmen -->
+  <section class="bg-gradient-to-b from-slate-50 to-white pt-4">
+    <div class="max-w-7xl mx-auto px-4">
+      <RecommendedTradesmen
+        tradeIds={[5]}
+        tradeName="Zidarie si Tencuiala"
+        cityName="Bucuresti"
+        supabaseUrl={supabaseUrl}
+        supabaseAnonKey={supabaseAnonKey}
+        maxResults={4}
+        compact={true}
+        client:load
+      />
+    </div>
+  </section>
+
+  <div class="max-w-7xl mx-auto px-4 pt-4 pb-16 sm:pt-6 sm:pb-20">
+    <div class="space-y-12">
+      
+      <!-- H2: Zidarie Bucuresti -->
+      <section class="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
+        <h2 class="text-2xl font-bold text-slate-900 mb-6">
+          Zidarie Bucuresti – BCA, Caramida, Piatra Naturala
+        </h2>
+        
+        <p class="text-slate-700 mb-4 leading-relaxed">
+          Echipele noastre de <strong>zidari autorizati din Bucuresti</strong> executa lucrari de zidarie pentru constructii noi, extinderi si compartimentari. Lucram cu toate tipurile de materiale: BCA (beton celular autoclavizat), caramida plina sau cu goluri verticale (GVP), piatra naturala decorativa.
+        </p>
+        
+        <p class="text-slate-700 mb-6 leading-relaxed">
+          Fiecare lucrare de zidarie este executata cu atentie la detalii: verificam verticalitatea cu nivela laser, folosim adeziv sau mortar de calitate, respectam grosimile recomandate pentru izolatie termica si fonica. Garantam rezistenta structurala si durabilitate pe termen lung.
+        </p>
+
+        <!-- H3: Zidarie BCA -->
+        <div class="mb-8">
+          <h3 class="text-xl font-bold text-slate-900 mb-4">Zidarie BCA Bucuresti – Cel Mai Popular Material</h3>
+          
+          <p class="text-slate-700 mb-4 leading-relaxed">
+            <strong>BCA-ul (betonul celular autoclavizat)</strong> este cel mai folosit material pentru zidarie in Bucuresti si Ilfov datorita raportului excelent calitate-pret. Este usor de manevrat, ofera izolatie termica superioara si se prelucreaza usor pentru trasee de instalatii.
+          </p>
+          
+          <div class="grid sm:grid-cols-2 gap-4 mb-4">
+            <div class="p-4 bg-green-50 rounded-lg border border-green-200">
+              <h4 class="font-semibold text-green-800 mb-2">Avantaje BCA</h4>
+              <ul class="text-sm text-green-700 space-y-1">
+                <li>• Izolatie termica excelenta (lambda 0.10-0.12)</li>
+                <li>• Usor de prelucrat si taiat</li>
+                <li>• Greutate redusa (500-600 kg/mc)</li>
+                <li>• Pret accesibil vs caramida</li>
+                <li>• Rezistenta buna la foc</li>
+              </ul>
+            </div>
+            <div class="p-4 bg-amber-50 rounded-lg border border-amber-200">
+              <h4 class="font-semibold text-amber-800 mb-2">Cand se foloseste</h4>
+              <ul class="text-sm text-amber-700 space-y-1">
+                <li>• Pereti exteriori case si vile</li>
+                <li>• Compartimentari interioare</li>
+                <li>• Extinderi si mansardari</li>
+                <li>• Constructii noi rezidentiale</li>
+                <li>• Cladiri cu max. P+2 etaje</li>
+              </ul>
+            </div>
+          </div>
+          
+          <p class="text-slate-600 text-sm">
+            <strong>Recomandat:</strong> BCA 25cm pentru pereti exteriori in zone cu ierni moderate, BCA 30cm pentru izolatie superioara sau zone mai reci. Pentru compartimentari interioare, BCA 10cm este suficient.
+          </p>
+        </div>
+
+        <!-- H3: Zidarie Caramida -->
+        <div class="mb-8">
+          <h3 class="text-xl font-bold text-slate-900 mb-4">Zidarie Caramida Bucuresti – Rezistenta Maxima</h3>
+          
+          <p class="text-slate-700 mb-4 leading-relaxed">
+            <strong>Caramida</strong> ramane alegerea preferata pentru constructii care necesita rezistenta structurala maxima. Oferim zidarie din caramida plina (pentru fundatii, soclu, pereti portanti) si caramida cu goluri verticale GVP (pentru pereti exteriori cu izolatie).
+          </p>
+          
+          <div class="grid sm:grid-cols-3 gap-4">
+            <div class="p-4 bg-slate-50 rounded-lg border border-slate-200">
+              <h4 class="font-semibold text-slate-900 mb-2">Caramida plina</h4>
+              <p class="text-sm text-slate-600">Rezistenta maxima, ideala pentru fundatii, soclu si pereti portanti. 100-140 lei/mp manopera.</p>
+            </div>
+            <div class="p-4 bg-slate-50 rounded-lg border border-slate-200">
+              <h4 class="font-semibold text-slate-900 mb-2">Caramida GVP</h4>
+              <p class="text-sm text-slate-600">Goluri verticale pentru izolatie. Pereti exteriori cu termoizolatie buna. 90-120 lei/mp.</p>
+            </div>
+            <div class="p-4 bg-slate-50 rounded-lg border border-slate-200">
+              <h4 class="font-semibold text-slate-900 mb-2">Caramida aparenta</h4>
+              <p class="text-sm text-slate-600">Aspect decorativ, nu necesita tencuiala. Garduri, fatade, accente. 120-180 lei/mp.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Exemplu lucrare -->
+        <div class="bg-blue-50 rounded-lg p-6 border border-blue-200">
+          <h4 class="font-bold text-blue-900 mb-3">Exemplu lucrare: Zidarie casa 120mp in Sector 3</h4>
+          <div class="grid sm:grid-cols-4 gap-4 text-sm">
+            <div><span class="text-blue-600 font-medium">Material:</span><br/>BCA 30cm Celco</div>
+            <div><span class="text-blue-600 font-medium">Suprafata:</span><br/>180mp pereti</div>
+            <div><span class="text-blue-600 font-medium">Durata:</span><br/>12 zile lucratoare</div>
+            <div><span class="text-blue-600 font-medium">Cost manopera:</span><br/>18.000 lei</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- H2: Tencuiala Mecanizata Bucuresti -->
+      <section class="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
+        <h2 class="text-2xl font-bold text-slate-900 mb-6">
+          Tencuiala Mecanizata Bucuresti – Interior si Exterior
+        </h2>
+        
+        <p class="text-slate-700 mb-4 leading-relaxed">
+          Oferim servicii de <strong>tencuiala mecanizata in Bucuresti si Ilfov</strong> cu echipamente profesionale (pompe PFT, Putzmeister). Tencuiala mecanizata asigura uniformitate perfecta, aderenta superioara si viteza de executie de 10x mai mare decat tencuiala manuala.
+        </p>
+        
+        <p class="text-slate-700 mb-6 leading-relaxed">
+          Procesul de tencuire mecanizata include: pregatirea suprafetei (curatare, grunduire), montarea ghidajelor, aplicarea mortarului cu pompa, nivelarea cu dreptarul si finisarea. Folosim mortare de calitate (Baumit, Knauf, Weber) pentru rezultate durabile.
+        </p>
+
+        <!-- H3: Procesul de tencuire mecanizata -->
+        <div class="mb-8">
+          <h3 class="text-xl font-bold text-slate-900 mb-4">Cum Functioneaza Tencuiala Mecanizata</h3>
+          
+          <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="p-4 bg-slate-50 rounded-lg border border-slate-200 text-center">
+              <div class="w-10 h-10 bg-amber-500 rounded-full flex items-center justify-center text-white font-bold mx-auto mb-3">1</div>
+              <h4 class="font-semibold text-slate-900 mb-1">Pregatire</h4>
+              <p class="text-xs text-slate-600">Curatare pereti, grunduire, montare ghidaje metalice</p>
+            </div>
+            <div class="p-4 bg-slate-50 rounded-lg border border-slate-200 text-center">
+              <div class="w-10 h-10 bg-amber-500 rounded-full flex items-center justify-center text-white font-bold mx-auto mb-3">2</div>
+              <h4 class="font-semibold text-slate-900 mb-1">Aplicare</h4>
+              <p class="text-xs text-slate-600">Mortar aplicat cu pompa profesionala, presiune constanta</p>
+            </div>
+            <div class="p-4 bg-slate-50 rounded-lg border border-slate-200 text-center">
+              <div class="w-10 h-10 bg-amber-500 rounded-full flex items-center justify-center text-white font-bold mx-auto mb-3">3</div>
+              <h4 class="font-semibold text-slate-900 mb-1">Nivelare</h4>
+              <p class="text-xs text-slate-600">Tragere cu dreptar pe ghidaje, suprafata perfect plana</p>
+            </div>
+            <div class="p-4 bg-slate-50 rounded-lg border border-slate-200 text-center">
+              <div class="w-10 h-10 bg-amber-500 rounded-full flex items-center justify-center text-white font-bold mx-auto mb-3">4</div>
+              <h4 class="font-semibold text-slate-900 mb-1">Finisare</h4>
+              <p class="text-xs text-slate-600">Driscuire sau gletuit, gata pentru zugraveli</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Comparatie mecanizata vs manuala -->
+        <div class="mb-8">
+          <h3 class="text-xl font-bold text-slate-900 mb-4">Tencuiala Mecanizata vs Manuala – Comparatie</h3>
+          
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="bg-slate-100">
+                  <th class="p-3 text-left font-semibold text-slate-900">Criteriu</th>
+                  <th class="p-3 text-left font-semibold text-slate-900">Mecanizata</th>
+                  <th class="p-3 text-left font-semibold text-slate-900">Manuala</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200">
+                <tr><td class="p-3 text-slate-700">Viteza</td><td class="p-3 text-green-600 font-medium">300-500 mp/zi</td><td class="p-3 text-slate-600">30-50 mp/zi</td></tr>
+                <tr><td class="p-3 text-slate-700">Uniformitate</td><td class="p-3 text-green-600 font-medium">Perfecta</td><td class="p-3 text-slate-600">Variabila</td></tr>
+                <tr><td class="p-3 text-slate-700">Aderenta</td><td class="p-3 text-green-600 font-medium">Superioara (presiune)</td><td class="p-3 text-slate-600">Standard</td></tr>
+                <tr><td class="p-3 text-slate-700">Pret (100mp+)</td><td class="p-3 text-green-600 font-medium">25-40 lei/mp</td><td class="p-3 text-slate-600">35-50 lei/mp</td></tr>
+                <tr><td class="p-3 text-slate-700">Minim recomandat</td><td class="p-3 text-slate-600">100 mp</td><td class="p-3 text-green-600 font-medium">Fara minim</td></tr>
+                <tr><td class="p-3 text-slate-700">Zone dificile</td><td class="p-3 text-slate-600">Limitat</td><td class="p-3 text-green-600 font-medium">Flexibil</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Exemplu lucrare tencuiala -->
+        <div class="bg-amber-50 rounded-lg p-6 border border-amber-200">
+          <h4 class="font-bold text-amber-900 mb-3">Exemplu lucrare: Tencuiala mecanizata apartament 3 camere Sector 1</h4>
+          <div class="grid sm:grid-cols-4 gap-4 text-sm">
+            <div><span class="text-amber-600 font-medium">Suprafata:</span><br/>220mp pereti + tavane</div>
+            <div><span class="text-amber-600 font-medium">Material:</span><br/>Baumit MPI 25</div>
+            <div><span class="text-amber-600 font-medium">Durata:</span><br/>3 zile aplicare + uscare</div>
+            <div><span class="text-amber-600 font-medium">Cost total:</span><br/>6.600 lei manopera</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- H2: Preturi Zidarie si Tencuiala Bucuresti -->
+      <section class="bg-slate-50 rounded-2xl p-8 border border-slate-200">
+        <h2 class="text-2xl font-bold text-slate-900 mb-6">
+          Preturi Zidarie si Tencuiala Bucuresti 2026
+        </h2>
+        
+        <p class="text-slate-700 mb-6">
+          Preturile de mai jos sunt pentru <strong>manopera</strong> in Bucuresti si Ilfov. Materialele se calculeaza separat. Solicita oferta personalizata pentru pret exact bazat pe specificul lucrarii tale.
+        </p>
+        
+        <div class="grid lg:grid-cols-2 gap-8">
+          <div>
+            <h3 class="font-bold text-slate-900 mb-4 text-lg">Preturi Zidarie Bucuresti</h3>
+            <div class="space-y-3">
+              {prices.zidarie.map(item => (
+                <div class="flex justify-between items-center p-3 bg-white rounded-lg border border-slate-200">
+                  <div>
+                    <span class="text-slate-700 font-medium">{item.service}</span>
+                    <span class="text-slate-400 text-xs ml-2">({item.note})</span>
+                  </div>
+                  <span class="font-bold text-green-600">{item.price}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div>
+            <h3 class="font-bold text-slate-900 mb-4 text-lg">Preturi Tencuiala Bucuresti</h3>
+            <div class="space-y-3">
+              {prices.tencuiala.map(item => (
+                <div class="flex justify-between items-center p-3 bg-white rounded-lg border border-slate-200">
+                  <div>
+                    <span class="text-slate-700 font-medium">{item.service}</span>
+                    <span class="text-slate-400 text-xs ml-2">({item.note})</span>
+                  </div>
+                  <span class="font-bold text-green-600">{item.price}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        
+        <div class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+          <p class="text-blue-900 text-sm">
+            <strong>Nota:</strong> Pentru suprafete mari (peste 200mp), preturile pot fi negociate. Deplasare gratuita in Bucuresti si Ilfov pentru lucrari de peste 1.000 lei. Toate preturile includ garantie 3 ani.
+          </p>
+        </div>
+      </section>
+
+      <!-- H2: Zone Acoperite -->
+      <section class="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
+        <h2 class="text-2xl font-bold text-slate-900 mb-6">
+          Zone Acoperite – Zidari Bucuresti si Ilfov
+        </h2>
+        
+        <p class="text-slate-700 mb-6">
+          Echipele noastre de <strong>zidari autorizati</strong> acopera <strong>toate cele 6 sectoare din Bucuresti</strong> plus <strong>judetul Ilfov</strong>. Deplasare gratuita pentru lucrari de peste 1.000 lei. Timp de raspuns: maxim 24 ore pentru oferta.
+        </p>
+
+        <div class="grid sm:grid-cols-2 gap-6 mb-6">
+          <div>
+            <h3 class="font-semibold text-slate-900 mb-3">Bucuresti - Toate Sectoarele</h3>
+            <div class="flex flex-wrap gap-2">
+              {zones.slice(0, 6).map(zone => (
+                <span class="px-3 py-1.5 bg-blue-50 text-blue-800 rounded-lg text-sm font-medium border border-blue-200">
+                  {zone}
+                </span>
+              ))}
+            </div>
+          </div>
+          <div>
+            <h3 class="font-semibold text-slate-900 mb-3">Judetul Ilfov</h3>
+            <div class="flex flex-wrap gap-2">
+              {zones.slice(6).map(zone => (
+                <span class="px-3 py-1.5 bg-green-50 text-green-800 rounded-lg text-sm font-medium border border-green-200">
+                  {zone}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+        
+        <p class="text-slate-600 text-sm">
+          De asemenea acoperim: Tunari, Stefanestii de Jos, Afumati, Balotesti, Snagov, Ciorogarla, Clinceni, Berceni si alte localitati din Ilfov.
+        </p>
+      </section>
+
+      <!-- CTA inline formular -->
+      <section class="bg-gradient-to-r from-amber-500 to-orange-500 rounded-2xl p-8 text-center">
+        <h2 class="text-2xl font-bold text-white mb-4">
+          Solicita Oferta Gratuita pentru Zidarie sau Tencuiala
+        </h2>
+        <p class="text-white/90 mb-6 max-w-2xl mx-auto">
+          Completeaza formularul si primesti 3-5 oferte de la zidari verificati din Bucuresti in maxim 24 ore. Fara obligatii, fara comisioane.
+        </p>
+        
+        <div class="flex flex-wrap items-center justify-center gap-4 mb-6">
+          <div class="flex items-center gap-2 text-white/80 text-sm">
+            <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+            Echipe verificate
+          </div>
+          <div class="flex items-center gap-2 text-white/80 text-sm">
+            <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+            Garantie 3 ani
+          </div>
+          <div class="flex items-center gap-2 text-white/80 text-sm">
+            <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+            Fara comisioane
+          </div>
+        </div>
+        
+        <a href={`${APP_URL}/cere-oferta?title=${encodeURIComponent('Zidarie Bucuresti')}`}
+          class="inline-flex items-center px-8 py-4 bg-white text-orange-600 font-bold rounded-xl hover:bg-slate-100 transition-all duration-200 shadow-lg text-lg">
+          Cere Oferta Gratuita Acum
+          <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+          </svg>
+        </a>
+      </section>
+
+      <!-- H2: Intrebari Frecvente -->
+      <section class="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
+        <h2 class="text-2xl font-bold text-slate-900 mb-6">
+          Intrebari Frecvente despre Zidarie si Tencuiala in Bucuresti
+        </h2>
+        
+        <div class="space-y-4">
+          <details class="group bg-slate-50 rounded-lg" open>
+            <summary class="flex items-center justify-between p-4 cursor-pointer font-semibold text-slate-900">
+              Cat costa zidaria din BCA in Bucuresti?
+              <span class="text-slate-400 group-open:rotate-180 transition-transform">&#9660;</span>
+            </summary>
+            <div class="px-4 pb-4 text-slate-700 leading-relaxed">
+              <p class="mb-2">Zidaria din BCA in Bucuresti costa intre <strong>80-120 lei/mp pentru manopera</strong>, in functie de grosimea blocurilor (25cm sau 30cm). Pretul include montaj cu adeziv sau mortar, rostuire si verificare nivel cu nivela laser.</p>
+              <p class="mb-2">Materialele (BCA, adeziv, plasa armatura) se calculeaza separat si costa aproximativ 50-70 lei/mp. Pentru o casa de 100mp cu pereti de 180mp, bugetul total pentru zidarie este de <strong>13.000-19.000 lei</strong> (manopera) + 9.000-12.600 lei (materiale).</p>
+              <p class="text-sm text-slate-500">Sfat: Pentru economie, comanda BCA direct de la producator (Celco, Macon, Elpreco) si negociaza transportul inclus.</p>
+            </div>
+          </details>
+          
+          <details class="group bg-slate-50 rounded-lg">
+            <summary class="flex items-center justify-between p-4 cursor-pointer font-semibold text-slate-900">
+              Cat costa tencuiala mecanizata in Bucuresti?
+              <span class="text-slate-400 group-open:rotate-180 transition-transform">&#9660;</span>
+            </summary>
+            <div class="px-4 pb-4 text-slate-700 leading-relaxed">
+              <p class="mb-2">Tencuiala mecanizata in Bucuresti costa <strong>25-40 lei/mp pentru interior</strong> si <strong>35-50 lei/mp pentru exterior</strong>. Pretul include aplicare cu pompa profesionala, nivelare si finisare.</p>
+              <p class="mb-2">Pentru suprafete de peste 200mp, pretul poate scadea la 20-30 lei/mp. Minim recomandat: 100mp pentru eficienta maxima a echipamentului. Un apartament de 70mp (180mp pereti) costa aproximativ <strong>4.500-7.200 lei</strong> manopera.</p>
+              <p class="text-sm text-slate-500">Mortarul (Baumit, Knauf, Weber) costa suplimentar 15-25 lei/mp si este de obicei inclus in oferta totala.</p>
+            </div>
+          </details>
+          
+          <details class="group bg-slate-50 rounded-lg">
+            <summary class="flex items-center justify-between p-4 cursor-pointer font-semibold text-slate-900">
+              Care e diferenta intre tencuiala mecanizata si manuala?
+              <span class="text-slate-400 group-open:rotate-180 transition-transform">&#9660;</span>
+            </summary>
+            <div class="px-4 pb-4 text-slate-700 leading-relaxed">
+              <p class="mb-2"><strong>Tencuiala mecanizata</strong> se aplica cu pompa profesionala (PFT, Putzmeister) si acopera 300-500mp/zi, fata de 30-50mp/zi manual. Mortarul este amestecat automat si aplicat sub presiune, asigurand aderenta superioara si uniformitate perfecta.</p>
+              <p class="mb-2"><strong>Tencuiala manuala</strong> este potrivita pentru suprafete mici (sub 50mp), zone greu accesibile (nise, colturi complicate) sau reparatii punctuale. Este mai flexibila dar mai lenta si mai scumpa la suprafete mari.</p>
+              <p class="text-sm text-slate-500">Recomandare: Pentru apartamente si case, alege mecanizata. Pentru o baie sau o camera mica, manuala poate fi mai practica.</p>
+            </div>
+          </details>
+          
+          <details class="group bg-slate-50 rounded-lg">
+            <summary class="flex items-center justify-between p-4 cursor-pointer font-semibold text-slate-900">
+              Cat dureaza zidirea unui perete din BCA?
+              <span class="text-slate-400 group-open:rotate-180 transition-transform">&#9660;</span>
+            </summary>
+            <div class="px-4 pb-4 text-slate-700 leading-relaxed">
+              <p class="mb-2">Un perete de 10mp din BCA se zideste in <strong>1-2 zile</strong> de o echipa de 2 zidari. Timpul depinde de grosimea peretelui, numarul de goluri pentru usi/ferestre si conditiile de lucru (temperatura, umiditate).</p>
+              <p class="mb-2">Pentru o casa intreaga (150-200mp pereti), durata este de <strong>10-15 zile lucratoare</strong>. Uscarea completa a adezivului dureaza 2-4 saptamani inainte de a putea aplica tencuiala.</p>
+              <p class="text-sm text-slate-500">Important: Nu grabi uscarea cu incalzire artificiala - poate cauza fisuri. Lasa peretii sa se usuce natural.</p>
+            </div>
+          </details>
+          
+          <details class="group bg-slate-50 rounded-lg">
+            <summary class="flex items-center justify-between p-4 cursor-pointer font-semibold text-slate-900">
+              Ce garantie ofera zidarii pentru lucrari in Bucuresti?
+              <span class="text-slate-400 group-open:rotate-180 transition-transform">&#9660;</span>
+            </summary>
+            <div class="px-4 pb-4 text-slate-700 leading-relaxed">
+              <p class="mb-2">Zidarii verificati din platforma Meserias Local ofera <strong>garantie de 3-5 ani</strong> pentru lucrari de zidarie si tencuiala. Garantia acopera: fisuri structurale, desprinderi de tencuiala, probleme de aderenta si defecte de executie.</p>
+              <p class="mb-2">Toate lucrarile sunt documentate cu <strong>contract scris</strong> care specifica: suprafata, materialele folosite, termenul de executie, pretul si conditiile de garantie.</p>
+              <p class="text-sm text-slate-500">Sfat: Cere intotdeauna contract scris si pastreaza facturile pentru materiale - sunt necesare pentru garantie.</p>
+            </div>
+          </details>
+          
+          <details class="group bg-slate-50 rounded-lg">
+            <summary class="flex items-center justify-between p-4 cursor-pointer font-semibold text-slate-900">
+              Lucrati si in Ilfov, nu doar in Bucuresti?
+              <span class="text-slate-400 group-open:rotate-180 transition-transform">&#9660;</span>
+            </summary>
+            <div class="px-4 pb-4 text-slate-700 leading-relaxed">
+              <p class="mb-2">Da, echipele noastre de zidari acopera <strong>toate sectoarele din Bucuresti</strong> plus <strong>judetul Ilfov</strong>: Voluntari, Popesti-Leordeni, Bragadiru, Chitila, Pantelimon, Otopeni, Buftea, Magurele, Chiajna, Cornetu, Domnesti, Jilava.</p>
+              <p class="mb-2"><strong>Deplasare gratuita</strong> pentru lucrari de peste 1.000 lei. Pentru lucrari mai mici, se percepe o taxa de deplasare de 50-100 lei in functie de distanta.</p>
+              <p class="text-sm text-slate-500">Timp de raspuns: Primesti oferte in maxim 24 ore dupa completarea formularului.</p>
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <!-- Related Services -->
+      <section class="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
+        <h2 class="text-xl font-bold text-slate-900 mb-4">Servicii Conexe in Bucuresti si Ilfov</h2>
+        <div class="flex flex-wrap gap-3">
+          <a href="/electrician-bucuresti/" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 text-sm transition-colors">Electrician Bucuresti</a>
+          <a href="/amenajari-interioare-bucuresti/" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 text-sm transition-colors">Amenajari interioare Bucuresti</a>
+          <a href="/servicii/constructii-structuri/" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 text-sm transition-colors">Constructii si structuri</a>
+          <a href="/servicii/amenajari-interioare/zugraveli-vopsitorii/" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 text-sm transition-colors">Zugraveli Bucuresti</a>
+          <a href="/servicii/instalatii-utilitati/instalatii-sanitare/" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 text-sm transition-colors">Instalatii sanitare</a>
+          <a href="/servicii/amenajari-interioare/montaj-gresie-faianta-piatra/" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 text-sm transition-colors">Montaj gresie faianta</a>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</Base>

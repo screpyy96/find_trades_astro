@@ -1,0 +1,192 @@
+---
+import Base from '../layouts/Base.astro';
+
+const title = "Intrebari Frecvente (FAQ) | Meserias Local";
+const description = "Raspunsuri la cele mai frecvente intrebari despre platforma Meserias Local. Cum gasesti meseriasi, cum functioneaza, preturi, garantii si siguranta.";
+const canonical = "https://www.meseriaslocal.ro/faq";
+const APP_URL = 'https://app.meseriaslocal.ro';
+
+const faqCategories = [
+  {
+    title: "Despre platforma",
+    icon: "🏠",
+    faqs: [
+      { q: "Ce este Meserias Local?", a: "Meserias Local este o platforma care conecteaza clientii cu meseriasi verificati din toata Romania. Poti gasi rapid profesionisti pentru orice tip de lucrare: constructii, renovari, instalatii, curatenie si multe altele." },
+      { q: "Este gratuit sa folosesc platforma?", a: "Da, pentru clienti platforma este 100% gratuita. Poti cauta meseriasi, vizualiza profiluri si solicita oferte fara niciun cost. Meseriasii platesc un abonament pentru a fi listati." },
+      { q: "In ce orase sunteti disponibili?", a: "Acoperim toate orasele din Romania. Avem meseriasi in Bucuresti, Cluj, Timisoara, Iasi, Constanta, Brasov, Craiova si in toate celelalte judete." },
+      { q: "Cum va diferentiati de alte platforme?", a: "Verificam fiecare meserias inainte de listare, oferim recenzii reale de la clienti, nu percepem comisioane la tranzactii si avem suport dedicat pentru rezolvarea oricaror probleme." }
+    ]
+  },
+  {
+    title: "Pentru clienti",
+    icon: "👤",
+    faqs: [
+      { q: "Cum gasesc un meserias potrivit?", a: "Foloseste bara de cautare pentru a gasi meseriasi dupa serviciu si locatie. Poti filtra dupa recenzii, experienta si disponibilitate. Vizualizeaza profilurile si alege pe cel care ti se potriveste." },
+      { q: "Cum solicit o oferta?", a: "Apasa pe butonul 'Cere oferta' de pe profilul meseriasului sau completeaza formularul general. Descrie lucrarea, adauga poze daca ai si vei primi oferte in 24-48 ore." },
+      { q: "Cum stiu ca un meserias este de incredere?", a: "Toti meseriasii PRO sunt verificati de echipa noastra. Verifica badge-ul 'Verificat', recenziile de la alti clienti, portofoliul de lucrari si anii de experienta." },
+      { q: "Ce fac daca nu sunt multumit de lucrare?", a: "Contacteaza-ne la support si vom media situatia. Meseriasii verificati ofera garantie pentru lucrari. In cazuri grave, putem suspenda meseriasul de pe platforma." },
+      { q: "Pot negocia pretul cu meseriasul?", a: "Da, preturile afisate sunt orientative. Discuta direct cu meseriasul pentru a obtine un pret final bazat pe specificul lucrarii tale." }
+    ]
+  },
+  {
+    title: "Pentru meseriasi",
+    icon: "🔧",
+    faqs: [
+      { q: "Cum ma inscriu ca meserias?", a: "Descarca aplicatia Meserias Local sau acceseaza app.meseriaslocal.ro. Creeaza un cont, completeaza profilul cu serviciile oferite, experienta si portofoliu, apoi alege un abonament." },
+      { q: "Cat costa sa fiu listat pe platforma?", a: "Oferim abonamente PRO incepand de la 49 lei/luna si Enterprise pentru companii. Abonamentul include profil verificat, vizibilitate in cautari si acces la solicitari de oferte." },
+      { q: "Cum primesc clienti noi?", a: "Clientii te gasesc prin cautare sau iti trimit cereri de oferta. Primesti notificari pentru fiecare solicitare noua. Cu cat ai mai multe recenzii pozitive, cu atat apari mai sus in rezultate." },
+      { q: "Ce inseamna badge-ul Verificat?", a: "Badge-ul Verificat confirma ca am verificat identitatea, experienta si calitatea lucrarilor tale. Meseriasii verificati au prioritate in rezultatele cautarilor." },
+      { q: "Pot anula abonamentul oricand?", a: "Da, poti anula abonamentul in orice moment din setarile contului. Nu exista perioada minima de contract." }
+    ]
+  },
+  {
+    title: "Preturi si plati",
+    icon: "💰",
+    faqs: [
+      { q: "Cum se stabilesc preturile?", a: "Preturile sunt stabilite direct intre client si meserias. Platforma nu percepe comisioane la tranzactii. Afisam preturi orientative pentru a te ajuta sa estimezi costurile." },
+      { q: "Ce metode de plata acceptati?", a: "Plata pentru lucrari se face direct catre meserias, in numerar sau transfer bancar. Pentru abonamentele meseriasilor acceptam card si transfer bancar." },
+      { q: "Exista costuri ascunse?", a: "Nu. Pentru clienti platforma este gratuita. Pentru meseriasi, costul abonamentului este transparent si afisat clar inainte de achizitie." },
+      { q: "Oferiti factura pentru abonamente?", a: "Da, toate abonamentele includ factura fiscala. O primesti automat pe email dupa fiecare plata." }
+    ]
+  },
+  {
+    title: "Siguranta si garantii",
+    icon: "🛡️",
+    faqs: [
+      { q: "Cum verificati meseriasii?", a: "Verificam identitatea, experienta declarata, portofoliul de lucrari si solicitam referinte. Meseriasii cu recenzii negative repetate sunt suspendati." },
+      { q: "Ce garantii ofera meseriasii?", a: "Meseriasii PRO ofera garantie pentru lucrari, de obicei intre 1-5 ani in functie de tipul serviciului. Discuta garantia inainte de a incepe lucrarea." },
+      { q: "Datele mele sunt in siguranta?", a: "Da, respectam GDPR si folosim criptare pentru toate datele. Nu vindem informatiile tale catre terti. Citeste Politica de Confidentialitate pentru detalii." },
+      { q: "Ce fac in caz de frauda?", a: "Raporteaza imediat la support@meseriaslocal.ro. Investigam toate cazurile si luam masuri, inclusiv suspendarea permanenta a conturilor frauduloase." }
+    ]
+  }
+];
+
+const allFaqs = faqCategories.flatMap(cat => cat.faqs);
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": allFaqs.map(faq => ({
+    "@type": "Question",
+    "name": faq.q,
+    "acceptedAnswer": { "@type": "Answer", "text": faq.a }
+  }))
+};
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Acasa", "item": "https://www.meseriaslocal.ro" },
+    { "@type": "ListItem", "position": 2, "name": "FAQ", "item": canonical }
+  ]
+};
+---
+
+<Base title={title} description={description} canonical={canonical} disableDefaultBreadcrumb={true}>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(faqSchema)} is:inline></script>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} is:inline></script>
+
+  <!-- Hero Section -->
+  <section class="py-12 sm:py-16" style="background: linear-gradient(180deg, #1a1d2e 0%, #1e2235 50%, #252a3d 100%)">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl mx-auto text-center">
+        <nav class="flex justify-center mb-6">
+          <ol class="flex items-center space-x-2 text-slate-300 text-xs font-medium">
+            <li><a href="/" class="hover:text-white">Acasa</a></li>
+            <li><span class="mx-2 text-white/40">/</span></li>
+            <li><span class="text-amber-400 font-semibold">FAQ</span></li>
+          </ol>
+        </nav>
+
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6">
+          Intrebari Frecvente
+        </h1>
+        
+        <p class="text-xl text-slate-300 mb-8">
+          Gaseste raspunsuri la cele mai comune intrebari despre platforma Meserias Local
+        </p>
+
+        <div class="flex flex-wrap justify-center gap-3">
+          {faqCategories.map((cat, i) => (
+            <a href={`#cat-${i}`} class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-white text-sm font-medium transition-colors">
+              {cat.icon} {cat.title}
+            </a>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Content -->
+  <div class="max-w-4xl mx-auto px-4 py-12 sm:py-16">
+    <div class="space-y-12">
+      {faqCategories.map((category, catIndex) => (
+        <section id={`cat-${catIndex}`} class="scroll-mt-8">
+          <div class="flex items-center gap-3 mb-6">
+            <span class="text-3xl">{category.icon}</span>
+            <h2 class="text-2xl font-bold text-slate-900">{category.title}</h2>
+          </div>
+          
+          <div class="space-y-4">
+            {category.faqs.map((faq, faqIndex) => (
+              <details class="group bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                <summary class="flex items-center justify-between p-5 cursor-pointer">
+                  <span class="font-semibold text-slate-900 pr-4">{faq.q}</span>
+                  <span class="text-slate-400 group-open:rotate-180 transition-transform flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </span>
+                </summary>
+                <div class="px-5 pb-5 text-slate-600 leading-relaxed border-t border-slate-100 pt-4">
+                  {faq.a}
+                </div>
+              </details>
+            ))}
+          </div>
+        </section>
+      ))}
+    </div>
+
+    <!-- Contact CTA -->
+    <section class="mt-16 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 text-center">
+      <h2 class="text-2xl font-bold text-white mb-4">
+        Nu ai gasit raspunsul?
+      </h2>
+      <p class="text-blue-100 mb-6 max-w-xl mx-auto">
+        Echipa noastra de suport iti sta la dispozitie pentru orice intrebare sau problema.
+      </p>
+      <div class="flex flex-wrap justify-center gap-4">
+        <a href="mailto:support@meseriaslocal.ro" class="inline-flex items-center px-6 py-3 bg-white text-blue-600 font-semibold rounded-xl hover:bg-blue-50 transition-colors">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+          support@meseriaslocal.ro
+        </a>
+        <a href={APP_URL} class="inline-flex items-center px-6 py-3 bg-white/20 text-white font-semibold rounded-xl hover:bg-white/30 transition-colors border border-white/30">
+          Deschide aplicatia
+        </a>
+      </div>
+    </section>
+
+    <!-- Quick Links -->
+    <section class="mt-12 grid sm:grid-cols-3 gap-6">
+      <a href="/servicii/" class="p-6 bg-slate-50 rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-blue-50 transition-colors group">
+        <div class="text-2xl mb-3">🔍</div>
+        <h3 class="font-semibold text-slate-900 group-hover:text-blue-600">Cauta servicii</h3>
+        <p class="text-sm text-slate-500 mt-1">Gaseste meseriasi pentru orice lucrare</p>
+      </a>
+      <a href="/despre-noi/" class="p-6 bg-slate-50 rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-blue-50 transition-colors group">
+        <div class="text-2xl mb-3">ℹ️</div>
+        <h3 class="font-semibold text-slate-900 group-hover:text-blue-600">Despre noi</h3>
+        <p class="text-sm text-slate-500 mt-1">Afla mai multe despre platforma</p>
+      </a>
+      <a href="/blog/" class="p-6 bg-slate-50 rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-blue-50 transition-colors group">
+        <div class="text-2xl mb-3">📚</div>
+        <h3 class="font-semibold text-slate-900 group-hover:text-blue-600">Blog</h3>
+        <p class="text-sm text-slate-500 mt-1">Sfaturi si ghiduri utile</p>
+      </a>
+    </section>
+  </div>
+</Base>

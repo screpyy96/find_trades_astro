@@ -88,6 +88,9 @@ export async function GET() {
     { url: '/amenajari-interioare-bucuresti/', priority: '1.0', changefreq: 'weekly' },
     { url: '/renovari-acoperisuri-deva/', priority: '1.0', changefreq: 'weekly' },
     { url: '/constructii-amenajari-braila/', priority: '1.0', changefreq: 'weekly' },
+    { url: '/faq/', priority: '0.7', changefreq: 'monthly' },
+    { url: '/suport/', priority: '0.6', changefreq: 'monthly' },
+    { url: '/zidarie-tencuiala-bucuresti/', priority: '1.0', changefreq: 'weekly' },
     // NOTE: /meseriasi and /solicitari are NOT included - they're dynamic user content
   ];
 

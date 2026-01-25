@@ -61,7 +61,69 @@ interface Worker {
   subscription_plan?: string;
 }
 
-// Compact card component for subcategory pages
+// Mobile horizontal card - very compact row layout
+function MobileCompactCard({ worker }: { worker: Worker }) {
+  return (
+    <a 
+      href={`/meseriasi/${worker.id}`}
+      className="flex items-center gap-3 bg-white border border-slate-200 rounded-lg p-2 hover:shadow-md transition-all duration-200 hover:border-slate-300 group"
+    >
+      {/* Small Avatar */}
+      <div className="relative w-14 h-14 flex-shrink-0 rounded-lg overflow-hidden bg-slate-100">
+        {worker.avatar_url ? (
+          <img
+            src={worker.avatar_url}
+            alt={worker.name}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg">
+            {worker.name.charAt(0).toUpperCase()}
+          </div>
+        )}
+        {isPremiumUser(worker.subscription_plan) && (
+          <div className="absolute -top-0.5 -right-0.5 flex items-center gap-0.5 px-1 py-0.5 bg-amber-500 rounded text-[8px]">
+            <Crown className="w-2 h-2 text-white" />
+          </div>
+        )}
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-1.5">
+          <h3 className="font-semibold text-slate-900 text-sm truncate group-hover:text-blue-600">
+            {worker.name}
+          </h3>
+          {worker.is_verified && (
+            <svg className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+          )}
+        </div>
+        <div className="flex items-center gap-2 text-[11px] text-slate-500">
+          {worker.address && (
+            <span className="truncate max-w-[120px]">{worker.address}</span>
+          )}
+          {worker.rating > 0 && (
+            <span className="flex items-center gap-0.5 flex-shrink-0">
+              <svg className="w-3 h-3 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+              {worker.rating.toFixed(1)}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Arrow */}
+      <svg className="w-4 h-4 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+      </svg>
+    </a>
+  );
+}
+
+// Compact card component for subcategory pages (desktop grid)
 function CompactTradesmanCard({ worker }: { worker: Worker }) {
   // Truncate bio to ~40 characters
   const shortBio = worker.bio 
@@ -268,11 +330,33 @@ export function RecommendedTradesmen({
           const { cities } = await import('../../data/cities');
           const cityData = cities.find(c => c.name === cityName);
           
+          // Helper to create search variants (with and without diacritics)
+          const createSearchVariants = (name: string) => {
+            const withoutDiacritics = name
+              .replace(/ă/g, 'a').replace(/Ă/g, 'A')
+              .replace(/â/g, 'a').replace(/Â/g, 'A')
+              .replace(/î/g, 'i').replace(/Î/g, 'I')
+              .replace(/ș/g, 's').replace(/Ș/g, 'S')
+              .replace(/ț/g, 't').replace(/Ț/g, 'T');
+            
+            // Also handle București specifically
+            if (name.toLowerCase() === 'bucuresti' || name.toLowerCase() === 'bucurești') {
+              return ['bucuresti', 'bucurești', 'Bucuresti', 'București'];
+            }
+            
+            return [name, withoutDiacritics].filter((v, i, a) => a.indexOf(v) === i);
+          };
+          
+          const cityVariants = createSearchVariants(cityName);
+          
           if (cityData && cityData.county && cityData.county !== cityData.name) {
-            // Search for city name OR county name (e.g., "Râmnicu Vâlcea" OR "Vâlcea")
-            workersQuery = workersQuery.or(`address.ilike.%${cityName}%,address.ilike.%${cityData.county}%`);
+            const countyVariants = createSearchVariants(cityData.county);
+            const allVariants = [...cityVariants, ...countyVariants];
+            const orConditions = allVariants.map(v => `address.ilike.%${v}%`).join(',');
+            workersQuery = workersQuery.or(orConditions);
           } else {
-            workersQuery = workersQuery.ilike('address', `%${cityName}%`);
+            const orConditions = cityVariants.map(v => `address.ilike.%${v}%`).join(',');
+            workersQuery = workersQuery.or(orConditions);
           }
         }
 
@@ -412,17 +496,33 @@ export function RecommendedTradesmen({
       </div>
 
       <div className="p-4">
-        <div className={`grid gap-2 ${compact ? 'grid-cols-2 lg:grid-cols-4' : workers.length === 1 ? 'grid-cols-1 max-w-md mx-auto' : 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3'}`}>
-          {workers.map((worker: Worker) => (
-            <div key={worker.id} className="transform hover:scale-[1.02] transition-all duration-200">
-              {compact ? (
-                <CompactTradesmanCard worker={worker} />
-              ) : (
-                  <TradesmanCard worker={worker} />
-                )}
+        {/* Mobile: horizontal row cards, Desktop: grid */}
+        {compact ? (
+          <>
+            {/* Mobile view - horizontal cards in a column, centered if only 1 */}
+            <div className={`sm:hidden flex flex-col gap-2 ${workers.length === 1 ? 'max-w-xs mx-auto' : ''}`}>
+              {workers.map((worker: Worker) => (
+                <MobileCompactCard key={worker.id} worker={worker} />
+              ))}
+            </div>
+            {/* Desktop view - grid */}
+            <div className={`hidden sm:grid gap-2 ${workers.length === 1 ? 'grid-cols-1 max-w-xs mx-auto' : 'grid-cols-2 lg:grid-cols-4'}`}>
+              {workers.map((worker: Worker) => (
+                <div key={worker.id} className="transform hover:scale-[1.02] transition-all duration-200">
+                  <CompactTradesmanCard worker={worker} />
+                </div>
+              ))}
+            </div>
+          </>
+        ) : (
+          <div className={`grid gap-2 ${workers.length === 1 ? 'grid-cols-1 max-w-md mx-auto' : 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3'}`}>
+            {workers.map((worker: Worker) => (
+              <div key={worker.id} className="transform hover:scale-[1.02] transition-all duration-200">
+                <TradesmanCard worker={worker} />
               </div>
             ))}
           </div>
+        )}
 
         {workers.length > 0 && !compact && (
           <div className="mt-4 pt-4 border-t border-slate-100 text-center">
