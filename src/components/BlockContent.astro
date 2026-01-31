@@ -1,0 +1,179 @@
+---
+interface Props {
+  blocks: any[];
+}
+
+const { blocks } = Astro.props;
+
+// Helper to render text with marks (bold, italic, links)
+function renderChildren(children: any[], markDefs: any[] = []) {
+  if (!children) return '';
+  
+  return children.map(child => {
+    let text = child.text || '';
+    
+    if (!child.marks || child.marks.length === 0) {
+      return text;
+    }
+    
+    // Process marks
+    for (const mark of child.marks) {
+      if (mark === 'strong') {
+        text = `<strong>${text}</strong>`;
+      } else if (mark === 'em') {
+        text = `<em>${text}</em>`;
+      } else {
+        // Check for link annotation
+        const linkDef = markDefs?.find(def => def._key === mark && def._type === 'link');
+        if (linkDef) {
+          const target = linkDef.blank ? ' target="_blank" rel="noopener"' : '';
+          text = `<a href="${linkDef.href}" class="text-emerald-600 hover:text-emerald-700 underline"${target}>${text}</a>`;
+        }
+      }
+    }
+    
+    return text;
+  }).join('');
+}
+
+// Group consecutive list items
+function groupBlocks(blocks: any[]) {
+  const grouped: any[] = [];
+  let currentList: any[] = [];
+  let currentListType: string | null = null;
+  
+  for (const block of blocks) {
+    if (block._type === 'block' && block.listItem) {
+      if (currentListType === block.listItem) {
+        currentList.push(block);
+      } else {
+        if (currentList.length > 0) {
+          grouped.push({ type: 'list', listType: currentListType, items: currentList });
+        }
+        currentList = [block];
+        currentListType = block.listItem;
+      }
+    } else {
+      if (currentList.length > 0) {
+        grouped.push({ type: 'list', listType: currentListType, items: currentList });
+        currentList = [];
+        currentListType = null;
+      }
+      grouped.push({ type: 'block', block });
+    }
+  }
+  
+  if (currentList.length > 0) {
+    grouped.push({ type: 'list', listType: currentListType, items: currentList });
+  }
+  
+  return grouped;
+}
+
+const groupedBlocks = blocks ? groupBlocks(blocks) : [];
+---
+
+<div class="block-content">
+  {groupedBlocks.map((item, idx) => {
+    if (item.type === 'list') {
+      const ListTag = item.listType === 'number' ? 'ol' : 'ul';
+      const listClass = item.listType === 'number' ? 'list-decimal' : 'list-disc';
+      return (
+        <Fragment>
+          {ListTag === 'ol' ? (
+            <ol class={`${listClass} ml-6 mb-4 space-y-2`}>
+              {item.items.map((listItem: any) => (
+                <li class="text-slate-700" set:html={renderChildren(listItem.children, listItem.markDefs)} />
+              ))}
+            </ol>
+          ) : (
+            <ul class={`${listClass} ml-6 mb-4 space-y-2`}>
+              {item.items.map((listItem: any) => (
+                <li class="text-slate-700" set:html={renderChildren(listItem.children, listItem.markDefs)} />
+              ))}
+            </ul>
+          )}
+        </Fragment>
+      );
+    }
+    
+    const block = item.block;
+    
+    if (block._type !== 'block') return null;
+    
+    const content = renderChildren(block.children, block.markDefs);
+    
+    if (block.style === 'h2') {
+      return <h2 class="text-2xl font-bold text-slate-900 mt-8 mb-4" set:html={content} />;
+    }
+    
+    if (block.style === 'h3') {
+      return <h3 class="text-xl font-semibold text-slate-900 mt-6 mb-3" set:html={content} />;
+    }
+    
+    if (block.style === 'h4') {
+      return <h4 class="text-lg font-semibold text-slate-800 mt-4 mb-2" set:html={content} />;
+    }
+    
+    // Normal paragraph
+    if (content.trim()) {
+      return <p class="text-slate-700 mb-4 leading-relaxed" set:html={content} />;
+    }
+    
+    return null;
+  })}
+</div>
+
+<style>
+  .block-content h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+  }
+  
+  .block-content h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .block-content p {
+    line-height: 1.7;
+    color: #475569;
+    margin-bottom: 1rem;
+  }
+  
+  .block-content ul,
+  .block-content ol {
+    margin-left: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .block-content li {
+    margin-bottom: 0.5rem;
+    line-height: 1.6;
+    color: #475569;
+  }
+  
+  .block-content strong {
+    font-weight: 600;
+    color: #1e293b;
+  }
+  
+  .block-content em {
+    font-style: italic;
+  }
+  
+  .block-content a {
+    color: #059669;
+    text-decoration: underline;
+  }
+  
+  .block-content a:hover {
+    color: #047857;
+  }
+</style>

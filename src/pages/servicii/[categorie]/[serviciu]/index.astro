@@ -1,5 +1,6 @@
 ---
 import Base from '../../../../layouts/Base.astro';
+import BlockContent from '../../../../components/BlockContent.astro';
 import { getServicePage, getImageUrl } from '../../../../lib/sanity';
 import { supabase } from '../../../../lib/supabase';
 
@@ -42,51 +43,6 @@ const service = {
 // Get content from Sanity
 const sanityContent = await getServicePage(serviciu);
 
-// Helper to render portable text
-function renderPortableText(blocks: any[]) {
-  if (!blocks) return '';
-  
-  let html = '';
-  
-  for (const block of blocks) {
-    if (block._type !== 'block') continue;
-    
-    const text = block.children?.map((child: any) => {
-      let processedText = child.text;
-      
-      if (child.marks?.length) {
-        if (child.marks.includes('strong')) {
-          processedText = `<strong>${processedText}</strong>`;
-        }
-        if (child.marks.includes('em')) {
-          processedText = `<em>${processedText}</em>`;
-        }
-        const linkMark = block.markDefs?.find((mark: any) => 
-          mark._type === 'link' && child.marks.includes(mark._key)
-        );
-        if (linkMark) {
-          const target = linkMark.blank ? ' target="_blank" rel="noopener"' : '';
-          processedText = `<a href="${linkMark.href}" class="text-emerald-600 hover:text-emerald-700 underline"${target}>${processedText}</a>`;
-        }
-      }
-      
-      return processedText;
-    }).join('') || '';
-    
-    if (text.trim()) {
-      if (block.style === 'h2') {
-        html += `<h2 class="text-2xl font-bold text-slate-900 mt-8 mb-4">${text}</h2>`;
-      } else if (block.style === 'h3') {
-        html += `<h3 class="text-xl font-semibold text-slate-900 mt-6 mb-3">${text}</h3>`;
-      } else {
-        html += `<p class="text-slate-700 mb-4 leading-relaxed">${text}</p>`;
-      }
-    }
-  }
-  
-  return html;
-}
-
 // SEO
 const canonical = sanityContent?.customCanonical || `https://www.meseriaslocal.ro/servicii/${categorie}/${serviciu}/`;
 const title = sanityContent?.seoTitle || `${service.name} – Profesioniști Verificați, Prețuri 2026 | Meserias Local`;
@@ -109,12 +65,12 @@ const topCities = [
 ];
 
 // Content
-const content = sanityContent?.content ? renderPortableText(sanityContent.content) : '';
 const faq = sanityContent?.faqSection || [];
 const prices = sanityContent?.priceRanges || [];
 const priceDisplay = sanityContent?.priceRangeDisplay;
 const rating = sanityContent?.aggregateRating;
 const relatedServices = sanityContent?.relatedServices || [];
+const contentBlocks = sanityContent?.content || [];
 
 // Similar services from DB
 let similarServices: Array<{ name: string; slug: string }> = [];
@@ -176,7 +132,6 @@ const serviceSchema = {
         },
         priceCurrency: 'RON',
         price: p.minPrice,
-        highPrice: p.maxPrice,
         description: `${p.minPrice}-${p.maxPrice} RON/${p.unit || 'mp'}`
       }))
     }
@@ -321,9 +276,9 @@ const ogImage = sanityContent?.ogImage ? getImageUrl(sanityContent.ogImage) : '/
       )}
 
       <!-- Main Content -->
-      {content ? (
+      {contentBlocks.length > 0 ? (
         <section class="bg-white rounded-lg p-6 border border-slate-200 shadow-sm">
-          <div class="prose prose-slate max-w-none" set:html={content}></div>
+          <BlockContent blocks={contentBlocks} />
         </section>
       ) : (
         <section class="bg-white rounded-lg p-6 border border-slate-200 shadow-sm">
