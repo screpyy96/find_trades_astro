@@ -1,9 +1,9 @@
 ---
 import Base from '../../../../layouts/Base.astro';
-import { getServicePage } from '../../../../lib/sanity';
+import { getServicePage, getImageUrl } from '../../../../lib/sanity';
 import { supabase } from '../../../../lib/supabase';
 
-// SSR with caching
+// SSR with caching - hybrid approach (Sanity + fallback)
 export const prerender = false;
 
 const { categorie, serviciu } = Astro.params;
@@ -16,7 +16,6 @@ if (!supabase) {
   return Astro.redirect('/servicii', 500);
 }
 
-// Helper to capitalize first letter of each word
 const capitalizeWords = (str: string) => {
   return str.split(' ').map(word => 
     word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
@@ -30,7 +29,6 @@ const { data: trade, error: tradeError } = await supabase
   .single();
 
 if (tradeError || !trade) {
-  // Redirect 301 to category page if service doesn't exist (better for SEO than 404)
   return Astro.redirect(`/servicii/${categorie}/`, 301);
 }
 
@@ -41,19 +39,10 @@ const service = {
   categorySlug: categorie,
 };
 
-// Try to get custom content from Sanity
+// Get content from Sanity
 const sanityContent = await getServicePage(serviciu);
 
-// Debug: Log what we get from Sanity
-if (import.meta.env.DEV) {
-  console.log('🔍 Sanity Debug for service page:');
-  console.log('  tradeSlug:', serviciu);
-  console.log('  sanityContent:', sanityContent);
-  console.log('  seoTitle:', sanityContent?.seoTitle);
-  console.log('  seoDescription:', sanityContent?.seoDescription);
-}
-
-// Helper to render portable text with support for links, marks, and internal city linking
+// Helper to render portable text
 function renderPortableText(blocks: any[]) {
   if (!blocks) return '';
   
@@ -65,7 +54,6 @@ function renderPortableText(blocks: any[]) {
     const text = block.children?.map((child: any) => {
       let processedText = child.text;
       
-      // Handle marks
       if (child.marks?.length) {
         if (child.marks.includes('strong')) {
           processedText = `<strong>${processedText}</strong>`;
@@ -73,44 +61,25 @@ function renderPortableText(blocks: any[]) {
         if (child.marks.includes('em')) {
           processedText = `<em>${processedText}</em>`;
         }
-      }
-      
-      // Handle internal links
-      if (child._type === 'span' && child.marks?.includes('link')) {
-        const linkMark = block.markDefs?.find((mark: any) => mark._type === 'link' && child.marks.includes(mark._key));
+        const linkMark = block.markDefs?.find((mark: any) => 
+          mark._type === 'link' && child.marks.includes(mark._key)
+        );
         if (linkMark) {
-          processedText = `<a href="${linkMark.href}" class="text-emerald-600 hover:text-emerald-700 underline">${processedText}</a>`;
+          const target = linkMark.blank ? ' target="_blank" rel="noopener"' : '';
+          processedText = `<a href="${linkMark.href}" class="text-emerald-600 hover:text-emerald-700 underline"${target}>${processedText}</a>`;
         }
       }
       
       return processedText;
     }).join('') || '';
     
-    // Auto-link city names for internal linking
-    const cityNames = ['București', 'Cluj-Napoca', 'Timișoara', 'Iași', 'Constanța', 'Craiova', 'Brașov', 'Galați', 'Ploiești', 'Oradea'];
-    let finalText = text;
-    
-    cityNames.forEach(city => {
-      const citySlug = city.toLowerCase()
-        .replace(/ș/g, 's')
-        .replace(/ț/g, 't')
-        .replace(/ă/g, 'a')
-        .replace(/î/g, 'i')
-        .replace(/â/g, 'a')
-        .replace(/ /g, '-');
-      
-      // Create regex for whole word matching
-      const regex = new RegExp(`\\b${city}\\b`, 'gi');
-      finalText = finalText.replace(regex, `<a href="/servicii/${categorie}/${serviciu}/${citySlug}/" class="text-emerald-600 hover:text-emerald-700 underline font-medium">${city}</a>`);
-    });
-    
-    if (finalText.trim()) {
+    if (text.trim()) {
       if (block.style === 'h2') {
-        html += `<h2 class="text-2xl font-bold text-slate-900 mb-4">${finalText}</h2>`;
+        html += `<h2 class="text-2xl font-bold text-slate-900 mt-8 mb-4">${text}</h2>`;
       } else if (block.style === 'h3') {
-        html += `<h3 class="text-xl font-semibold text-slate-900 mb-3">${finalText}</h3>`;
+        html += `<h3 class="text-xl font-semibold text-slate-900 mt-6 mb-3">${text}</h3>`;
       } else {
-        html += `<p class="text-slate-700 mb-4 leading-relaxed">${finalText}</p>`;
+        html += `<p class="text-slate-700 mb-4 leading-relaxed">${text}</p>`;
       }
     }
   }
@@ -118,13 +87,14 @@ function renderPortableText(blocks: any[]) {
   return html;
 }
 
-// SEO optimized content
-const canonical = `https://www.meseriaslocal.ro/servicii/${categorie}/${serviciu}/`;
-const title = sanityContent?.seoTitle || `${service.name} – Profesioniști Verificați, Oferte Rapide`;
-const description = sanityContent?.seoDescription || `Găsește ${service.name.toLowerCase()} verificați în România. Peste 150+ meseriași certificați în 42 orașe. Oferte gratuite în 24h, recenzii reale, garanție satisfacție.`;
-const keywords = `${service.name.toLowerCase()}, ${service.name.toLowerCase()} profesionist, ${service.name.toLowerCase()} verificat, preț ${service.name.toLowerCase()}, ${service.name.toLowerCase()} România, meseriași ${service.name.toLowerCase()}`;
+// SEO
+const canonical = sanityContent?.customCanonical || `https://www.meseriaslocal.ro/servicii/${categorie}/${serviciu}/`;
+const title = sanityContent?.seoTitle || `${service.name} – Profesioniști Verificați, Prețuri 2026 | Meserias Local`;
+const description = sanityContent?.seoDescription || `Găsește ${service.name.toLowerCase()} verificați în România. Peste 150+ meseriași certificați în 42 orașe. Oferte gratuite în 24h, recenzii reale.`;
+const h1 = sanityContent?.h1 || `${service.name} – Profesioniști Verificați în România`;
+const keywords = sanityContent?.seoKeywords?.join(', ') || `${service.name.toLowerCase()}, ${service.name.toLowerCase()} profesionist, preț ${service.name.toLowerCase()}`;
 
-// Top 10 major cities in Romania
+// Top cities
 const topCities = [
   { name: 'București', slug: 'bucuresti' },
   { name: 'Cluj-Napoca', slug: 'cluj-napoca' },
@@ -138,22 +108,15 @@ const topCities = [
   { name: 'Oradea', slug: 'oradea' }
 ];
 
-// Content from Sanity or fallback
-const content = sanityContent?.content ? renderPortableText(sanityContent.content) : `
-  <h2 class="text-2xl font-bold text-slate-900 mb-4">Găsește ${service.name.toLowerCase()} verificați în România</h2>
-  <p class="text-slate-700 mb-4 leading-relaxed">Platforma Meserias Local conectează clienții cu peste 150+ meseriași certificați pentru servicii de ${service.name.toLowerCase()} în toate orașele importante din România. Toți profesioniștii sunt verificați, cu experiență dovedită și recenzii reale.</p>
-  
-  <h3 class="text-xl font-semibold text-slate-900 mb-3">Acoperire națională completă</h3>
-  <p class="text-slate-700 mb-4 leading-relaxed">Meserias Local acoperă întreaga Română, de la București la Cluj-Napoca, de la Timișoara la Iași și până în Constanța, Craiova, Brașov, Galați, Ploiești și Oradea. Indiferent de locația ta, vei găsi profesioniști ${service.name.toLowerCase()} verificați pregătiți să te ajute.</p>
-  
-  <h3 class="text-xl font-semibold text-slate-900 mb-3">De ce să alegi Meserias Local?</h3>
-  <p class="text-slate-700 mb-4 leading-relaxed">Primești oferte multiple în 2-4 ore, poți compara prețuri și recenzii, și alegi cel mai bun profesionist pentru proiectul tău. Serviciul este 100% gratuit pentru clienți, fără comisioane ascunse.</p>
-  
-  <h3 class="text-xl font-semibold text-slate-900 mb-3">Cum funcționează?</h3>
-  <p class="text-slate-700 mb-4 leading-relaxed">Completezi o cerere cu detaliile lucrării, primești oferte personalizate de la meseriași verificați, compari și alegi cea mai bună ofertă. Simplu, rapid și sigur!</p>
-`;
+// Content
+const content = sanityContent?.content ? renderPortableText(sanityContent.content) : '';
+const faq = sanityContent?.faqSection || [];
+const prices = sanityContent?.priceRanges || [];
+const priceDisplay = sanityContent?.priceRangeDisplay;
+const rating = sanityContent?.aggregateRating;
+const relatedServices = sanityContent?.relatedServices || [];
 
-// Get similar services
+// Similar services from DB
 let similarServices: Array<{ name: string; slug: string }> = [];
 if (supabase) {
   const { data: similarTrades } = await supabase
@@ -168,152 +131,144 @@ if (supabase) {
   }
 }
 
-// Enhanced structured data for SEO
+// JSON-LD Schemas
 const serviceSchema = {
   '@context': 'https://schema.org',
   '@type': 'Service',
-  name: service.name,
-  description: `Servicii profesionale ${service.name.toLowerCase()} în România. Meseriași verificați în București, Cluj-Napoca, Timișoara, Iași, Constanța, Craiova, Brașov, Galați, Ploiești, Oradea și în toată țara.`,
+  '@id': canonical,
+  name: h1,
+  description: description,
   url: canonical,
   provider: {
     '@type': 'Organization',
     name: 'Meserias Local',
     url: 'https://www.meseriaslocal.ro',
-    address: {
-      '@type': 'PostalAddress',
-      addressCountry: 'RO'
-    }
+    sameAs: [
+      'https://www.facebook.com/meseriaslocal',
+      'https://www.instagram.com/meseriaslocal',
+      'https://www.tiktok.com/@meseriaslocal'
+    ]
   },
   areaServed: {
     '@type': 'Country',
     name: 'România'
   },
-  availableChannel: {
-    '@type': 'ServiceChannel',
-    serviceUrl: canonical,
-    servicePhone: '+40-XX-XXXX-XXXX',
-    serviceEmail: 'contact@meseriaslocal.ro'
-  },
   serviceType: service.name,
   category: service.category,
-  offers: {
-    '@type': 'Offer',
-    itemOffered: {
-      '@type': 'Service',
-      name: service.name,
-      description: `Servicii ${service.name.toLowerCase()} verificate în România`
-    },
-    priceCurrency: 'RON',
-    availability: 'https://schema.org/InStock',
-    seller: {
-      '@type': 'Organization',
-      name: 'Meserias Local'
+  ...(priceDisplay && { priceRange: priceDisplay }),
+  ...(rating && {
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: rating.ratingValue,
+      ratingCount: rating.ratingCount,
+      bestRating: 5,
+      worstRating: 1
     }
-  },
-  hasOfferCatalog: {
-    '@type': 'OfferCatalog',
-    name: `${service.name} Services in Romania`,
-    numberOfItems: 10
+  }),
+  ...(prices.length > 0 && {
+    offers: prices.map(p => ({
+      '@type': 'Offer',
+      name: p.service,
+      priceCurrency: 'RON',
+      price: p.minPrice,
+      priceSpecification: {
+        '@type': 'PriceSpecification',
+        minPrice: p.minPrice,
+        maxPrice: p.maxPrice,
+        priceCurrency: 'RON',
+        unitText: p.unit || 'mp'
+      }
+    }))
+  }),
+  potentialAction: {
+    '@type': 'OrderAction',
+    target: {
+      '@type': 'EntryPoint',
+      urlTemplate: `https://app.meseriaslocal.ro/cere-oferta?serviciu=${serviciu}`,
+      actionPlatform: ['http://schema.org/DesktopWebPlatform', 'http://schema.org/MobileWebPlatform']
+    }
   }
 };
 
 const breadcrumbSchema = {
   '@context': 'https://schema.org',
   '@type': 'BreadcrumbList',
-  name: `${service.name} - Breadcrumb Navigation`,
   itemListElement: [
-    {
-      '@type': 'ListItem',
-      position: 1,
-      name: 'Acasă',
-      item: 'https://www.meseriaslocal.ro'
-    },
-    {
-      '@type': 'ListItem',
-      position: 2,
-      name: 'Servicii',
-      item: 'https://www.meseriaslocal.ro/servicii'
-    },
-    {
-      '@type': 'ListItem',
-      position: 3,
-      name: service.name,
-      item: canonical
-    }
+    { '@type': 'ListItem', position: 1, name: 'Acasă', item: 'https://www.meseriaslocal.ro' },
+    { '@type': 'ListItem', position: 2, name: 'Servicii', item: 'https://www.meseriaslocal.ro/servicii/' },
+    { '@type': 'ListItem', position: 3, name: service.category, item: `https://www.meseriaslocal.ro/servicii/${categorie}/` },
+    { '@type': 'ListItem', position: 4, name: service.name, item: canonical }
   ]
 };
 
-const faqSchema = {
+const faqSchema = faq.length > 0 ? {
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
-  mainEntity: [
-    {
-      '@type': 'Question',
-      name: `Cât costă serviciile de ${service.name.toLowerCase()}?`,
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: `Prețurile pentru ${service.name.toLowerCase()} variază în funcție de complexitatea proiectului. Pe Meserias Local primești oferte gratuite personalizate de la mai mulți profesioniști, astfel poți compara prețurile și alege oferta cea mai bună.`
-      }
-    },
-    {
-      '@type': 'Question',
-      name: `Cum găsesc ${service.name.toLowerCase()} de încredere?`,
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: `Pe Meserias Local toți meseriașii sunt verificați cu identitate confirmată. Verifică recenziile, portofoliul și rating-ul pentru a alege cel mai bun profesionist.`
-      }
-    },
-    {
-      '@type': 'Question',
-      name: 'În cât timp primesc oferte?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: 'De obicei primești primele oferte în 2-4 ore de la postarea cererii. În 24 de ore vei avea 3-5 oferte complete de la profesioniști din zona ta.'
-      }
+  mainEntity: faq.map(f => ({
+    '@type': 'Question',
+    name: f.question,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: f.answer
     }
-  ]
-};
+  }))
+} : null;
 
+const ogImage = sanityContent?.ogImage ? getImageUrl(sanityContent.ogImage) : '/og-image.png';
 ---
 
 <Base title={title} description={description} canonical={canonical} disableDefaultBreadcrumb={true}>
-  <!-- Enhanced SEO Meta Tags -->
   <meta slot="head" name="keywords" content={keywords} />
   <meta slot="head" property="og:title" content={title} />
   <meta slot="head" property="og:description" content={description} />
   <meta slot="head" property="og:url" content={canonical} />
   <meta slot="head" property="og:type" content="website" />
+  <meta slot="head" property="og:image" content={ogImage} />
   <meta slot="head" name="twitter:card" content="summary_large_image" />
-  <meta slot="head" name="twitter:title" content={title} />
-  <meta slot="head" name="twitter:description" content={description} />
   
-  <!-- Structured Data for Rich Snippets -->
   <script slot="head" is:inline type="application/ld+json" set:html={JSON.stringify(serviceSchema)}></script>
   <script slot="head" is:inline type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)}></script>
-  <script slot="head" is:inline type="application/ld+json" set:html={JSON.stringify(faqSchema)}></script>
+  {faqSchema && <script slot="head" is:inline type="application/ld+json" set:html={JSON.stringify(faqSchema)}></script>}
 
-  <!-- Hero Section -->
+  <!-- Hero -->
   <section class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
     <div class="max-w-7xl mx-auto px-4 py-12 sm:py-16">
       <div class="max-w-4xl mx-auto text-center">
-        <!-- Breadcrumb -->
         <nav class="flex justify-center mb-6">
-          <ol class="flex items-center text-sm text-slate-300">
+          <ol class="flex items-center text-sm text-slate-300 flex-wrap justify-center">
             <li><a href="/" class="hover:text-amber-400">Acasă</a></li>
             <li><span class="mx-2 text-white/40">›</span></li>
-            <li><a href="/servicii" class="hover:text-amber-400">Servicii</a></li>
+            <li><a href="/servicii/" class="hover:text-amber-400">Servicii</a></li>
+            <li><span class="mx-2 text-white/40">›</span></li>
+            <li><a href={`/servicii/${categorie}/`} class="hover:text-amber-400">{service.category}</a></li>
             <li><span class="mx-2 text-white/40">›</span></li>
             <li><span class="text-orange-400 font-semibold">{service.name}</span></li>
           </ol>
         </nav>
 
         <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4">
-          {sanityContent?.heroTitle || `${service.name} – Profesioniști Verificați în România`}
+          {h1}
         </h1>
         
-        <p class="text-lg text-slate-300 mb-8 max-w-2xl mx-auto">
-          {sanityContent?.heroDescription || `Găsește ${service.name.toLowerCase()} verificați în București, Cluj-Napoca, Timișoara, Iași, Constanța, Craiova, Brașov, Galați, Ploiești, Oradea și în toată România. Peste 150+ meseriași certificați, oferte gratuite în 24h.`}
+        <p class="text-lg text-slate-300 mb-6 max-w-2xl mx-auto">
+          {sanityContent?.heroDescription || `Găsește ${service.name.toLowerCase()} verificați în București, Cluj-Napoca, Timișoara și în toată România. Oferte gratuite în 24h.`}
         </p>
+
+        <!-- Stats Row -->
+        <div class="flex flex-wrap justify-center gap-4 mb-8 text-sm">
+          <span class="bg-white/10 px-4 py-2 rounded-full">150+ meseriași verificați</span>
+          <span class="bg-white/10 px-4 py-2 rounded-full">42 orașe acoperite</span>
+          {rating && (
+            <span class="bg-amber-500/20 text-amber-300 px-4 py-2 rounded-full font-medium">
+              {rating.ratingValue} ⭐ ({rating.ratingCount} reviews)
+            </span>
+          )}
+          {priceDisplay && (
+            <span class="bg-emerald-500/20 text-emerald-300 px-4 py-2 rounded-full font-medium">
+              {priceDisplay}
+            </span>
+          )}
+        </div>
 
         <a 
           href="https://app.meseriaslocal.ro/cere-oferta"
@@ -328,27 +283,66 @@ const faqSchema = {
     </div>
   </section>
 
-  <!-- Main Content -->
   <div class="max-w-7xl mx-auto px-4 py-8 sm:py-12">
     <div class="space-y-8 sm:space-y-10">
-      <!-- Service Description -->
-      <section class="bg-white rounded-lg p-6 border border-slate-200 shadow-sm">
-        <h2 class="text-xl font-semibold text-slate-900 mb-6">Despre serviciul {service.name.toLowerCase()}</h2>
-        <div class="prose prose-slate max-w-none">
-          <div set:html={content}></div>
-        </div>
-      </section>
+      
+      <!-- Prices Table -->
+      {prices.length > 0 && (
+        <section class="bg-white rounded-lg p-6 border border-slate-200 shadow-sm">
+          <h2 class="text-xl font-semibold text-slate-900 mb-6 flex items-center gap-2">
+            <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Prețuri {service.name} 2026
+          </h2>
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead>
+                <tr class="border-b border-slate-200">
+                  <th class="text-left py-3 px-4 font-semibold text-slate-700">Serviciu</th>
+                  <th class="text-left py-3 px-4 font-semibold text-slate-700">Preț</th>
+                  <th class="text-left py-3 px-4 font-semibold text-slate-700">Unitate</th>
+                </tr>
+              </thead>
+              <tbody>
+                {prices.map((price, i) => (
+                  <tr class={i % 2 === 0 ? 'bg-slate-50' : ''}>
+                    <td class="py-3 px-4 text-slate-700">{price.service}</td>
+                    <td class="py-3 px-4 font-semibold text-emerald-600">{price.minPrice} - {price.maxPrice} RON</td>
+                    <td class="py-3 px-4 text-slate-500">{price.unit || 'mp'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p class="text-sm text-slate-500 mt-4">* Prețurile sunt orientative și pot varia în funcție de complexitate și locație.</p>
+        </section>
+      )}
 
-      <!-- CTA Section -->
+      <!-- Main Content -->
+      {content ? (
+        <section class="bg-white rounded-lg p-6 border border-slate-200 shadow-sm">
+          <div class="prose prose-slate max-w-none" set:html={content}></div>
+        </section>
+      ) : (
+        <section class="bg-white rounded-lg p-6 border border-slate-200 shadow-sm">
+          <h2 class="text-2xl font-bold text-slate-900 mb-4">Găsește {service.name.toLowerCase()} verificați în România</h2>
+          <p class="text-slate-700 mb-4 leading-relaxed">Platforma Meserias Local conectează clienții cu peste 150+ meseriași certificați pentru servicii de {service.name.toLowerCase()} în toate orașele importante din România.</p>
+          <h3 class="text-xl font-semibold text-slate-900 mb-3">De ce să alegi Meserias Local?</h3>
+          <p class="text-slate-700 mb-4 leading-relaxed">Primești oferte multiple în 2-4 ore, poți compara prețuri și recenzii, și alegi cel mai bun profesionist pentru proiectul tău. Serviciul este 100% gratuit pentru clienți.</p>
+        </section>
+      )}
+
+      <!-- CTA -->
       <section class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg p-6 text-white">
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
-            <h3 class="text-lg font-semibold mb-2">Ai nevoie de {service.name.toLowerCase()}?</h3>
+            <h3 class="text-lg font-semibold mb-1">Ai nevoie de {service.name.toLowerCase()}?</h3>
             <p class="text-blue-100 text-sm">Primești oferte personalizate în 2-4 ore</p>
           </div>
           <a 
             href="https://app.meseriaslocal.ro/cere-oferta"
-            class="inline-flex items-center gap-2 px-6 py-3 bg-white text-blue-600 font-semibold rounded-md hover:bg-blue-50 transition-colors"
+            class="inline-flex items-center gap-2 px-6 py-3 bg-white text-blue-600 font-semibold rounded-md hover:bg-blue-50 transition-colors whitespace-nowrap"
           >
             Solicită ofertă gratuită
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -356,150 +350,121 @@ const faqSchema = {
             </svg>
           </a>
         </div>
-        
-        <div class="mt-4 pt-4 border-t border-white/20 grid grid-cols-3 gap-4 text-xs">
-          <div class="flex items-center gap-2">
-            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-            </svg>
-            <span>Fără obligații</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
-            </svg>
-            <span>Răspuns în 2-4 ore</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-              <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-            </svg>
-            <span>Oferte multiple</span>
-          </div>
-        </div>
       </section>
 
-      <!-- Top Cities Section -->
+      <!-- Cities -->
       <section class="bg-white rounded-lg p-6 border border-slate-200 shadow-sm">
-        <h2 class="text-xl font-semibold text-slate-900 mb-6">{service.name} în Orașele Principale din România</h2>
-        <p class="text-slate-600 mb-6">Acoperim cele mai importante orașe din România cu profesioniști {service.name.toLowerCase()} verificați. Indiferent de locația ta, vei găsi expertul potrivit pentru proiectul tău.</p>
-        
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
+        <h2 class="text-xl font-semibold text-slate-900 mb-6">{service.name} în Orașele Principale</h2>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
           {topCities.map(city => (
             <a 
               href={`/servicii/${categorie}/${serviciu}/${city.slug}/`}
               class="flex items-center gap-2 p-4 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-lg hover:from-emerald-100 hover:to-teal-100 border border-emerald-200 transition-all group"
             >
-              <svg class="w-5 h-5 text-emerald-600 group-hover:text-emerald-700 transition-colors" fill="currentColor" viewBox="0 0 20 20">
+              <svg class="w-5 h-5 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
               </svg>
-              <span class="text-slate-700 font-semibold group-hover:text-emerald-700 transition-colors">{city.name}</span>
+              <span class="text-slate-700 font-semibold group-hover:text-emerald-700">{city.name}</span>
             </a>
           ))}
         </div>
-        
-        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
-          <h3 class="text-xl font-bold text-slate-900 mb-3 flex items-center gap-2">
-            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            Acoperire Națională Completă
-          </h3>
-          <p class="text-slate-600 mb-4">Pe lângă orașele principale, Meserias Local acoperă și alte orașe din România. Oricât de mică ar fi localitatea ta, vom găsi profesioniști {service.name.toLowerCase()} în zonă.</p>
-          <div class="flex items-center gap-4">
-            <a 
-              href="https://app.meseriaslocal.ro/cere-oferta"
-              class="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Caută în orașul tău
-              <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-            </a>
-            <span class="text-slate-500 text-sm">• Răspuns în 2-4 ore • Oferte gratuite • Garanție satisfacție</span>
-          </div>
-        </div>
       </section>
 
-      <!-- FAQ Section -->
-      <section class="bg-white rounded-lg p-6 border border-slate-200 shadow-sm">
-        <h2 class="text-xl font-semibold text-slate-900 mb-6">Întrebări frecvente</h2>
-        <div class="space-y-4">
-          <details class="border border-slate-200 rounded-lg overflow-hidden">
-            <summary class="flex items-center justify-between p-4 cursor-pointer bg-slate-50 hover:bg-slate-100 transition-colors">
-              <h3 class="font-semibold text-slate-900 pr-4">Cât costă serviciile de {service.name.toLowerCase()}?</h3>
-              <svg class="w-5 h-5 text-slate-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-              </svg>
-            </summary>
-            <div class="p-4 pt-0">
-              <p class="text-slate-600">Prețurile variază în funcție de complexitatea proiectului. Primești oferte gratuite personalizate de la mai mulți profesioniști și poți compara prețurile pentru a alege cea mai bună variantă.</p>
-            </div>
-          </details>
-
-          <details class="border border-slate-200 rounded-lg overflow-hidden">
-            <summary class="flex items-center justify-between p-4 cursor-pointer bg-slate-50 hover:bg-slate-100 transition-colors">
-              <h3 class="font-semibold text-slate-900 pr-4">Cum aleg un {service.name.toLowerCase()} de încredere?</h3>
-              <svg class="w-5 h-5 text-slate-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-              </svg>
-            </summary>
-            <div class="p-4 pt-0">
-              <p class="text-slate-600">Toți meseriașii sunt verificați cu identitate confirmată. Verifică recenziile, portofoliul și rating-ul pentru a alege cel mai bun profesionist pentru proiectul tău.</p>
-            </div>
-          </details>
-
-          <details class="border border-slate-200 rounded-lg overflow-hidden">
-            <summary class="flex items-center justify-between p-4 cursor-pointer bg-slate-50 hover:bg-slate-100 transition-colors">
-              <h3 class="font-semibold text-slate-900 pr-4">În cât timp primesc oferte?</h3>
-              <svg class="w-5 h-5 text-slate-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-              </svg>
-            </summary>
-            <div class="p-4 pt-0">
-              <p class="text-slate-600">De obicei primești primele oferte în 2-4 ore. În 24 de ore vei avea 3-5 oferte complete de la profesioniști din zona ta.</p>
-            </div>
-          </details>
-        </div>
-      </section>
-
-      <!-- Similar Services -->
-      {similarServices.length > 0 && (
+      <!-- FAQ -->
+      {faq.length > 0 ? (
         <section class="bg-white rounded-lg p-6 border border-slate-200 shadow-sm">
-          <h3 class="font-semibold text-slate-900 mb-4">Servicii similare</h3>
+          <h2 class="text-xl font-semibold text-slate-900 mb-6">Întrebări Frecvente</h2>
+          <div class="space-y-4">
+            {faq.map((item, i) => (
+              <details class="border border-slate-200 rounded-lg overflow-hidden" open={i === 0}>
+                <summary class="flex items-center justify-between p-4 cursor-pointer bg-slate-50 hover:bg-slate-100 transition-colors">
+                  <h3 class="font-semibold text-slate-900 pr-4">{item.question}</h3>
+                  <svg class="w-5 h-5 text-slate-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </summary>
+                <div class="p-4 pt-0">
+                  <p class="text-slate-600">{item.answer}</p>
+                </div>
+              </details>
+            ))}
+          </div>
+        </section>
+      ) : (
+        <section class="bg-white rounded-lg p-6 border border-slate-200 shadow-sm">
+          <h2 class="text-xl font-semibold text-slate-900 mb-6">Întrebări Frecvente</h2>
+          <div class="space-y-4">
+            <details class="border border-slate-200 rounded-lg overflow-hidden" open>
+              <summary class="flex items-center justify-between p-4 cursor-pointer bg-slate-50 hover:bg-slate-100">
+                <h3 class="font-semibold text-slate-900 pr-4">Cât costă serviciile de {service.name.toLowerCase()}?</h3>
+                <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <div class="p-4 pt-0">
+                <p class="text-slate-600">Prețurile variază în funcție de complexitatea proiectului. Primești oferte gratuite de la mai mulți profesioniști și poți compara.</p>
+              </div>
+            </details>
+            <details class="border border-slate-200 rounded-lg overflow-hidden">
+              <summary class="flex items-center justify-between p-4 cursor-pointer bg-slate-50 hover:bg-slate-100">
+                <h3 class="font-semibold text-slate-900 pr-4">Cum aleg un {service.name.toLowerCase()} de încredere?</h3>
+                <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <div class="p-4 pt-0">
+                <p class="text-slate-600">Toți meseriașii sunt verificați. Verifică recenziile, portofoliul și rating-ul pentru a alege cel mai bun profesionist.</p>
+              </div>
+            </details>
+            <details class="border border-slate-200 rounded-lg overflow-hidden">
+              <summary class="flex items-center justify-between p-4 cursor-pointer bg-slate-50 hover:bg-slate-100">
+                <h3 class="font-semibold text-slate-900 pr-4">În cât timp primesc oferte?</h3>
+                <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <div class="p-4 pt-0">
+                <p class="text-slate-600">De obicei primești primele oferte în 2-4 ore. În 24 de ore vei avea 3-5 oferte complete.</p>
+              </div>
+            </details>
+          </div>
+        </section>
+      )}
+
+      <!-- Related Services -->
+      {relatedServices.length > 0 && (
+        <section class="bg-white rounded-lg p-6 border border-slate-200 shadow-sm">
+          <h3 class="font-semibold text-slate-900 mb-4">Servicii Conexe</h3>
           <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {similarServices.map(similarService => (
+            {relatedServices.map(rs => (
               <a 
-                href={`/servicii/${categorie}/${similarService.slug}/`}
+                href={rs.serviceUrl || `/servicii/${categorie}/${rs.serviceSlug}/`}
                 class="p-4 bg-slate-50 rounded-lg border border-slate-200 hover:border-blue-500 hover:shadow-sm transition text-center"
               >
-                <h4 class="font-semibold text-sm">{similarService.name}</h4>
+                <span class="font-semibold text-sm">{rs.serviceName}</span>
               </a>
             ))}
           </div>
         </section>
       )}
 
-      <!-- Contact Info -->
-      <div class="bg-white rounded-lg p-4 border border-slate-200 shadow-sm text-center">
-        <h3 class="font-semibold text-slate-900 mb-3">Ai întrebări?</h3>
-        <div class="flex justify-center gap-6">
-          <a href="tel:0744123456" class="flex items-center gap-2 text-slate-700 hover:text-blue-600 transition-colors text-sm">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-            </svg>
-            +447930097259
-          </a>
-          
-          <a href="mailto:contact@meseriaslocal.ro" class="flex items-center gap-2 text-slate-700 hover:text-blue-600 transition-colors text-sm">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2v10a2 2 0 002 2z" />
-            </svg>
-            contact@meseriaslocal.ro
-          </a>
-        </div>
-      </div>
+      <!-- Similar Services from DB (fallback) -->
+      {similarServices.length > 0 && relatedServices.length === 0 && (
+        <section class="bg-white rounded-lg p-6 border border-slate-200 shadow-sm">
+          <h3 class="font-semibold text-slate-900 mb-4">Servicii Similare</h3>
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {similarServices.map(s => (
+              <a 
+                href={`/servicii/${categorie}/${s.slug}/`}
+                class="p-4 bg-slate-50 rounded-lg border border-slate-200 hover:border-blue-500 hover:shadow-sm transition text-center"
+              >
+                <span class="font-semibold text-sm">{s.name}</span>
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
+
     </div>
   </div>
 </Base>

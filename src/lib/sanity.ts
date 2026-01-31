@@ -14,16 +14,18 @@ export interface ServicePage {
   title: string;
   slug: { current: string };
   tradeSlug: string;
-  citySlug: string;
+  citySlug?: string;
   tradeName?: string;
   cityName?: string;
   categoryName?: string;
   categorySlug?: string;
   isPublished: boolean;
   publishedAt?: string;
+  updatedAt?: string;
   heroTitle?: string;
   heroSubtitle?: string;
   heroDescription?: string;
+  h1?: string;
   seoTitle?: string;
   seoDescription?: string;
   metaDescription?: string;
@@ -37,16 +39,28 @@ export interface ServicePage {
     service: string;
     minPrice: number;
     maxPrice: number;
+    unit?: string;
   }>;
+  priceRangeDisplay?: string;
+  aggregateRating?: {
+    ratingValue: number;
+    ratingCount: number;
+  };
+  customCanonical?: string;
   localTips?: Array<{
     title: string;
     description: string;
   }>;
   relatedServices?: Array<{
     serviceName: string;
-    serviceSlug: string;
+    serviceSlug?: string;
+    serviceUrl?: string;
   }>;
-  schema?: any; // JSON-LD schema override
+  ogImage?: {
+    asset: { _ref: string };
+    alt?: string;
+  };
+  schema?: any;
 }
 
 const servicePageProjection = `{
@@ -62,9 +76,11 @@ const servicePageProjection = `{
   categorySlug,
   isPublished,
   publishedAt,
+  updatedAt,
   heroTitle,
   heroSubtitle,
   heroDescription,
+  h1,
   seoTitle,
   seoDescription,
   metaDescription,
@@ -72,8 +88,12 @@ const servicePageProjection = `{
   content,
   faqSection,
   priceRanges,
+  priceRangeDisplay,
+  aggregateRating,
+  customCanonical,
   localTips,
-  relatedServices
+  relatedServices,
+  ogImage
 }`;
 
 export async function getAllServicePages(): Promise<ServicePage[]> {
