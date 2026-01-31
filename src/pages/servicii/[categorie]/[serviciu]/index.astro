@@ -96,14 +96,23 @@ const serviceSchema = {
   description: description,
   url: canonical,
   provider: {
-    '@type': 'Organization',
+    '@type': 'LocalBusiness',
     name: 'Meserias Local',
     url: 'https://www.meseriaslocal.ro',
     sameAs: [
       'https://www.facebook.com/meseriaslocal',
       'https://www.instagram.com/meseriaslocal',
       'https://www.tiktok.com/@meseriaslocal'
-    ]
+    ],
+    ...(rating && {
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: rating.ratingValue,
+        ratingCount: rating.ratingCount,
+        bestRating: 5,
+        worstRating: 1
+      }
+    })
   },
   areaServed: {
     '@type': 'Country',
@@ -111,15 +120,6 @@ const serviceSchema = {
   },
   serviceType: service.name,
   category: service.category,
-  ...(rating && {
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: rating.ratingValue,
-      ratingCount: rating.ratingCount,
-      bestRating: 5,
-      worstRating: 1
-    }
-  }),
   ...(prices.length > 0 && {
     hasOfferCatalog: {
       '@type': 'OfferCatalog',
