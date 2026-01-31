@@ -1,9 +1,7 @@
 ---
 import Base from '../../../../../layouts/Base.astro';
 import { cities, getCityBySlug, getNearbyCities } from '../../../../../data';
-import { trades } from '../../../../../data/trades';
 import { getServiceCityPage } from '../../../../../lib/sanity';
-import { supabase } from '../../../../../lib/supabase';
 import { generateFallbackContent } from '../../../../../lib/seo-fallback';
 import { getAppConfig, getPublicSupabaseConfig } from '../../../../../lib/publicEnv';
 import { fetchServicePageData, fetchServiceMetrics, fetchRelatedTrades } from '../../../../../lib/service-data';
@@ -11,8 +9,7 @@ import {
   MAX_NEARBY_CITIES, 
   MAX_PRICE_RANGES, 
   MIN_RATING_FOR_DISPLAY,
-  MIN_BUDGET_FOR_DISPLAY,
-  CACHE_REVALIDATE_CITY
+  MIN_BUDGET_FOR_DISPLAY
 } from '../../../../../lib/constants';
 import { RecommendedTradesmen } from '../../../../../components/tradesman/RecommendedTradesmen';
 

@@ -112,72 +112,69 @@ export function generateHomepageSchema(stats: HomepageStats, trades: Trade[]) {
 export function generateServicesPageSchema(totalTrades: number, totalCategories: number, trades: Trade[]) {
   const baseUrl = "https://www.meseriaslocal.ro";
   
+  // Helper to generate category slug
+  const generateCategorySlug = (category: string) => {
+    return category.toLowerCase()
+      .replace(/\s+&\s+/g, '-')
+      .replace(/&/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/ș/g, 's')
+      .replace(/ț/g, 't')
+      .replace(/ă/g, 'a')
+      .replace(/â/g, 'a')
+      .replace(/î/g, 'i')
+      .replace(/[^a-z0-9-]/g, '')
+      .replace(/-+/g, '-');
+  };
+
+  // Get total cities count
+  const totalCities = 143; // or import from cities.ts
+  
   return {
     "@context": "https://schema.org",
     "@graph": [
+      // Breadcrumb
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Acasă",
+            "item": baseUrl
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Servicii",
+            "item": `${baseUrl}/servicii/`
+          }
+        ]
+      },
+      // ItemList with all services
+      {
+        "@type": "ItemList",
+        "name": "Servicii Meseriași România",
+        "description": `${totalTrades} servicii profesionale în ${totalCities} orașe`,
+        "numberOfItems": totalTrades,
+        "itemListElement": trades.map((trade, index) => {
+          const categorySlug = trade.category ? generateCategorySlug(trade.category) : 'servicii';
+          return {
+            "@type": "ListItem",
+            "position": index + 1,
+            "name": trade.name,
+            "url": `${baseUrl}/servicii/${categorySlug}/${trade.slug}/`
+          };
+        })
+      },
+      // WebPage
       {
         "@type": "WebPage",
         "@id": `${baseUrl}/servicii/#webpage`,
         "url": `${baseUrl}/servicii/`,
-        "name": `Servicii Profesionale - ${totalTrades} Meserii în ${totalCategories} Categorii`,
-        "description": `Director complet cu ${totalTrades} servicii profesionale în ${totalCategories} categorii`,
-        "isPartOf": { "@id": `${baseUrl}/#website` },
-        "breadcrumb": {
-          "@type": "BreadcrumbList",
-          "itemListElement": [
-            {
-              "@type": "ListItem",
-              "position": 1,
-              "name": "Acasă",
-              "item": baseUrl
-            },
-            {
-              "@type": "ListItem",
-              "position": 2,
-              "name": "Servicii",
-              "item": `${baseUrl}/servicii/`
-            }
-          ]
-        }
-      },
-      {
-        "@type": "ItemList",
-        "name": "Servicii Profesionale Disponibile",
-        "description": `${totalTrades} specializări disponibile pe platformă`,
-        "numberOfItems": totalTrades,
-        "itemListElement": trades.slice(0, 20).map((trade, index) => ({
-          "@type": "ListItem",
-          "position": index + 1,
-          "item": {
-            "@type": "Service",
-            "name": trade.name,
-            "url": `${baseUrl}/meseriasi/?q=${encodeURIComponent(trade.name)}`,
-            "description": `Găsește ${trade.name} verificați în zona ta.`,
-            "provider": { "@id": `${baseUrl}/#organization` }
-          }
-        }))
-      },
-      {
-        "@type": "Service",
-        "name": "Platformă Meseriași Verificați",
-        "description": "Conectarea clienților cu meseriași verificați și de încredere",
-        "provider": { "@id": `${baseUrl}/#organization` },
-        "areaServed": {
-          "@type": "Country",
-          "name": "România"
-        },
-        "hasOfferCatalog": {
-          "@type": "OfferCatalog",
-          "name": "Servicii Profesionale",
-          "itemListElement": trades.slice(0, 30).map(trade => ({
-            "@type": "Offer",
-            "itemOffered": {
-              "@type": "Service",
-              "name": trade.name,
-              "description": `Servicii de ${trade.name} în România`
-            }
-          }))
-        }
+        "name": `Servicii Meseriași România - ${totalTrades} Meserii în ${totalCities} Orașe`,
+        "description": `Director complet cu ${totalTrades} servicii profesionale de meseriași în ${totalCities} orașe. Găsește meseriași verificați în toată România.`,
+        "isPartOf": { "@id": `${baseUrl}/#website` }
       }
     ]
   };

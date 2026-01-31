@@ -1,0 +1,64 @@
+# Meserias Local
+
+> Platforma de încredere pentru găsirea meseriașilor profesioniști în România.
+
+## Despre
+
+Meserias Local este o platformă online care conectează utilizatorii cu meseriași verificați din România. Oferim servicii de căutare și comparare a profesioniștilor din diverse domenii: instalații, construcții, renovări, electricieni, zugravi, instalatori și multe altele.
+
+## Funcționalități principale
+
+- Căutare meseriași după serviciu și locație
+- Profile detaliate ale meseriașilor cu recenzii reale
+- Comparare oferte de la mai mulți profesioniști
+- Acoperire în peste 45 de orașe din România
+- Blog cu ghiduri și sfaturi pentru renovări
+
+## Structura site-ului
+
+- `/` - Pagina principală cu căutare și categorii populare
+- `/servicii/` - Lista tuturor categoriilor de servicii
+- `/servicii/[categorie]/` - Servicii dintr-o categorie specifică
+- `/servicii/[categorie]/[serviciu]/` - Pagină serviciu la nivel național
+- `/servicii/[categorie]/[serviciu]/[oras]/` - Pagină serviciu + oraș specific
+- `/meseriasi/` - Lista meseriașilor
+- `/meseriasi/[slug]/` - Profil meserias individual
+- `/companii/` - Lista companiilor partenere
+- `/companii/[slug]/` - Profil companie
+- `/blog/` - Articole și ghiduri
+- `/blog/[slug]/` - Articol individual
+- `/despre-noi/` - Despre platformă
+- `/faq/` - Întrebări frecvente
+- `/suport/` - Contact și suport
+
+## Categorii de servicii
+
+- Instalații sanitare și termice
+- Electricieni
+- Zugrăveli și vopsitorii
+- Construcții și renovări
+- Amenajări interioare
+- Montaj parchet și gresie
+- Acoperișuri
+- Tâmplărie și mobilier
+- Curățenie profesională
+- Grădinărit și peisagistică
+
+## Aplicații mobile
+
+- Android (Google Play): https://play.google.com/store/apps/details?id=com.screpyy.meserias
+- iOS (App Store): https://apps.apple.com/gb/app/meserias-local/id6755662662
+
+Aplicațiile mobile oferă acces rapid la platformă, notificări pentru oferte noi și posibilitatea de a contacta meseriași direct din telefon.
+
+## Contact
+
+- Website: https://www.meseriaslocal.ro
+- Email: contact@meseriaslocal.ro
+
+## Informații tehnice
+
+- Framework: Astro (Static Site Generation)
+- CMS: Sanity
+- Hosting: Vercel
+- Limbă: Română

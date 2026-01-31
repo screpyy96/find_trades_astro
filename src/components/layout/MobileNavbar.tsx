@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Home, Search, Menu, X, PlusCircle, LogIn, Briefcase, FileText, Info, Mail, BookOpen, Building2 } from 'lucide-react';
 
 interface MobileNavbarProps {
@@ -20,7 +20,7 @@ export function MobileNavbar({ currentPath, appUrl = '', webUrl = '' }: MobileNa
   const closeDrawer = () => setDrawerOpen(false);
 
   // Check for session on mount
-  useState(() => {
+  useEffect(() => {
     if (typeof window === 'undefined') return;
     
     const isAstroSite = !window.location.hostname.includes('app.');
@@ -42,7 +42,7 @@ export function MobileNavbar({ currentPath, appUrl = '', webUrl = '' }: MobileNa
     }
     
     setDrawerOpen(false);
-  });
+  }, [appUrl]);
 
   const navActions = [
     { icon: <Home className="w-6 h-6" />, label: 'Acasă', href: webUrl || '/', id: 'home' },

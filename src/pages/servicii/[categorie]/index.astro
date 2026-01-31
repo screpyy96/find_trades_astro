@@ -1,372 +1,425 @@
 ---
 import Base from '../../../layouts/Base.astro';
-import { supabase } from '../../../lib/supabase';
+import { categories, getCategoryBySlug, type CategoryData } from '../../../data/categories';
+import { trades } from '../../../data/trades';
+import { cities } from '../../../data/cities';
 import { getPublicSupabaseConfig } from '../../../lib/publicEnv';
 import { RecommendedTradesmen } from '../../../components/tradesman/RecommendedTradesmen';
 
-// SSR with caching
-export const prerender = false;
+// Static generation - pre-render all category pages at build time
+export async function getStaticPaths() {
+  return categories.map(cat => ({
+    params: { categorie: cat.slug },
+    props: { categoryData: cat }
+  }));
+}
+
+interface Props {
+  categoryData: CategoryData;
+}
 
 const { categorie } = Astro.params;
 
-if (!supabase) {
-  return Astro.redirect('/servicii', 500);
+// Get categoryData from props or fallback to lookup
+let categoryData: CategoryData | undefined = Astro.props.categoryData;
+if (!categoryData) {
+  categoryData = getCategoryBySlug(categorie || '');
 }
 
-// Get all trades from this category
-const { data: categoryTrades, error: tradesError } = await supabase
-  .from('trades')
-  .select('id, name, slug, category, description')
-  .order('name');
-
-if (tradesError || !categoryTrades || categoryTrades.length === 0) {
-  return Astro.redirect('/servicii');
+// 404 if category not found - throw error for static generation
+if (!categoryData) {
+  return new Response(null, {
+    status: 404,
+    statusText: 'Not Found'
+  });
 }
 
-// Normalize category slug for comparison
+// Get all trades for this category from static data
 const normalizeSlug = (str: string) => {
-  return str
-    .toLowerCase()
-    .replace(/\s+&\s+/g, '-')
-    .replace(/&/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/ș/g, 's')
-    .replace(/ț/g, 't')
-    .replace(/ă/g, 'a')
-    .replace(/â/g, 'a')
-    .replace(/î/g, 'i')
-    .replace(/[^a-z0-9-]/g, '')
-    .replace(/-+/g, '-');
+  return str.toLowerCase()
+    .replace(/\s+&\s+/g, '-').replace(/&/g, '').replace(/\s+/g, '-')
+    .replace(/ș/g, 's').replace(/ț/g, 't').replace(/ă/g, 'a').replace(/â/g, 'a').replace(/î/g, 'i')
+    .replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-');
 };
 
-// Find trades matching this category
-const trades = categoryTrades.filter(trade => 
-  normalizeSlug(trade.category) === categorie
-);
+const categoryTrades = trades.filter(t => normalizeSlug(t.category) === categorie);
 
-if (trades.length === 0) {
-  // Redirect 301 to services page if category doesn't exist (better for SEO than 404)
-  return Astro.redirect('/servicii/', 301);
-}
+// Get trade IDs for this category (for RecommendedTradesmen)
+const categoryTradeIds = categoryTrades.map(t => t.id);
 
-// Get the category name from the first trade
-const categoryName = trades[0].category;
+// Top 6 cities for matrix
+const topCities = cities
+  .filter(c => c.population && c.population > 100000 && !c.slug.startsWith('sectorul'))
+  .sort((a, b) => (b.population || 0) - (a.population || 0))
+  .slice(0, 6);
 
-// Get Supabase config for the component
+// Supabase config for RecommendedTradesmen
 const { url: supabaseUrl, anonKey: supabaseAnonKey } = getPublicSupabaseConfig();
 
-// Helper function to capitalize
-const capitalizeFirst = (str: string) => {
-  return str.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+// Helper: capitalize first letter of each keyword
+const capitalizeKeywords = (keywords: string[]) => {
+  return keywords.map(k => k.charAt(0).toUpperCase() + k.slice(1));
 };
 
-const title = `${capitalizeFirst(categoryName)} - Servicii și Meseriași Verificați`;
-const description = `Descoperă ${trades.length} servicii de ${categoryName.toLowerCase()} cu meseriași verificați în toată România. Primește oferte gratuite în 24h, compară prețuri și recenzii.`;
-const keywords = `${categoryName.toLowerCase()}, servicii ${categoryName.toLowerCase()}, meseriași ${categoryName.toLowerCase()}, ${categoryName.toLowerCase()} România`;
+// SEO
+const title = `${categoryData.h1} (${categoryTrades.length} Servicii) | Meserias Local`;
+const description = categoryData.description;
+const canonical = `https://www.meseriaslocal.ro/servicii/${categorie}/`;
 
-// Schema.org structured data
-const categorySchema = {
+// Schema ItemList
+const itemListSchema = {
   '@context': 'https://schema.org',
-  '@type': 'CollectionPage',
-  name: categoryName,
-  description: description,
-  url: `https://www.meseriaslocal.ro/servicii/${categorie}/`,
-  inLanguage: 'ro-RO',
-  isPartOf: {
-    '@type': 'WebSite',
-    name: 'Meserias Local',
-    url: 'https://www.meseriaslocal.ro'
-  },
-  provider: {
-    '@type': 'Organization',
-    name: 'Meserias Local',
-    url: 'https://www.meseriaslocal.ro',
-    logo: 'https://www.meseriaslocal.ro/icon-192.png'
-  },
-  mainEntity: {
-    '@type': 'ItemList',
-    name: `Servicii ${categoryName}`,
-    numberOfItems: trades.length,
-    itemListElement: trades.slice(0, 10).map((trade, index) => ({
-      '@type': 'ListItem',
-      position: index + 1,
-      name: trade.name,
-      url: `https://www.meseriaslocal.ro/servicii/${categorie}/${trade.slug}/`
-    }))
-  }
+  '@type': 'ItemList',
+  name: `Servicii ${categoryData.name} România`,
+  description: `${categoryTrades.length} servicii profesionale de ${categoryData.name.toLowerCase()}`,
+  numberOfItems: categoryTrades.length,
+  itemListElement: categoryTrades.map((trade, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: trade.name,
+    url: `https://www.meseriaslocal.ro/servicii/${categorie}/${trade.slug}/`
+  }))
 };
 
+// Breadcrumb Schema
 const breadcrumbSchema = {
   '@context': 'https://schema.org',
   '@type': 'BreadcrumbList',
-  name: `${categoryName} - Breadcrumb Navigation`,
   itemListElement: [
-    {
-      '@type': 'ListItem',
-      position: 1,
-      name: 'Acasă',
-      item: 'https://www.meseriaslocal.ro'
-    },
-    {
-      '@type': 'ListItem',
-      position: 2,
-      name: 'Servicii',
-      item: 'https://www.meseriaslocal.ro/servicii'
-    },
-    {
-      '@type': 'ListItem',
-      position: 3,
-      name: categoryName,
-      item: `https://www.meseriaslocal.ro/servicii/${categorie}/`
-    }
+    { '@type': 'ListItem', position: 1, name: 'Acasă', item: 'https://www.meseriaslocal.ro' },
+    { '@type': 'ListItem', position: 2, name: 'Servicii', item: 'https://www.meseriaslocal.ro/servicii/' },
+    { '@type': 'ListItem', position: 3, name: categoryData.name, item: canonical }
   ]
 };
 
-// Service schema for rich results
-const serviceSchema = {
+// FAQ Schema
+const faqSchema = {
   '@context': 'https://schema.org',
-  '@type': 'Service',
-  name: `Servicii ${categoryName}`,
-  description: description,
-  url: `https://www.meseriaslocal.ro/servicii/${categorie}/`,
-  areaServed: {
-    '@type': 'Country',
-    name: 'România'
-  },
-  provider: {
-    '@type': 'Organization',
-    name: 'Meserias Local',
-    url: 'https://www.meseriaslocal.ro',
-    logo: 'https://www.meseriaslocal.ro/icon-192.png',
-    address: {
-      '@type': 'PostalAddress',
-      addressCountry: 'RO'
-    }
-  },
-  serviceType: categoryName,
-  hasOfferCatalog: {
-    '@type': 'OfferCatalog',
-    name: `Servicii ${categoryName}`,
-    itemListElement: trades.slice(0, 5).map(trade => ({
-      '@type': 'Offer',
-      itemOffered: {
-        '@type': 'Service',
-        name: trade.name,
-        description: trade.description || `Servicii profesionale de ${trade.name.toLowerCase()}`
-      }
-    }))
-  }
+  '@type': 'FAQPage',
+  mainEntity: categoryData.faq.map(item => ({
+    '@type': 'Question',
+    name: item.q,
+    acceptedAnswer: { '@type': 'Answer', text: item.a }
+  }))
 };
 ---
 
-<Base title={title} description={description} disableDefaultBreadcrumb={true}>
-  <meta slot="head" name="keywords" content={keywords} />
-  <script is:inline type="application/ld+json" set:html={JSON.stringify(categorySchema)} slot="head" />
+<Base title={title} description={description} canonical={canonical} disableDefaultBreadcrumb={true}>
+  <!-- Meta Keywords -->
+  <meta slot="head" name="keywords" content={categoryData.keywords.join(', ')} />
+  
+  <!-- Structured Data -->
   <script is:inline type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} slot="head" />
-  <script is:inline type="application/ld+json" set:html={JSON.stringify(serviceSchema)} slot="head" />
+  <script is:inline type="application/ld+json" set:html={JSON.stringify(itemListSchema)} slot="head" />
+  <script is:inline type="application/ld+json" set:html={JSON.stringify(faqSchema)} slot="head" />
 
-  <!-- Hero Section -->
-  <section 
-    class="relative overflow-hidden py-16 lg:py-20"
-    style="background: linear-gradient(180deg, #1b1f1d 0%, #21251f 50%, #2a302b 100%)"
-  >
-    <!-- Grid pattern -->
-    <div class="absolute inset-0 opacity-15">
-      <div
-        class="absolute inset-0"
-        style="background-image: linear-gradient(rgba(45, 51, 45, 0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(45, 51, 45, 0.4) 1px, transparent 1px); background-size: 60px 60px"
-      ></div>
-    </div>
+  <!-- Hero -->
+  <section class="bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 py-12 lg:py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Breadcrumb -->
+      <nav class="mb-6" aria-label="Breadcrumb">
+        <ol class="flex items-center gap-2 text-sm text-slate-400">
+          <li><a href="/" class="hover:text-white">Acasă</a></li>
+          <li class="flex items-center gap-2">
+            <span>›</span>
+            <a href="/servicii/" class="hover:text-white">Servicii</a>
+          </li>
+          <li class="flex items-center gap-2">
+            <span>›</span>
+            <span class="text-white font-medium">{categoryData.name}</span>
+          </li>
+        </ol>
+      </nav>
 
-    <!-- Floating geometric shapes (static) -->
-    <div class="absolute inset-0 opacity-15">
-      <div class="absolute top-24 left-40 w-14 h-14 border-2 border-blue-400/30 rounded-full"></div>
-      <div class="absolute top-48 left-20 w-10 h-10 bg-emerald-400/15 rounded-full"></div>
-      <div class="absolute top-20 right-28 w-16 h-16 border-2 border-purple-400/30 rounded-full"></div>
-      <div class="absolute top-52 right-16 w-12 h-12 bg-blue-400/15 rounded-full"></div>
-    </div>
-
-    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="max-w-4xl mx-auto text-center">
-        <!-- Breadcrumb -->
-        <nav class="flex justify-center mb-6">
-          <div class="bg-slate-800/40 backdrop-blur-md rounded-full px-4 py-2 border border-slate-700/50">
-            <ol class="flex items-center space-x-2 text-slate-300 text-xs font-medium">
-              <li class="flex items-center">
-                <a href="/" class="hover:text-white transition-colors">Acasă</a>
-              </li>
-              <li class="flex items-center">
-                <span class="mx-2 text-white/40">›</span>
-                <a href="/servicii/" class="hover:text-white transition-colors">Servicii</a>
-              </li>
-              <li class="flex items-center">
-                <span class="mx-2 text-white/40">›</span>
-                <span class="text-orange-400 font-semibold">{categoryName}</span>
-              </li>
-            </ol>
-          </div>
-        </nav>
-
-        <!-- Main Heading -->
-        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
-          {capitalizeFirst(categoryName)}
+      <div class="max-w-4xl">
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight mb-4">
+          {categoryData.h1}
         </h1>
 
-        <p class="text-xl text-slate-300 mb-4">
-          {trades.length} servicii disponibile cu meseriași verificați
+        <!-- Stats -->
+        <div class="flex flex-wrap gap-4 mb-6">
+          <div class="bg-white/5 border border-white/10 rounded-lg px-4 py-2">
+            <span class="text-white font-bold">{categoryData.stats.cereriLuna.toLocaleString()}+</span>
+            <span class="text-slate-400 text-sm ml-1">cereri/lună</span>
+          </div>
+          <div class="bg-white/5 border border-white/10 rounded-lg px-4 py-2">
+            <span class="text-white font-bold">{categoryData.stats.meseriasi}+</span>
+            <span class="text-slate-400 text-sm ml-1">meseriași verificați</span>
+          </div>
+          <div class="bg-white/5 border border-white/10 rounded-lg px-4 py-2">
+            <span class="text-white font-bold">143</span>
+            <span class="text-slate-400 text-sm ml-1">orașe</span>
+          </div>
+        </div>
+
+        <!-- Intro with keywords -->
+        <p class="text-lg text-slate-300 mb-8">
+          <strong class="text-white">{capitalizeKeywords(categoryData.keywords.slice(0, 3)).join(', ')}</strong> – găsește echipe verificate în orașul tău. Oferte gratuite în 24h, fără comisioane.
         </p>
 
-        <p class="text-lg text-slate-300 mb-8 leading-relaxed max-w-3xl mx-auto">
-          Găsește profesioniști de încredere pentru servicii de {categoryName.toLowerCase()}. 
-          Primește oferte gratuite în 24 ore, compară prețuri și recenzii.
-        </p>
-
-        <!-- CTA Button -->
-        <div class="flex flex-wrap items-center justify-center gap-4">
-          <a
-            href="https://app.meseriaslocal.ro/cere-oferta"
-            class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-xl hover:from-amber-600 hover:to-orange-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
-          >
-            Cere ofertă gratuită
-            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-            </svg>
+        <!-- CTA -->
+        <div class="flex flex-wrap gap-4">
+          <a href="#servicii" class="inline-flex items-center px-6 py-3 bg-white/10 text-white font-semibold rounded-xl border border-white/20 hover:bg-white/20 transition-all">
+            Caută serviciul tău
+          </a>
+          <a href="https://app.meseriaslocal.ro/cere-oferta" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-xl hover:from-amber-600 hover:to-orange-600 shadow-lg">
+            Cere ofertă gratuită →
           </a>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Services Grid -->
-  <section class="py-16 bg-white">
+
+  <!-- Orașe Populare Matrix -->
+  <section class="py-12 bg-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-10">
-        <h2 class="text-3xl font-bold text-slate-900 mb-3">
-          Toate serviciile din categoria {categoryName}
-        </h2>
-        <p class="text-slate-600 max-w-2xl mx-auto">
-          Selectează serviciul de care ai nevoie pentru a vedea meseriași verificați și a primi oferte personalizate
-        </p>
+      <h2 class="text-2xl font-bold text-slate-900 mb-6">
+        {categoryData.name} în Orașul Tău
+      </h2>
+      
+      <!-- Desktop: Table -->
+      <div class="hidden lg:block overflow-x-auto">
+        <table class="w-full border-collapse bg-white rounded-xl border border-slate-200">
+          <thead>
+            <tr class="bg-slate-100">
+              <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">Serviciu</th>
+              {topCities.map(city => (
+                <th class="px-4 py-3 text-center text-sm font-semibold text-slate-700">{city.name}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200">
+            {categoryData.topServices.slice(0, 5).map(service => (
+              <tr class="hover:bg-slate-50">
+                <td class="px-4 py-3 font-medium text-slate-900">{service.name}</td>
+                {topCities.map(city => (
+                  <td class="px-4 py-3 text-center">
+                    <a href={`/servicii/${categorie}/${service.slug}/${city.slug}/`} class="text-sm text-blue-600 hover:text-blue-800 hover:underline">
+                      {city.name} →
+                    </a>
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {trades.map(trade => (
-          <a
-            href={`/servicii/${categorie}/${trade.slug}/`}
-            class="group bg-white hover:bg-gradient-to-br hover:from-blue-50 hover:to-purple-50 border border-slate-200 hover:border-blue-300 rounded-xl p-6 transition-all duration-200 shadow-sm hover:shadow-lg"
-          >
-            <h3 class="text-lg font-semibold text-slate-900 group-hover:text-blue-700 mb-2">
-              {trade.name}
-            </h3>
-            {trade.description && (
-              <p class="text-sm text-slate-600 line-clamp-2">
-                {trade.description}
-              </p>
-            )}
-            <div class="mt-4 flex items-center text-blue-600 group-hover:text-blue-700 text-sm font-medium">
-              Vezi detalii
-              <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-              </svg>
+      <!-- Mobile: Cards -->
+      <div class="lg:hidden space-y-4">
+        {categoryData.topServices.slice(0, 5).map(service => (
+          <div class="bg-slate-50 rounded-xl p-4">
+            <h3 class="font-semibold text-slate-900 mb-3">{service.name}</h3>
+            <div class="flex flex-wrap gap-2">
+              {topCities.slice(0, 4).map(city => (
+                <a href={`/servicii/${categorie}/${service.slug}/${city.slug}/`} class="text-sm px-3 py-1.5 bg-white border border-slate-200 text-blue-600 rounded-lg hover:bg-blue-50 hover:border-blue-300">
+                  {city.name}
+                </a>
+              ))}
             </div>
+          </div>
+        ))}
+      </div>
+
+      <p class="text-sm text-slate-500 mt-4">
+        {categoryData.topServices.length} servicii × {topCities.length} orașe = {categoryData.topServices.length * topCities.length} linkuri directe
+      </p>
+    </div>
+  </section>
+
+  <!-- Top Servicii + Prețuri -->
+  <section class="py-12 bg-slate-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-2xl font-bold text-slate-900 mb-6">
+        Top Servicii {categoryData.name} România 2026
+      </h2>
+      
+      <!-- Desktop: Table -->
+      <div class="hidden md:block bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <table class="w-full">
+          <thead class="bg-slate-100">
+            <tr>
+              <th class="px-6 py-4 text-left text-sm font-semibold text-slate-700">Serviciu</th>
+              <th class="px-6 py-4 text-center text-sm font-semibold text-slate-700">Preț mediu</th>
+              <th class="px-6 py-4 text-center text-sm font-semibold text-slate-700">Orașe populare</th>
+              <th class="px-6 py-4 text-right text-sm font-semibold text-slate-700">Acțiune</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200">
+            {categoryData.topServices.map(service => (
+              <tr class="hover:bg-slate-50">
+                <td class="px-6 py-4">
+                  <a href={`/servicii/${categorie}/${service.slug}/`} class="font-medium text-slate-900 hover:text-blue-700">
+                    {service.name}
+                  </a>
+                </td>
+                <td class="px-6 py-4 text-center text-slate-600 font-medium">{service.pret}</td>
+                <td class="px-6 py-4 text-center">
+                  <div class="flex flex-wrap justify-center gap-1">
+                    <a href={`/servicii/${categorie}/${service.slug}/bucuresti/`} class="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200">București</a>
+                    <a href={`/servicii/${categorie}/${service.slug}/cluj-napoca/`} class="text-xs px-2 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200">Cluj</a>
+                  </div>
+                </td>
+                <td class="px-6 py-4 text-right">
+                  <a href="https://app.meseriaslocal.ro/cere-oferta" class="text-sm text-amber-600 hover:text-amber-700 font-medium">
+                    Cere ofertă →
+                  </a>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Mobile: Cards -->
+      <div class="md:hidden space-y-3">
+        {categoryData.topServices.map(service => (
+          <div class="bg-white rounded-xl border border-slate-200 p-4">
+            <div class="flex justify-between items-start mb-2">
+              <a href={`/servicii/${categorie}/${service.slug}/`} class="font-semibold text-slate-900 hover:text-blue-700">
+                {service.name}
+              </a>
+              <span class="text-sm font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded">{service.pret}</span>
+            </div>
+            <div class="flex flex-wrap gap-2 mb-3">
+              <a href={`/servicii/${categorie}/${service.slug}/bucuresti/`} class="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200">București</a>
+              <a href={`/servicii/${categorie}/${service.slug}/cluj-napoca/`} class="text-xs px-2 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200">Cluj</a>
+              <a href={`/servicii/${categorie}/${service.slug}/timisoara/`} class="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded hover:bg-purple-200">Timișoara</a>
+            </div>
+            <a href="https://app.meseriaslocal.ro/cere-oferta" class="text-sm text-amber-600 hover:text-amber-700 font-medium">
+              Cere ofertă gratuită →
+            </a>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Toate Serviciile -->
+  <section id="servicii" class="py-12 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-2xl font-bold text-slate-900 mb-6">
+        Toate serviciile {categoryData.name} ({categoryTrades.length})
+      </h2>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {categoryTrades.map(trade => (
+          <a href={`/servicii/${categorie}/${trade.slug}/`} class="group bg-white hover:bg-blue-50 border border-slate-200 hover:border-blue-300 rounded-xl p-5 transition-all">
+            <h3 class="font-semibold text-slate-900 group-hover:text-blue-700 mb-1 capitalize">{trade.name}</h3>
+            {trade.description && <p class="text-sm text-slate-600 line-clamp-2 mb-2">{trade.description}</p>}
+            <span class="text-sm text-blue-600">Vezi detalii →</span>
           </a>
         ))}
       </div>
     </div>
   </section>
 
-  <!-- Recommended Tradesmen -->
-  <section class="py-16 bg-slate-50">
+  <!-- Tendințe + Checklist -->
+  <section class="py-12 bg-slate-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-10">
-        <h2 class="text-3xl font-bold text-slate-900 mb-3">
-          Meseriași Premium din categoria {categoryName}
-        </h2>
-        <p class="text-slate-600 max-w-2xl mx-auto">
-          Profesioniști verificați cu abonament PRO, gata să îți ofere servicii de calitate
-        </p>
+      <div class="grid lg:grid-cols-2 gap-8">
+        <div class="bg-white rounded-xl border border-slate-200 p-6">
+          <h2 class="text-xl font-bold text-slate-900 mb-4">Tendințe {categoryData.name} 2026</h2>
+          <ul class="space-y-3">
+            {categoryData.trends.map(trend => (
+              <li class="flex items-start gap-3">
+                <span class="text-green-500">✓</span>
+                <span class="text-slate-700">{trend}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 p-6">
+          <h2 class="text-xl font-bold text-slate-900 mb-4">Checklist Alegere Meseriaș</h2>
+          <ul class="space-y-3 text-slate-700">
+            <li>☐ Verifică identitatea pe Meserias Local</li>
+            <li>☐ Cere minimum 3 oferte comparative</li>
+            <li>☐ Verifică portofoliul și recenziile</li>
+            <li>☐ Stabilește contract scris cu termene</li>
+            <li>☐ Plătește în tranșe, nu tot în avans</li>
+          </ul>
+        </div>
       </div>
+    </div>
+  </section>
 
+  <!-- Meseriași Premium -->
+  <section class="py-12 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-2xl font-bold text-slate-900 mb-2">Top Meseriași {categoryData.name}</h2>
+      <p class="text-slate-600 mb-6">Profesioniști verificați cu recenzii excelente</p>
       <RecommendedTradesmen
+        tradeIds={categoryTradeIds}
+        tradeName={categoryData.name}
         cityName="România"
-        categoryName={categoryName}
         supabaseUrl={supabaseUrl}
         supabaseAnonKey={supabaseAnonKey}
-        maxResults={9}
+        maxResults={6}
         compact={true}
         client:load
       />
     </div>
   </section>
 
-  <!-- How it Works -->
-  <section class="py-16 bg-slate-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="max-w-4xl mx-auto">
-        <h2 class="text-3xl font-bold text-slate-900 mb-10 text-center">
-          Cum funcționează?
-        </h2>
-        <div class="grid md:grid-cols-4 gap-8">
-          <div class="text-center">
-            <div class="w-16 h-16 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-bold text-2xl mx-auto mb-4">
-              1
-            </div>
-            <h3 class="font-semibold text-slate-900 mb-2">Alege serviciul</h3>
-            <p class="text-sm text-slate-600">
-              Selectează serviciul de care ai nevoie din lista de mai sus
-            </p>
-          </div>
-          <div class="text-center">
-            <div class="w-16 h-16 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-bold text-2xl mx-auto mb-4">
-              2
-            </div>
-            <h3 class="font-semibold text-slate-900 mb-2">Descrie proiectul</h3>
-            <p class="text-sm text-slate-600">
-              Completează un formular simplu cu detaliile lucrării
-            </p>
-          </div>
-          <div class="text-center">
-            <div class="w-16 h-16 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-bold text-2xl mx-auto mb-4">
-              3
-            </div>
-            <h3 class="font-semibold text-slate-900 mb-2">Primești oferte</h3>
-            <p class="text-sm text-slate-600">
-              Meseriașii verificați îți trimit oferte în 24h
-            </p>
-          </div>
-          <div class="text-center">
-            <div class="w-16 h-16 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-bold text-2xl mx-auto mb-4">
-              4
-            </div>
-            <h3 class="font-semibold text-slate-900 mb-2">Alege și începe</h3>
-            <p class="text-sm text-slate-600">
-              Compară ofertele și alege meseriașul potrivit
-            </p>
-          </div>
+  <!-- FAQ -->
+  <section class="py-12 bg-slate-50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-2xl font-bold text-slate-900 mb-6">Întrebări Frecvente – {categoryData.name}</h2>
+      <div class="space-y-4">
+        {categoryData.faq.map((item, i) => (
+          <details class="group bg-white border border-slate-200 rounded-xl" open={i === 0}>
+            <summary class="flex items-center justify-between cursor-pointer p-5 list-none">
+              <h3 class="font-semibold text-slate-900 pr-4">{item.q}</h3>
+              <span class="text-slate-500 group-open:rotate-180 transition-transform">▼</span>
+            </summary>
+            <div class="px-5 pb-5 text-slate-600">{item.a}</div>
+          </details>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Cum Funcționează -->
+  <section class="py-12 bg-white">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-2xl font-bold text-slate-900 mb-8 text-center">Cum Găsești Un Meseriaș?</h2>
+      <div class="flex items-start justify-between gap-2 sm:gap-4">
+        <div class="flex-1 min-w-0 text-center">
+          <div class="w-10 h-10 sm:w-14 sm:h-14 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-bold text-sm sm:text-xl mx-auto mb-2">1</div>
+          <h3 class="font-semibold text-slate-900 text-xs sm:text-sm">Alege serviciul</h3>
+        </div>
+        <div class="flex items-center text-slate-300 pt-3 sm:pt-4">→</div>
+        <div class="flex-1 min-w-0 text-center">
+          <div class="w-10 h-10 sm:w-14 sm:h-14 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center font-bold text-sm sm:text-xl mx-auto mb-2">2</div>
+          <h3 class="font-semibold text-slate-900 text-xs sm:text-sm">Descrie proiectul</h3>
+        </div>
+        <div class="flex items-center text-slate-300 pt-3 sm:pt-4">→</div>
+        <div class="flex-1 min-w-0 text-center">
+          <div class="w-10 h-10 sm:w-14 sm:h-14 bg-amber-100 text-amber-700 rounded-full flex items-center justify-center font-bold text-sm sm:text-xl mx-auto mb-2">3</div>
+          <h3 class="font-semibold text-slate-900 text-xs sm:text-sm">Primești oferte</h3>
+        </div>
+        <div class="flex items-center text-slate-300 pt-3 sm:pt-4">→</div>
+        <div class="flex-1 min-w-0 text-center">
+          <div class="w-10 h-10 sm:w-14 sm:h-14 bg-purple-100 text-purple-700 rounded-full flex items-center justify-center font-bold text-sm sm:text-xl mx-auto mb-2">4</div>
+          <h3 class="font-semibold text-slate-900 text-xs sm:text-sm">Alegi și începi</h3>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- CTA Section -->
-  <section class="py-16 bg-white">
+  <!-- Final CTA -->
+  <section class="py-12 bg-gradient-to-r from-slate-900 to-slate-800">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8 border border-blue-100">
-        <h2 class="text-2xl font-bold text-slate-900 mb-4">
-          Gata să începi proiectul tău?
-        </h2>
-        <p class="text-slate-700 mb-6 max-w-2xl mx-auto">
-          Primește oferte gratuite de la meseriași verificați. Răspuns rapid în 2–4 ore, fără comisioane ascunse.
-        </p>
-        <a
-          href="https://app.meseriaslocal.ro/cere-oferta"
-          class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-xl hover:from-amber-600 hover:to-orange-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
-        >
-          Cere Ofertă Acum
-          <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-          </svg>
-        </a>
+      <h2 class="text-2xl font-bold text-white mb-4">Gata să Începi Proiectul?</h2>
+      <p class="text-slate-300 mb-6">Primește oferte gratuite de la meseriași verificați în 24h.</p>
+      <a href="https://app.meseriaslocal.ro/cere-oferta" class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-xl hover:from-amber-600 hover:to-orange-600 shadow-lg">
+        Cere Ofertă Gratuită →
+      </a>
+      <div class="mt-6 flex flex-wrap justify-center gap-4 text-sm text-slate-400">
+        <span>✓ 100% Gratuit</span>
+        <span>✓ Răspuns 24h</span>
+        <span>✓ Meseriași Verificați</span>
       </div>
     </div>
   </section>

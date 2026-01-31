@@ -1,14 +1,26 @@
 import { useState, useEffect } from 'react';
-import { Crown, MapPin } from 'lucide-react';
+import { Crown, MapPin, Gem } from 'lucide-react';
 import { TradesmanCard } from './TradesmanCard';
-import { TradesmanCardSkeleton } from './TradesmanCardSkeleton';
 
 // Helper to check if user has premium subscription (pro or enterprise)
 const isPremiumUser = (plan: string | null | undefined): boolean => {
   if (!plan) return false;
-  // Normalize: trim whitespace, remove newlines, lowercase
   const normalizedPlan = plan.replace(/[\r\n]/g, '').trim().toLowerCase();
   return normalizedPlan === 'pro' || normalizedPlan.startsWith('enterprise');
+};
+
+// Helper to check if user is Enterprise
+const isEnterpriseUser = (plan: string | null | undefined): boolean => {
+  if (!plan) return false;
+  const normalizedPlan = plan.replace(/[\r\n]/g, '').trim().toLowerCase();
+  return normalizedPlan.startsWith('enterprise');
+};
+
+// Helper to get plan label
+const getPlanLabel = (plan: string | null | undefined): string => {
+  if (isEnterpriseUser(plan)) return 'ENTERPRISE';
+  if (isPremiumUser(plan)) return 'PRO';
+  return '';
 };
 
 // Helper function to batch fetch subscriptions to avoid URL too long errors
@@ -62,15 +74,18 @@ interface Worker {
   subscription_plan?: string;
 }
 
-// Mobile horizontal card - very compact row layout
+// Horizontal row card - used for compact mode on all devices
 function MobileCompactCard({ worker }: { worker: Worker }) {
+  const isEnterprise = isEnterpriseUser(worker.subscription_plan);
+  const planLabel = getPlanLabel(worker.subscription_plan);
+  
   return (
     <a 
       href={`/meseriasi/${worker.id}`}
-      className="flex items-center gap-3 bg-white border border-slate-200 rounded-lg p-2 hover:shadow-md transition-all duration-200 hover:border-slate-300 group"
+      className="flex items-center gap-4 bg-white border border-slate-200 rounded-xl p-3 hover:shadow-md transition-all duration-200 hover:border-slate-300 group"
     >
-      {/* Small Avatar */}
-      <div className="relative w-14 h-14 flex-shrink-0 rounded-lg overflow-hidden bg-slate-100">
+      {/* Avatar */}
+      <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 rounded-xl overflow-hidden bg-slate-100">
         {worker.avatar_url ? (
           <img
             src={worker.avatar_url}
@@ -78,134 +93,63 @@ function MobileCompactCard({ worker }: { worker: Worker }) {
             className="w-full h-full object-cover"
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg">
+          <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-xl sm:text-2xl">
             {worker.name.charAt(0).toUpperCase()}
-          </div>
-        )}
-        {isPremiumUser(worker.subscription_plan) && (
-          <div className="absolute -top-0.5 -right-0.5 flex items-center gap-0.5 px-1 py-0.5 bg-amber-500 rounded text-[8px]">
-            <Crown className="w-2 h-2 text-white" />
           </div>
         )}
       </div>
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-1.5">
-          <h3 className="font-semibold text-slate-900 text-sm truncate group-hover:text-blue-600">
+        <div className="flex items-center gap-2 mb-1">
+          <h3 className="font-bold text-slate-900 text-sm sm:text-base truncate group-hover:text-blue-600">
             {worker.name}
           </h3>
           {worker.is_verified && (
-            <svg className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <svg className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
           )}
         </div>
-        <div className="flex items-center gap-2 text-[11px] text-slate-500">
+        
+        {/* Plan Badge */}
+        {planLabel && (
+          <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-bold mb-1.5 ${
+            isEnterprise 
+              ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white' 
+              : 'bg-amber-100 text-amber-700 border border-amber-200'
+          }`}>
+            {isEnterprise ? <Gem className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> : <Crown className="w-2.5 h-2.5 sm:w-3 sm:h-3" />}
+            {planLabel}
+          </div>
+        )}
+        
+        <div className="flex items-center gap-3 text-xs sm:text-sm text-slate-500">
           {worker.address && (
-            <span className="truncate max-w-[120px]">{worker.address}</span>
+            <span className="flex items-center gap-1 truncate">
+              <MapPin className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+              <span className="truncate max-w-[120px] sm:max-w-[200px]">{worker.address}</span>
+            </span>
           )}
           {worker.rating > 0 && (
             <span className="flex items-center gap-0.5 flex-shrink-0">
-              <svg className="w-3 h-3 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
               </svg>
-              {worker.rating.toFixed(1)}
+              <span className="font-semibold text-slate-700">{worker.rating.toFixed(1)}</span>
             </span>
           )}
         </div>
       </div>
 
       {/* Arrow */}
-      <svg className="w-4 h-4 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-5 h-5 text-slate-400 flex-shrink-0 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
       </svg>
     </a>
   );
 }
 
-// Compact card component for subcategory pages (desktop grid)
-function CompactTradesmanCard({ worker }: { worker: Worker }) {
-  // Truncate bio to ~40 characters
-  const shortBio = worker.bio 
-    ? worker.bio.length > 40 
-      ? worker.bio.substring(0, 40) + '...' 
-      : worker.bio
-    : null;
-
-  return (
-    <a 
-      href={`/meseriasi/${worker.id}`}
-      className="block bg-white border border-slate-200 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-200 hover:border-slate-300 group"
-    >
-      {/* Smaller Avatar */}
-      <div className="relative w-full aspect-square overflow-hidden bg-slate-100">
-        {worker.avatar_url ? (
-          <img
-            src={worker.avatar_url}
-            alt={worker.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          />
-        ) : (
-          <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-2xl">
-            {worker.name.charAt(0).toUpperCase()}
-          </div>
-        )}
-        
-        {/* PRO/Enterprise Badge - Top Right */}
-        {isPremiumUser(worker.subscription_plan) && (
-          <div className="absolute top-1.5 right-1.5 flex items-center gap-0.5 px-1.5 py-0.5 bg-amber-500 rounded shadow-lg">
-            <Crown className="w-2.5 h-2.5 text-white" />
-            <span className="text-[10px] font-bold text-white">PRO</span>
-          </div>
-        )}
-
-        {/* Verified Badge - Bottom Left */}
-        {worker.is_verified && (
-          <div className="absolute bottom-1.5 left-1.5 flex items-center gap-0.5 px-1 py-0.5 bg-blue-500 rounded shadow-md">
-            <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-            </svg>
-            <span className="text-[10px] font-semibold text-white">Verificat</span>
-          </div>
-        )}
-      </div>
-
-      {/* Content - Very compact */}
-      <div className="p-2">
-        <h3 className="font-bold text-slate-900 text-sm mb-0.5 truncate group-hover:text-blue-600 transition-colors">
-          {worker.name}
-        </h3>
-        
-        {worker.address && (
-          <div className="flex items-center gap-0.5 mb-1">
-            <MapPin className="w-3 h-3 text-slate-400 flex-shrink-0" />
-            <span className="text-[11px] text-slate-600 truncate">
-              {worker.address}
-            </span>
-          </div>
-        )}
-
-        {/* Short Bio */}
-        {shortBio && (
-          <p className="text-[11px] text-slate-500 leading-tight line-clamp-2 mb-1">
-            {shortBio}
-          </p>
-        )}
-
-        {/* Rating */}
-        {worker.rating > 0 && (
-          <div className="flex items-center gap-0.5">
-            <svg className="w-3 h-3 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-            </svg>
-            <span className="text-xs font-semibold text-slate-700">{worker.rating.toFixed(1)}</span>
-          </div>
-        )}
-      </div>
-    </a>
-  );
-}
 
 interface RecommendedTradesmenProps {
   tradeId?: number;
@@ -480,55 +424,78 @@ export function RecommendedTradesmen({
 
   // Don't render if no workers, error, or still loading
   if (error || workers.length === 0) {
+    // Show skeleton while loading
+    if (isLoading) {
+      return (
+        <section className="bg-white rounded-xl border border-slate-200 shadow-sm animate-pulse">
+          <div className="p-4 border-b border-slate-100">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-slate-200 rounded-lg" />
+              <div>
+                <div className="h-5 w-40 bg-slate-200 rounded mb-1" />
+                <div className="h-3 w-32 bg-slate-100 rounded" />
+              </div>
+            </div>
+          </div>
+          <div className="p-4 grid grid-cols-2 lg:grid-cols-4 gap-2">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="aspect-square bg-slate-100 rounded-xl" />
+            ))}
+          </div>
+        </section>
+      );
+    }
     return null;
   }
 
+  const hasEnterprise = workers.some(w => isEnterpriseUser(w.subscription_plan));
+  const hasPro = workers.some(w => isPremiumUser(w.subscription_plan) && !isEnterpriseUser(w.subscription_plan));
+
   return (
-    <section className="bg-white rounded-lg border border-slate-200 shadow-sm">
+    <section className="bg-white rounded-xl border border-slate-200 shadow-sm">
       <div className="p-4 border-b border-slate-100">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-6 h-6 bg-amber-500 rounded-md flex items-center justify-center text-white">
-              <Crown className="w-3 h-3" />
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white ${
+              hasEnterprise ? 'bg-gradient-to-br from-purple-500 to-indigo-600' : 'bg-amber-500'
+            }`}>
+              {hasEnterprise ? <Gem className="w-4 h-4" /> : <Crown className="w-4 h-4" />}
             </div>
             <div>
-              <h2 className="text-base font-semibold text-slate-900">
+              <h2 className="text-lg font-bold text-slate-900">
                 {compact ? 'Meseriași Premium' : `Meseriași Premium${cityName !== 'România' ? ` în ${cityName}` : ''}`}
               </h2>
-              <p className="text-slate-500 text-xs">
-                {compact ? 'Meseriași recomandați' : 'Profesioniști PRO'}
+              <p className="text-slate-500 text-sm">
+                Profesioniști verificați cu abonament activ
               </p>
             </div>
           </div>
           
-          {workers.some(w => isPremiumUser(w.subscription_plan)) && (
-            <div className="flex items-center gap-1 px-2 py-1 bg-amber-50 border border-amber-200 rounded-md">
-              <Crown className="w-3 h-3 text-amber-600" />
-              <span className="text-xs font-medium text-amber-700">PRO</span>
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            {hasEnterprise && (
+              <div className="flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-purple-100 to-indigo-100 border border-purple-200 rounded-lg">
+                <Gem className="w-3 h-3 text-purple-600" />
+                <span className="text-xs font-bold text-purple-700">ENTERPRISE</span>
+              </div>
+            )}
+            {hasPro && (
+              <div className="flex items-center gap-1 px-2 py-1 bg-amber-50 border border-amber-200 rounded-lg">
+                <Crown className="w-3 h-3 text-amber-600" />
+                <span className="text-xs font-bold text-amber-700">PRO</span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       <div className="p-4">
-        {/* Mobile: horizontal row cards, Desktop: grid */}
+        {/* Always use horizontal row cards for compact mode */}
         {compact ? (
-          <>
-            {/* Mobile view - horizontal cards in a column, centered if only 1 */}
-            <div className={`sm:hidden flex flex-col gap-2 ${workers.length === 1 ? 'max-w-xs mx-auto' : ''}`}>
-              {workers.map((worker: Worker) => (
-                <MobileCompactCard key={worker.id} worker={worker} />
-              ))}
-            </div>
-            {/* Desktop view - grid */}
-            <div className={`hidden sm:grid gap-2 ${workers.length === 1 ? 'grid-cols-1 max-w-xs mx-auto' : 'grid-cols-2 lg:grid-cols-4'}`}>
-              {workers.map((worker: Worker) => (
-                <div key={worker.id} className="transform hover:scale-[1.02] transition-all duration-200">
-                  <CompactTradesmanCard worker={worker} />
-                </div>
-              ))}
-            </div>
-          </>
+          <div className="flex flex-col gap-2">
+            {workers.map((worker: Worker) => (
+              <MobileCompactCard key={worker.id} worker={worker} />
+            ))}
+          </div>
         ) : (
           <div className={`grid gap-2 ${workers.length === 1 ? 'grid-cols-1 max-w-md mx-auto' : 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3'}`}>
             {workers.map((worker: Worker) => (

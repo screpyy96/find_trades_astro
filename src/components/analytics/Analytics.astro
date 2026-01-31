@@ -4,24 +4,39 @@
 
 const GTM_ID = import.meta.env.PUBLIC_GTM_ID;
 const CLARITY_ID = import.meta.env.PUBLIC_CLARITY_ID;
+const isProd = import.meta.env.PROD;
+
+// Debug: log values at build time
+console.log('Analytics build - GTM_ID:', GTM_ID ? 'SET' : 'NOT SET', 'PROD:', isProd);
 ---
 
-{import.meta.env.PROD && (GTM_ID || CLARITY_ID) && (
+{(GTM_ID || CLARITY_ID) && (
   <script is:inline define:vars={{ GTM_ID, CLARITY_ID }}>
+    console.log('Analytics script loaded, GTM_ID:', GTM_ID ? 'present' : 'missing');
+    
     const isAnalyticsConsentGranted = () => {
       try {
         const analyticsConsent = localStorage.getItem('analytics-consent');
         const cookieConsent = localStorage.getItem('cookie-consent');
-        return analyticsConsent === 'true' || cookieConsent === 'true';
+        const granted = analyticsConsent === 'true' || cookieConsent === 'true';
+        console.log('Consent check:', { analyticsConsent, cookieConsent, granted });
+        return granted;
       } catch {
         return false;
       }
     };
 
     const loadGtmOnce = () => {
-      if (!GTM_ID) return;
-      if (window.__gtmLoaded) return;
+      if (!GTM_ID) {
+        console.log('GTM: No ID provided');
+        return;
+      }
+      if (window.__gtmLoaded) {
+        console.log('GTM: Already loaded');
+        return;
+      }
       window.__gtmLoaded = true;
+      console.log('GTM: Loading...', GTM_ID);
 
       window.dataLayer = window.dataLayer || [];
       window.dataLayer.push({
@@ -33,6 +48,7 @@ const CLARITY_ID = import.meta.env.PUBLIC_CLARITY_ID;
       s.async = true;
       s.src = `https://www.googletagmanager.com/gtm.js?id=${GTM_ID}`;
       document.head.appendChild(s);
+      console.log('GTM: Script added');
     };
 
     const loadClarityOnce = () => {
@@ -48,7 +64,11 @@ const CLARITY_ID = import.meta.env.PUBLIC_CLARITY_ID;
     };
 
     const loadAnalyticsIfAllowed = () => {
-      if (!isAnalyticsConsentGranted()) return;
+      if (!isAnalyticsConsentGranted()) {
+        console.log('Analytics: No consent, skipping');
+        return;
+      }
+      console.log('Analytics: Consent granted, loading...');
       loadGtmOnce();
       loadClarityOnce();
     };
