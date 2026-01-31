@@ -71,13 +71,17 @@ const similarServices = similarTrades.map((t: any) => ({
 
 // OPTIMIZATION: Fetch metrics and related trades in PARALLEL
 const relatedSlugs = sanityContent?.relatedServices?.map((rs: any) => {
-  let cleanSlug = rs.serviceSlug.replace(/^\/+|\/+$/g, '');
+  // Handle both serviceSlug and serviceUrl fields
+  const slugSource = rs.serviceSlug || rs.serviceUrl || '';
+  if (!slugSource) return null;
+  
+  let cleanSlug = slugSource.replace(/^\/+|\/+$/g, '');
   if (cleanSlug.includes('/')) {
     const parts = cleanSlug.split('/');
     cleanSlug = parts[parts.length - 1];
   }
   return cleanSlug;
-}) || [];
+}).filter(Boolean) || [];
 
 const [metrics, relatedTradesResult] = await Promise.all([
   fetchServiceMetrics({
