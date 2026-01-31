@@ -66,19 +66,42 @@ const title = `${categoryData.h1} (${categoryTrades.length} Servicii) | Meserias
 const description = categoryData.description;
 const canonical = `https://www.meseriaslocal.ro/servicii/${categorie}/`;
 
-// Schema ItemList
-const itemListSchema = {
+// CollectionPage + ItemList Schema (enhanced)
+const collectionPageSchema = {
   '@context': 'https://schema.org',
-  '@type': 'ItemList',
-  name: `Servicii ${categoryData.name} România`,
-  description: `${categoryTrades.length} servicii profesionale de ${categoryData.name.toLowerCase()}`,
-  numberOfItems: categoryTrades.length,
-  itemListElement: categoryTrades.map((trade, i) => ({
-    '@type': 'ListItem',
-    position: i + 1,
-    name: trade.name,
-    url: `https://www.meseriaslocal.ro/servicii/${categorie}/${trade.slug}/`
-  }))
+  '@type': 'CollectionPage',
+  '@id': canonical,
+  name: categoryData.h1,
+  description: categoryData.description,
+  url: canonical,
+  mainEntity: {
+    '@type': 'ItemList',
+    name: `Servicii ${categoryData.name} România`,
+    numberOfItems: categoryData.topServices.length,
+    itemListElement: categoryData.topServices.map((service, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      item: {
+        '@type': 'Service',
+        name: service.name,
+        description: `${service.name} – ${service.pret}`,
+        provider: {
+          '@type': 'Organization',
+          name: 'Meserias Local',
+          url: 'https://www.meseriaslocal.ro'
+        },
+        areaServed: ['România', 'București', 'Cluj-Napoca', 'Timișoara', 'Iași', 'Constanța'],
+        url: `https://www.meseriaslocal.ro/servicii/${categorie}/${service.slug}/`
+      }
+    }))
+  },
+  author: {
+    '@type': 'Organization',
+    name: 'Meserias Local',
+    url: 'https://www.meseriaslocal.ro'
+  },
+  datePublished: '2025-01-01',
+  dateModified: '2026-01-31'
 };
 
 // Breadcrumb Schema
@@ -109,8 +132,8 @@ const faqSchema = {
   <meta slot="head" name="keywords" content={categoryData.keywords.join(', ')} />
   
   <!-- Structured Data -->
+  <script is:inline type="application/ld+json" set:html={JSON.stringify(collectionPageSchema)} slot="head" />
   <script is:inline type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} slot="head" />
-  <script is:inline type="application/ld+json" set:html={JSON.stringify(itemListSchema)} slot="head" />
   <script is:inline type="application/ld+json" set:html={JSON.stringify(faqSchema)} slot="head" />
 
   <!-- Hero -->
