@@ -155,7 +155,6 @@ const serviceSchema = {
   },
   serviceType: service.name,
   category: service.category,
-  ...(priceDisplay && { priceRange: priceDisplay }),
   ...(rating && {
     aggregateRating: {
       '@type': 'AggregateRating',
@@ -166,19 +165,21 @@ const serviceSchema = {
     }
   }),
   ...(prices.length > 0 && {
-    offers: prices.map(p => ({
-      '@type': 'Offer',
-      name: p.service,
-      priceCurrency: 'RON',
-      price: p.minPrice,
-      priceSpecification: {
-        '@type': 'PriceSpecification',
-        minPrice: p.minPrice,
-        maxPrice: p.maxPrice,
+    hasOfferCatalog: {
+      '@type': 'OfferCatalog',
+      name: `Prețuri ${service.name}`,
+      itemListElement: prices.map(p => ({
+        '@type': 'Offer',
+        itemOffered: {
+          '@type': 'Service',
+          name: p.service
+        },
         priceCurrency: 'RON',
-        unitText: p.unit || 'mp'
-      }
-    }))
+        price: p.minPrice,
+        highPrice: p.maxPrice,
+        description: `${p.minPrice}-${p.maxPrice} RON/${p.unit || 'mp'}`
+      }))
+    }
   }),
   potentialAction: {
     '@type': 'OrderAction',
