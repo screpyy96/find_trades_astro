@@ -131,29 +131,30 @@ export async function fetchServicePageData(tradeSlug: string, categorySlug: stri
       }
 
       try {
-        // Fetch trade and similar trades in parallel
-        const [tradeResult, similarTradesResult] = await Promise.all([
-          supabase
-            .from('trades')
-            .select('id, name, slug, category')
-            .eq('slug', tradeSlug)
-            .single(),
-          
-          supabase
-            .from('trades')
-            .select('name, slug')
-            .eq('category', categorySlug)
-            .neq('slug', tradeSlug)
-            .limit(MAX_NEARBY_CITIES)
-        ]);
+        // First fetch the trade to get its actual category
+        const tradeResult = await supabase
+          .from('trades')
+          .select('id, name, slug, category')
+          .eq('slug', tradeSlug)
+          .single();
 
-        if (tradeResult.error) {
+        if (tradeResult.error || !tradeResult.data) {
           return {
             trade: null,
             similarTrades: [],
-            error: tradeResult.error.message
+            error: tradeResult.error?.message || 'Trade not found'
           };
         }
+
+        // Use the actual category from the trade for similar trades query
+        const actualCategory = tradeResult.data.category;
+        
+        const similarTradesResult = await supabase
+          .from('trades')
+          .select('name, slug')
+          .eq('category', actualCategory)
+          .neq('slug', tradeSlug)
+          .limit(MAX_NEARBY_CITIES);
 
         return {
           trade: tradeResult.data,
