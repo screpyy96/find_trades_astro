@@ -179,15 +179,12 @@ export function CompactTradesmenList({
           subscription_plan: subscriptionMap.get(worker.id) || null
         }));
 
-        // Sort: Premium users first, then others
+        // IMPORTANT: Filter to show ONLY PRO/Enterprise users (hide basic users)
+        workersWithData = workersWithData.filter((w: any) => isPremiumUser(w.subscription_plan));
+
+        // Sort by rating (all are PRO now)
         workersWithData.sort((a: any, b: any) => {
-          const aIsPremium = isPremiumUser(a.subscription_plan);
-          const bIsPremium = isPremiumUser(b.subscription_plan);
-          
-          if (aIsPremium && !bIsPremium) return -1;
-          if (!aIsPremium && bIsPremium) return 1;
-          
-          return 0;
+          return (b.rating || 0) - (a.rating || 0);
         });
 
         // Limit results

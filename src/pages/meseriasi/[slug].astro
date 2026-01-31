@@ -19,7 +19,11 @@ const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 if (isUuid) {
   if (!supabase) {
-    return Astro.redirect('/meseriasi/');
+    // Return 410 Gone for UUID-based URLs - these are old URLs that should be removed from Google
+    return new Response(
+      `<!DOCTYPE html><html><head><title>410 Gone</title></head><body><h1>410 Gone</h1><p>Această pagină nu mai există.</p><a href="/meseriasi/">Vezi meseriași</a></body></html>`,
+      { status: 410, headers: { 'Content-Type': 'text/html' } }
+    );
   }
 
   // Fetch worker data for redirect
@@ -31,7 +35,11 @@ if (isUuid) {
     .single();
 
   if (workerError || !worker) {
-    return Astro.redirect('/meseriasi/');
+    // Return 410 Gone for UUID-based URLs that don't exist
+    return new Response(
+      `<!DOCTYPE html><html><head><title>410 Gone</title></head><body><h1>410 Gone</h1><p>Acest meseriaș nu mai există pe platformă.</p><a href="/meseriasi/">Vezi meseriași</a></body></html>`,
+      { status: 410, headers: { 'Content-Type': 'text/html' } }
+    );
   }
 
   // Fetch trades

@@ -23,6 +23,14 @@
     {
       "source": "/studio/:path*",
       "destination": "https://7094dn36.api.sanity.io/:path*"
+    },
+    {
+      "source": "/login",
+      "destination": "/api/gone"
+    },
+    {
+      "source": "/client-dashboard/:path*",
+      "destination": "/api/gone"
     }
   ],
   "redirects": [
@@ -36,6 +44,121 @@
       "destination": "https://app.meseriaslocal.ro/cere-oferta",
       "permanent": true
     },
+    
+    {
+      "source": "/servicii/tamplarie-and-mobilier/:path*",
+      "destination": "/servicii/tamplarie-mobilier/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/servicii/constructii-and-structuri/:path*",
+      "destination": "/servicii/constructii-structuri/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/servicii/instalatii-and-utilitati/:path*",
+      "destination": "/servicii/instalatii-utilitati/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/servicii/curatenie-and-igienizare/:path*",
+      "destination": "/servicii/curatenie-igienizare/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/servicii/amenajari-exterioare-and-gradina/:path*",
+      "destination": "/servicii/amenajari-exterioare-gradina/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/servicii/securitate-and-siguranta/:path*",
+      "destination": "/servicii/securitate-siguranta/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/servicii/servicii-specializate-and-consultanta/:path*",
+      "destination": "/servicii/servicii-specializate-consultanta/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/servicii/evenimente-and-media/:path*",
+      "destination": "/servicii/evenimente-media/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/servicii/auto-and-utilaje/:path*",
+      "destination": "/servicii/auto-utilaje/:path*",
+      "permanent": true
+    },
+    
+    {
+      "source": "/servicii/finisaje/:path*",
+      "destination": "/servicii/amenajari-interioare/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/servicii/renovari-interioare/:path*",
+      "destination": "/servicii/amenajari-interioare/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/servicii/constructii/:path*",
+      "destination": "/servicii/constructii-structuri/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/servicii/instalatii/:path*",
+      "destination": "/servicii/instalatii-utilitati/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/servicii/exterioare/:path*",
+      "destination": "/servicii/amenajari-exterioare-gradina/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/servicii/amenajari-exterioare/:path*",
+      "destination": "/servicii/amenajari-exterioare-gradina/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/servicii/reparatii-intretinere/:path*",
+      "destination": "/servicii/reparatii-diverse/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/servicii/reparatii/:path*",
+      "destination": "/servicii/reparatii-diverse/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/servicii/design-si-decor/:path*",
+      "destination": "/servicii/servicii-specializate-consultanta/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/servicii/servicii-generale/:path*",
+      "destination": "/servicii/alte-servicii/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/servicii/servicii-specializate/:path*",
+      "destination": "/servicii/servicii-specializate-consultanta/:path*",
+      "permanent": true
+    },
+    
+    {
+      "source": "/servicii/servicii/:path*",
+      "destination": "/servicii/:path*",
+      "permanent": true
+    },
+    
+    {
+      "source": "/politica-cookies",
+      "destination": "/politica-confidentialitate/",
+      "permanent": true
+    },
+    
     {
       "source": "/blog/garduri-:city",
       "destination": "/servicii/amenajari-exterioare-gradina/constructie-garduri-porti/",
@@ -47,8 +170,18 @@
       "permanent": true
     },
     {
+      "source": "/blog/zugravi-:city",
+      "destination": "/servicii/amenajari-interioare/zugraveli-vopsitorii/",
+      "permanent": true
+    },
+    {
       "source": "/blog/zugraveli-:city",
       "destination": "/servicii/amenajari-interioare/zugraveli-vopsitorii/",
+      "permanent": true
+    },
+    {
+      "source": "/blog/electricieni-:city",
+      "destination": "/servicii/instalatii-utilitati/instalatii-electrice/",
       "permanent": true
     },
     {
@@ -57,8 +190,23 @@
       "permanent": true
     },
     {
+      "source": "/blog/instalatori-:city",
+      "destination": "/servicii/instalatii-utilitati/instalatii-sanitare/",
+      "permanent": true
+    },
+    {
       "source": "/blog/instalator-:city",
       "destination": "/servicii/instalatii-utilitati/instalatii-sanitare/",
+      "permanent": true
+    },
+    {
+      "source": "/blog/instalatori-ac-:city",
+      "destination": "/servicii/instalatii-utilitati/montaj-ac-ventilatie/",
+      "permanent": true
+    },
+    {
+      "source": "/blog/parchetari-:city",
+      "destination": "/servicii/amenajari-interioare/montaj-reconditionare-parchet/",
       "permanent": true
     },
     {
@@ -69,6 +217,11 @@
     {
       "source": "/blog/rigips-:city",
       "destination": "/servicii/amenajari-interioare/montaj-rigips-compartimentari/",
+      "permanent": true
+    },
+    {
+      "source": "/blog/acoperisuri-:city",
+      "destination": "/servicii/constructii-structuri/montaj-acoperisuri-pluviale/",
       "permanent": true
     },
     {
@@ -89,6 +242,11 @@
     {
       "source": "/blog/faiantari-:city",
       "destination": "/servicii/amenajari-interioare/montaj-gresie-faianta-piatra/",
+      "permanent": true
+    },
+    {
+      "source": "/blog/constructori-:city",
+      "destination": "/servicii/constructii-structuri/constructii-case/",
       "permanent": true
     },
     {
@@ -114,6 +272,77 @@
     {
       "source": "/blog/reparatii-:city",
       "destination": "/servicii/reparatii-diverse/",
+      "permanent": true
+    },
+    {
+      "source": "/blog/demolari-:city",
+      "destination": "/servicii/constructii-structuri/demolari-decopertari/",
+      "permanent": true
+    },
+    {
+      "source": "/blog/tamplari-:city",
+      "destination": "/servicii/tamplarie-mobilier/",
+      "permanent": true
+    },
+    {
+      "source": "/blog/tamplari-mobilier-:city",
+      "destination": "/servicii/tamplarie-mobilier/",
+      "permanent": true
+    },
+    {
+      "source": "/blog/lacatusi-:city",
+      "destination": "/servicii/servicii-de-urgenta/lacatus-deblocari-usi/",
+      "permanent": true
+    },
+    {
+      "source": "/blog/fierari-:city",
+      "destination": "/servicii/constructii-structuri/fierarie-confectii-metalice/",
+      "permanent": true
+    },
+    
+    {
+      "source": "/blog/ghid-:path*",
+      "destination": "/blog/",
+      "permanent": true
+    },
+    {
+      "source": "/blog/constructii-case",
+      "destination": "/servicii/constructii-structuri/constructii-case/",
+      "permanent": true
+    },
+    {
+      "source": "/blog/constructii-&-structuri",
+      "destination": "/servicii/constructii-structuri/",
+      "permanent": true
+    },
+    {
+      "source": "/blog/instalatii-termice-sanitare-electrice",
+      "destination": "/servicii/instalatii-utilitati/",
+      "permanent": true
+    },
+    {
+      "source": "/blog/parchetari-servicii",
+      "destination": "/servicii/amenajari-interioare/montaj-reconditionare-parchet/",
+      "permanent": true
+    },
+    {
+      "source": "/blog/tamplari-servicii",
+      "destination": "/servicii/tamplarie-mobilier/",
+      "permanent": true
+    },
+    {
+      "source": "/blog/tamplari-mobilier-servicii",
+      "destination": "/servicii/tamplarie-mobilier/",
+      "permanent": true
+    },
+    {
+      "source": "/blog/zugravi-servicii",
+      "destination": "/servicii/amenajari-interioare/zugraveli-vopsitorii/",
+      "permanent": true
+    },
+    {
+      "source": "/blog/garduri-servicii",
+      "destination": "/servicii/amenajari-exterioare-gradina/constructie-garduri-porti/",
       "permanent": true
     }
   ]

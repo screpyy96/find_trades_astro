@@ -508,6 +508,13 @@ export function TradesmenClientList({
             }))
           });
 
+          // IMPORTANT: Filter to show ONLY PRO/Enterprise users (hide basic users)
+          workersWithTrades = workersWithTrades.filter((w: any) => isPremiumUser(w.subscription_plan));
+          
+          console.log('💎 After PRO-only filter:', {
+            total: workersWithTrades.length
+          });
+
           // Search is now done at database level, no client-side filtering needed
 
           // Trade filter is now handled at database level, no client-side filtering needed
@@ -518,22 +525,13 @@ export function TradesmenClientList({
           const needsClientSidePagination = effectiveTrade;
 
           if (needsClientSidePagination) {
-            // Sort: PRO/Enterprise users first, then by rating
+            // Sort by rating (all are PRO now)
             workersWithTrades.sort((a: any, b: any) => {
-              const aIsPremium = isPremiumUser(a.subscription_plan);
-              const bIsPremium = isPremiumUser(b.subscription_plan);
-              
-              // Premium users first
-              if (aIsPremium && !bIsPremium) return -1;
-              if (!aIsPremium && bIsPremium) return 1;
-              
-              // Then by rating
               return (b.rating || 0) - (a.rating || 0);
             });
 
             console.log('🔄 After sorting:', {
               total: workersWithTrades.length,
-              premiumCount: workersWithTrades.filter((w: any) => isPremiumUser(w.subscription_plan)).length,
               firstFive: workersWithTrades.slice(0, 5).map((w: any) => ({
                 name: w.name,
                 subscription: w.subscription_plan,
@@ -551,8 +549,7 @@ export function TradesmenClientList({
               page: pageNum,
               from, 
               to,
-              itemsOnPage: paginatedWorkers.length,
-              premiumInPage: paginatedWorkers.filter((w: any) => isPremiumUser(w.subscription_plan)).length
+              itemsOnPage: paginatedWorkers.length
             });
 
             if (reset) {
@@ -563,17 +560,9 @@ export function TradesmenClientList({
             setHasMore(workersWithTrades.length > to);
           } else {
             // Database-level pagination was already applied
-            // Just sort Premium users first within current page
+            // Sort by rating
             workersWithTrades.sort((a: any, b: any) => {
-              const aIsPremium = isPremiumUser(a.subscription_plan);
-              const bIsPremium = isPremiumUser(b.subscription_plan);
-              
-              // Premium users first
-              if (aIsPremium && !bIsPremium) return -1;
-              if (!aIsPremium && bIsPremium) return 1;
-              
-              // Keep database rating order
-              return 0;
+              return (b.rating || 0) - (a.rating || 0);
             });
 
             if (reset) {
@@ -581,7 +570,8 @@ export function TradesmenClientList({
             } else {
               setWorkers((prev: Worker[]) => [...prev, ...(workersWithTrades as Worker[])]);
             }
-            setHasMore(data.length === ITEMS_PER_PAGE);
+            // No more pages since we filtered to PRO only
+            setHasMore(false);
           }
         } else {
           console.log('📊 No workers found after filtering');
@@ -591,17 +581,16 @@ export function TradesmenClientList({
           setHasMore(false);
         }
       } else {
-        console.log('📊 No filters - using optimized pagination with PRO users first');
+        console.log('📊 No filters - loading ONLY PRO/Enterprise users');
         
         // Apply default verified filter for main listing
         query = query.eq('is_verified', true);
 
-        // STRATEGY: On first page, load PRO users first, then fill with regular users
-        // On subsequent pages, load only regular users (PRO already shown)
+        // STRATEGY: Load ONLY PRO and Enterprise users (hide basic users)
         
         if (pageNum === 0) {
-          // FIRST PAGE: Load PRO users first
-          console.log('📊 First page - loading PRO users first');
+          // FIRST PAGE: Load only PRO/Enterprise users
+          console.log('📊 First page - loading ONLY PRO/Enterprise users');
           
           // Step 1: Get all PRO and Enterprise user IDs
           const { data: proSubscriptions } = await supabase
@@ -615,9 +604,8 @@ export function TradesmenClientList({
           console.log('💎 Found PRO/Enterprise users:', proUserIds.length);
           
           let proWorkers: any[] = [];
-          let regularWorkers: any[] = [];
           
-          // Step 2: Fetch PRO workers
+          // Step 2: Fetch ONLY PRO/Enterprise workers
           if (proUserIds.length > 0) {
             const { data: proData } = await supabase
               .from('profiles')
@@ -632,33 +620,8 @@ export function TradesmenClientList({
             console.log('💎 PRO workers loaded:', proWorkers.length);
           }
           
-          // Step 3: Calculate how many regular workers we need
-          const regularNeeded = ITEMS_PER_PAGE - proWorkers.length;
-          
-          if (regularNeeded > 0) {
-            // Fetch regular workers (excluding PRO)
-            let regularQuery = supabase
-              .from('profiles')
-              .select('id, name, avatar_url, address, bio, rating, is_verified, is_online, phone')
-              .eq('role', 'worker')
-              .eq('is_verified', true)
-              .not('name', 'is', null)
-              .order('rating', { ascending: false, nullsFirst: false })
-              .limit(regularNeeded);
-            
-            // Exclude PRO users if any
-            if (proUserIds.length > 0) {
-              // Use not.in to exclude PRO users
-              regularQuery = regularQuery.not('id', 'in', `(${proUserIds.join(',')})`);
-            }
-            
-            const { data: regularData } = await regularQuery;
-            regularWorkers = regularData || [];
-            console.log('📊 Regular workers loaded:', regularWorkers.length);
-          }
-          
-          // Combine: PRO first, then regular
-          const combinedData = [...proWorkers, ...regularWorkers];
+          // No regular workers - only PRO/Enterprise
+          const combinedData = [...proWorkers];
           
           if (combinedData.length > 0) {
             // Get worker IDs
@@ -737,125 +700,18 @@ export function TradesmenClientList({
             });
 
             setWorkers(workersWithTrades as Worker[]);
-            setHasMore(combinedData.length === ITEMS_PER_PAGE);
+            setHasMore(false); // No more pages - only PRO users shown
             
-            // Store PRO user IDs for subsequent pages
+            // Store PRO user IDs for reference
             (window as any).__PRO_USER_IDS = proUserIds;
           } else {
             setWorkers([]);
             setHasMore(false);
           }
         } else {
-          // SUBSEQUENT PAGES: Load only regular workers (PRO already shown on first page)
-          console.log('📊 Subsequent page - loading regular workers only');
-          
-          // Get PRO user IDs from first page load
-          const proUserIds = (window as any).__PRO_USER_IDS || [];
-          const proCount = proUserIds.length;
-          
-          // Calculate offset: skip PRO users and previous pages of regular users
-          const regularFrom = (pageNum - 1) * ITEMS_PER_PAGE + (ITEMS_PER_PAGE - proCount);
-          const regularTo = regularFrom + ITEMS_PER_PAGE - 1;
-          
-          let regularQuery = supabase
-            .from('profiles')
-            .select('id, name, avatar_url, address, bio, rating, is_verified, is_online, phone')
-            .eq('role', 'worker')
-            .eq('is_verified', true)
-            .not('name', 'is', null)
-            .order('rating', { ascending: false, nullsFirst: false })
-            .range(regularFrom, regularTo);
-          
-          // Exclude PRO users
-          if (proUserIds.length > 0) {
-            regularQuery = regularQuery.not('id', 'in', `(${proUserIds.join(',')})`);
-          }
-          
-          const { data, error: fetchError } = await regularQuery;
-
-          if (fetchError) {
-            throw new Error(fetchError.message);
-          }
-
-          if (data && data.length > 0) {
-            const workerIds = data.map((w: any) => w.id);
-
-            // Fetch worker_trades
-            let workerTradesData: any[] = [];
-            const batchSize = 50;
-            for (let i = 0; i < workerIds.length; i += batchSize) {
-              const batch = workerIds.slice(i, i + batchSize);
-              const { data: batchData } = await supabase
-                .from('worker_trades')
-                .select('profile_id, trade_ids')
-                .in('profile_id', batch);
-              if (batchData) {
-                workerTradesData.push(...batchData);
-              }
-            }
-
-            // Collect trade IDs
-            const allTradeIds = new Set<number>();
-            workerTradesData?.forEach((wt: any) => {
-              if (wt.trade_ids && Array.isArray(wt.trade_ids)) {
-                wt.trade_ids.forEach((id: number) => allTradeIds.add(id));
-              }
-            });
-
-            // Fetch trades with caching
-            let trades: any[] = [];
-            if (allTradeIds.size > 0) {
-              const tradesCacheKey = CacheKeys.trades();
-              let cachedTrades = (window as any).__WORKERS_CACHE?.get(tradesCacheKey);
-              
-              if (!cachedTrades) {
-                const tradeIdsArray = Array.from(allTradeIds);
-                const tradeBatchSize = 100;
-                trades = [];
-                
-                for (let i = 0; i < tradeIdsArray.length; i += tradeBatchSize) {
-                  const batch = tradeIdsArray.slice(i, i + tradeBatchSize);
-                  const { data: tradeData } = await supabase
-                    .from('trades')
-                    .select('id, name, slug')
-                    .in('id', batch);
-                  if (tradeData) {
-                    trades.push(...tradeData);
-                  }
-                }
-                
-                if (!(window as any).__WORKERS_CACHE) {
-                  (window as any).__WORKERS_CACHE = new Map();
-                }
-                (window as any).__WORKERS_CACHE.set(tradesCacheKey, trades);
-              } else {
-                trades = cachedTrades;
-              }
-            }
-
-            // Create maps
-            const tradeMap = new Map((trades || []).map((t: any) => [t.id, t]));
-            const workerTradesMap = new Map(
-              workerTradesData?.map((wt: any) => [wt.profile_id, wt.trade_ids]) || []
-            );
-
-            // Map trades to workers (no PRO on subsequent pages)
-            const workersWithTrades = data.map((worker: any) => {
-              const tradeIds = workerTradesMap.get(worker.id) || [];
-              const workerTrades = (Array.isArray(tradeIds) ? tradeIds : []).map((id: number) => tradeMap.get(id)).filter(Boolean);
-              
-              return {
-                ...worker,
-                trades: workerTrades,
-                subscription_plan: null
-              };
-            });
-
-            setWorkers((prev: Worker[]) => [...prev, ...(workersWithTrades as Worker[])]);
-            setHasMore(data.length === ITEMS_PER_PAGE);
-          } else {
-            setHasMore(false);
-          }
+          // SUBSEQUENT PAGES: No more workers to load (only PRO shown)
+          console.log('📊 Subsequent page - no more workers (only PRO users shown)');
+          setHasMore(false);
         }
       }
     } catch (err) {
@@ -1309,23 +1165,58 @@ export function TradesmenClientList({
             </div>
           ) : !error && !isLoading && (
             <div className="text-center py-16">
-              <div className="bg-white border border-slate-200 rounded-2xl p-8 sm:p-12 max-w-md mx-auto shadow-sm">
+              <div className="bg-white border border-slate-200 rounded-2xl p-8 sm:p-12 max-w-lg mx-auto shadow-sm">
                 <Search className="w-12 h-12 sm:w-16 sm:h-16 text-slate-400 mx-auto mb-4" />
-                <h3 className="text-lg sm:text-xl font-semibold text-slate-900 mb-2">Niciun meseriaș găsit</h3>
-                <p className="text-slate-600 text-sm sm:text-base">
-                  {searchTerm ? `Nu am găsit rezultate pentru "${searchTerm}". Încearcă alți termeni.` : 'Nu există meseriași care să corespundă filtrelor.'}
+                <h3 className="text-lg sm:text-xl font-semibold text-slate-900 mb-2">Niciun meseriaș PRO găsit</h3>
+                <p className="text-slate-600 text-sm sm:text-base mb-6">
+                  {searchTerm 
+                    ? `Nu am găsit meseriași PRO pentru "${searchTerm}".` 
+                    : 'Nu există meseriași PRO care să corespundă filtrelor.'}
                 </p>
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
+                  <p className="text-amber-800 text-sm font-medium mb-2">
+                    Vrei să găsești meseriași pentru proiectul tău?
+                  </p>
+                  <p className="text-amber-700 text-xs">
+                    Postează o solicitare gratuită și primește oferte de la meseriași verificați din zona ta.
+                  </p>
+                </div>
+                <a 
+                  href="https://app.meseriaslocal.ro/cere-oferta"
+                  className="inline-flex items-center px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-lg transition-colors shadow-sm"
+                >
+                  Postează o solicitare gratuită
+                  <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </a>
               </div>
             </div>
           )}
 
-          {/* Loading Indicator and Trigger */}
-          <div ref={ref} className="h-20 flex items-center justify-center mt-8">
+          {/* Loading Indicator */}
+          <div ref={ref} className="h-16 flex items-center justify-center mt-6">
             {isLoading && workers.length > 0 && <Loader2 className="w-8 h-8 text-sky-600 animate-spin" />}
-            {!hasMore && workers.length > 0 && (
-              <p className="text-slate-500">Ai ajuns la finalul listei.</p>
-            )}
           </div>
+
+          {/* CTA Banner - shown when list ends */}
+          {!hasMore && workers.length > 0 && !isLoading && (
+            <div className="mt-8 bg-gradient-to-r from-amber-500 to-orange-500 rounded-2xl p-8 text-center shadow-lg">
+              <h3 className="text-xl font-bold text-white mb-2">Nu ai găsit meșeriașul potrivit?</h3>
+              <p className="text-white/90 mb-6 max-w-lg mx-auto">
+                Postează gratuit ce ai nevoie și primește oferte de la meseriași verificați din zona ta.
+              </p>
+              <a 
+                href="https://app.meseriaslocal.ro/cere-oferta"
+                className="inline-flex items-center px-6 py-3 bg-white text-orange-600 font-bold rounded-xl hover:bg-slate-100 transition-colors shadow-md"
+              >
+                Postează o solicitare gratuită
+                <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </a>
+            </div>
+          )}
         </div>
       </div>
     </div>
