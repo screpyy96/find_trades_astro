@@ -852,7 +852,7 @@ const breadcrumbSchema = {
       )}
 
       <!-- Related Services -->
-      {(sanityContent?.relatedServices?.length > 0 || similarServices.length > 0) && (
+      {((sanityContent?.relatedServices && sanityContent.relatedServices.length > 0) || similarServices.length > 0) && (
         <section class="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
           <h2 class="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3">
             <div class="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center text-white">
