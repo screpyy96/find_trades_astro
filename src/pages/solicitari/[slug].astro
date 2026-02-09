@@ -47,7 +47,7 @@ export const getStaticPaths: GetStaticPaths = import.meta.env.DEV
 };
 
 interface Props {
-  job: any; // Use any for now since we're selecting all fields
+  job?: any; // Optional since it may not exist in dev mode
 }
 
 const { slug } = Astro.params;
