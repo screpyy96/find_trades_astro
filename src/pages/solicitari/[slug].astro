@@ -7,44 +7,44 @@ import type { GetStaticPaths } from 'astro';
 export const prerender = !import.meta.env.DEV;
 
 // Only export getStaticPaths in production to avoid warning
-export const getStaticPaths: GetStaticPaths = import.meta.env.DEV 
-  ? (() => []) as any
-  : (async () => {
+export const getStaticPaths = (import.meta.env.DEV 
+  ? async () => []
+  : async () => {
       // Check if Supabase is available
       if (!supabase) {
         console.warn('Supabase not configured, skipping job pages generation');
         return [];
       }
 
-  const { data: jobs } = await supabase
-    .from('jobs')
-    .select('*')
-    .order('created_at', { ascending: false })
-    .limit(1000); // Limit pentru build time
+      const { data: jobs } = await supabase
+        .from('jobs')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(1000); // Limit pentru build time
 
-  if (!jobs) return [];
+      if (!jobs) return [];
 
-  return jobs.map((job) => {
-    // Generate slug matching Remix logic: max 3 words from title + short ID (6 chars)
-    const titleWords = job.title.trim().split(/\s+/).slice(0, 3);
-    const titleSlug = titleWords.join(' ')
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
-      .replace(/[^a-z0-9\s-]/g, '') // Remove special chars
-      .replace(/\s+/g, '-') // Replace spaces with hyphens
-      .replace(/-+/g, '-') // Replace multiple hyphens with single
-      .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
-    
-    const shortId = job.id.replace(/-/g, '').substring(0, 6);
-    const slug = titleSlug ? `${titleSlug}-${shortId}` : `lucrare-${shortId}`;
+      return jobs.map((job) => {
+        // Generate slug matching Remix logic: max 3 words from title + short ID (6 chars)
+        const titleWords = job.title.trim().split(/\s+/).slice(0, 3);
+        const titleSlug = titleWords.join(' ')
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+          .replace(/[^a-z0-9\s-]/g, '') // Remove special chars
+          .replace(/\s+/g, '-') // Replace spaces with hyphens
+          .replace(/-+/g, '-') // Replace multiple hyphens with single
+          .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+        
+        const shortId = job.id.replace(/-/g, '').substring(0, 6);
+        const slug = titleSlug ? `${titleSlug}-${shortId}` : `lucrare-${shortId}`;
 
-    return {
-      params: { slug },
-      props: { job },
-    };
-  });
-};
+        return {
+          params: { slug },
+          props: { job },
+        };
+      });
+    }) satisfies GetStaticPaths;
 
 interface Props {
   job?: any; // Optional since it may not exist in dev mode
