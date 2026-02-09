@@ -44,7 +44,12 @@ const [serviceDataResult, sanityContent] = await Promise.all([
 ]);
 
 if (serviceDataResult.error || !serviceDataResult.trade) {
-  return Astro.redirect('/404');
+  // Return 410 Gone — tells Google to permanently deindex this URL
+  // Previously was 302→/404 which wasted crawl budget (Google saw 302, not 404)
+  return new Response(
+    '<html><head><meta name="robots" content="noindex"><title>410 Gone</title></head><body><h1>410 - Pagina nu mai există</h1><p><a href="/servicii/">Vezi toate serviciile</a></p></body></html>',
+    { status: 410, headers: { 'Content-Type': 'text/html; charset=utf-8', 'X-Robots-Tag': 'noindex', 'Cache-Control': 'public, max-age=86400' } }
+  );
 }
 
 const { trade, similarTrades } = serviceDataResult;

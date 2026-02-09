@@ -6,7 +6,7 @@ import react from '@astrojs/react';
 export default defineConfig({
   site: 'https://www.meseriaslocal.ro',
   output: 'server',
-  trailingSlash: 'ignore',
+  trailingSlash: 'always',
   adapter: vercel({
     webAnalytics: {
       enabled: true
