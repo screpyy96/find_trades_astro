@@ -39,6 +39,7 @@ Allow: /robots.txt
 
 # Sitemap location
 Sitemap: https://www.meseriaslocal.ro/sitemap.xml
+Sitemap: https://www.meseriaslocal.ro/sitemap-cities.xml
 `.trim();
 
   return new Response(robotsTxt, {

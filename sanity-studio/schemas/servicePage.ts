@@ -148,16 +148,16 @@ export default defineType({
     // HERO SECTION - Câmpuri pentru hero dinamic
     defineField({
       name: 'heroTitle',
-      title: 'Hero - Titlu Principal',
+      title: 'H1 — Titlu Principal (Hero)',
       type: 'string',
-      description: 'Ex: Electrician București - Servicii Profesionale 2026',
-      validation: (Rule) => Rule.max(80),
+      description: 'Acesta este H1-ul paginii. Un singur H1 per pagină! Include meseria + orașul + diferențiator. Ex: "Electrician autorizat ANRE în București — Servicii electrice complete"',
+      validation: (Rule) => Rule.required().max(80),
     }),
     defineField({
       name: 'heroSubtitle',
       title: 'Hero - Subtitlu',
       type: 'string',
-      description: 'Ex: Electrician București - Servicii Electrice Profesionale',
+      description: 'Subtitlu sub H1. Include variație de keyword. Ex: "Conectăm Clienții cu Profesioniști Autorizați ANRE"',
       validation: (Rule: any) => Rule.max(100),
     }),
     defineField({
@@ -165,7 +165,7 @@ export default defineType({
       title: 'Hero - Descriere',
       type: 'text',
       rows: 3,
-      description: 'Descriere scurtă pentru hero (2-3 propoziții)',
+      description: 'Descriere scurtă (2-3 propoziții) cu intenție de căutare. Include: ce oferim, cât durează, zonă acoperită.',
       validation: (Rule: any) => Rule.max(300),
     }),
     // SEO FIELDS
@@ -173,16 +173,16 @@ export default defineType({
       name: 'seoTitle',
       title: 'SEO Title (pentru Google)',
       type: 'string',
-      description: 'Titlul care apare în rezultatele Google (50-60 caractere). Ex: Zugravi București – Profesioniști Verificați | Meserias Local',
-      validation: (Rule: any) => Rule.max(70),
+      description: 'Titlul din tab-ul browserului și rezultatele Google. Max 60 chars vizibili. Ex: "Instalații electrice București – Electricieni autorizați ANRE | Meserias Local"',
+      validation: (Rule: any) => Rule.required().max(70),
     }),
     defineField({
       name: 'seoDescription',
       title: 'SEO Description (pentru Google)',
       type: 'text',
-      rows: 2,
-      description: 'Descrierea care apare în rezultatele Google (150-160 caractere)',
-      validation: (Rule: any) => Rule.max(160),
+      rows: 3,
+      description: 'Descrierea din rezultatele Google. 155-160 chars. Include: ce oferim, beneficiu principal, CTA. Ex: "Ai nevoie de un electrician autorizat ANRE în București? Primești în 2–4 ore oferte gratuite de la electricieni verificați în sectoarele 1–6."',
+      validation: (Rule: any) => Rule.required().min(120).max(165),
     }),
     defineField({
       name: 'metaDescription',
@@ -217,22 +217,32 @@ export default defineType({
         },
       ],
     }),
-    // CONȚINUT PRINCIPAL - SIMPLU
+    // CONȚINUT PRINCIPAL
+    // Structură recomandată:
+    //   H2: Servicii [meserie] în [oraș] — Ce oferim
+    //   H3: Tipuri de lucrări acoperite (+ listă)
+    //   H2: [Meserie] în toate zonele/sectoarele [orașului]
+    //   H3: Sector/Zonă 1, H3: Sector/Zonă 2, etc.
+    //   H2: De ce să alegi un [meseriaș] prin Meserias Local? (+ listă beneficii)
+    //   H2: Cum funcționează — 3 pași simpli
+    //   H2: [Topic specific: smart home / urgențe / etc.]
+    // Keywords naturale: [meserie] [oraș], autorizat, urgențe, prețuri, sectoare/zone
     defineField({
       name: 'content',
       title: 'Conținut SEO',
       type: 'array',
-      description: 'Scrie conținut util pentru utilizatori ',
+      description: 'Conținut structurat cu H2/H3. NU pune H1 aici (vine din heroTitle). Folosește H2 pentru secțiuni principale, H3 pentru subsecțiuni. Include cuvinte cheie natural.',
       of: [
         {
           type: 'block',
           styles: [
             { title: 'Normal', value: 'normal' },
-            { title: 'H2', value: 'h2' },
-            { title: 'H3', value: 'h3' },
+            { title: 'H2 — Secțiune principală', value: 'h2' },
+            { title: 'H3 — Subsecțiune', value: 'h3' },
+            { title: 'H4 — Detaliu', value: 'h4' },
           ],
           lists: [
-            { title: 'Lista', value: 'bullet' },
+            { title: 'Lista (bullet)', value: 'bullet' },
             { title: 'Numerotată', value: 'number' },
           ],
           marks: {
@@ -250,6 +260,7 @@ export default defineType({
                     name: 'href',
                     type: 'url',
                     title: 'URL',
+                    description: 'Folosește linkuri relative pentru pagini interne (ex: /servicii/instalatii-utilitati/instalatii-sanitare/bucuresti/)',
                     validation: (Rule: any) => Rule.uri({
                       allowRelative: true,
                       scheme: ['http', 'https', 'mailto', 'tel']
@@ -268,18 +279,18 @@ export default defineType({
         },
       ],
     }),
-    // FAQ SIMPLU
+    // FAQ — generează FAQPage schema markup automat
     defineField({
       name: 'faqSection',
-      title: 'FAQ (opțional)',
+      title: 'FAQ — Întrebări frecvente',
       type: 'array',
-      description: 'Întrebări frecvente - bune pentru SEO',
+      description: 'Minim 5 întrebări. Generează automat FAQPage schema (JSON-LD) pentru Google rich results. Include keywords în întrebări: "Cât costă [meserie] în [oraș]?", "Ce înseamnă [certificare]?", etc.',
       of: [
         {
           type: 'object',
           fields: [
-            { name: 'question', title: 'Întrebare', type: 'string' },
-            { name: 'answer', title: 'Răspuns', type: 'text', rows: 2 },
+            { name: 'question', title: 'Întrebare', type: 'string', validation: (Rule: any) => Rule.required() },
+            { name: 'answer', title: 'Răspuns', type: 'text', rows: 3, validation: (Rule: any) => Rule.required().min(50) },
           ],
           preview: {
             select: { title: 'question' },
@@ -287,26 +298,27 @@ export default defineType({
         },
       ],
     }),
-    // PREȚURI SIMPLE
+    // PREȚURI — afișate pe pagină + bune pentru SEO
     defineField({
       name: 'priceRanges',
-      title: 'Prețuri (opțional)',
+      title: 'Prețuri orientative',
       type: 'array',
-      description: 'Adaugă câteva prețuri orientative',
+      description: 'Prețuri orientative pentru servicii. Ajută la conversie și la SEO (Google afișează prețuri în snippets). Minim 4-5 servicii.',
       of: [
         {
           type: 'object',
           fields: [
-            { name: 'service', title: 'Serviciu', type: 'string' },
-            { name: 'minPrice', title: 'De la (RON)', type: 'number' },
-            { name: 'maxPrice', title: 'Până la (RON)', type: 'number' },
+            { name: 'service', title: 'Serviciu', type: 'string', description: 'Ex: Montaj tablou electric', validation: (Rule: any) => Rule.required() },
+            { name: 'minPrice', title: 'De la (RON)', type: 'number', validation: (Rule: any) => Rule.required().min(0) },
+            { name: 'maxPrice', title: 'Până la (RON)', type: 'number', validation: (Rule: any) => Rule.required().min(0) },
+            { name: 'unit', title: 'Unitate (opțional)', type: 'string', description: 'Ex: per punct, per mp, per cameră', options: { list: ['per bucată', 'per mp', 'per ml', 'per cameră', 'per punct', 'per proiect', 'per oră'] } },
           ],
           preview: {
-            select: { title: 'service', minPrice: 'minPrice', maxPrice: 'maxPrice' },
-            prepare({ title, minPrice, maxPrice }: any) {
+            select: { title: 'service', minPrice: 'minPrice', maxPrice: 'maxPrice', unit: 'unit' },
+            prepare({ title, minPrice, maxPrice, unit }: any) {
               return {
                 title: title,
-                subtitle: `${minPrice} - ${maxPrice} RON`,
+                subtitle: `${minPrice}–${maxPrice} RON${unit ? ` ${unit}` : ''}`,
               };
             },
           },
@@ -339,18 +351,18 @@ export default defineType({
         },
       ],
     }),
-    // SFATURI LOCALE
+    // SFATURI LOCALE — conținut unic per oraș
     defineField({
       name: 'localTips',
-      title: 'Sfaturi Locale (opțional)',
+      title: 'Sfaturi locale',
       type: 'array',
-      description: 'Sfaturi specifice pentru orașul respectiv (ex: autorizații locale, zone speciale)',
+      description: 'Informații specifice orașului: autorizații necesare, sectoare/zone acoperite, urgențe, reglementări locale. Conținut unic = SEO mai bun.',
       of: [
         {
           type: 'object',
           fields: [
-            { name: 'title', type: 'string', title: 'Titlu' },
-            { name: 'description', type: 'text', title: 'Descriere', rows: 3 },
+            { name: 'title', type: 'string', title: 'Titlu', description: 'Ex: Autorizații necesare în București', validation: (Rule: any) => Rule.required() },
+            { name: 'description', type: 'text', title: 'Descriere', rows: 4, description: 'Detalii utile. Include zone/cartiere specifice.', validation: (Rule: any) => Rule.required().min(50) },
           ],
           preview: {
             select: { title: 'title', description: 'description' },
@@ -364,25 +376,25 @@ export default defineType({
         },
       ],
     }),
-    // SERVICII CONEXE
+    // SERVICII CONEXE — linking intern
     defineField({
       name: 'relatedServices',
-      title: 'Servicii Conexe (opțional)',
+      title: 'Servicii conexe (linking intern)',
       type: 'array',
-      description: 'Servicii similare sau complementare (ex: Instalator Gaz, Instalator Apă)',
+      description: 'Linkuri către alte servicii în același oraș. Important pentru SEO (internal linking). Ex: Instalații sanitare, Instalații termice, Montaj AC.',
       of: [
         {
           type: 'object',
           fields: [
-            { name: 'serviceName', type: 'string', title: 'Nume serviciu' },
-            { name: 'serviceSlug', type: 'string', title: 'Slug serviciu (ex: instalatii-utilitati/instalatii-gaz)' },
+            { name: 'serviceName', type: 'string', title: 'Nume serviciu afișat', description: 'Ex: Instalații sanitare București', validation: (Rule: any) => Rule.required() },
+            { name: 'serviceSlug', type: 'string', title: 'Slug complet (categorie/serviciu)', description: 'Ex: instalatii-utilitati/instalatii-sanitare — orașul se adaugă automat', validation: (Rule: any) => Rule.required() },
           ],
           preview: {
             select: { title: 'serviceName', slug: 'serviceSlug' },
             prepare({ title, slug }) {
               return {
                 title: title,
-                subtitle: slug,
+                subtitle: `/servicii/${slug}/[oras]/`,
               };
             },
           },
