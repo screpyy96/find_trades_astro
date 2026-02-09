@@ -6,17 +6,15 @@ import type { GetStaticPaths } from 'astro';
 // Use SSR in development, SSG in production
 export const prerender = !import.meta.env.DEV;
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  // In development, return empty array to use SSR for all requests
-  if (import.meta.env.DEV) {
-    return [];
-  }
-
-  // Check if Supabase is available
-  if (!supabase) {
-    console.warn('Supabase not configured, skipping job pages generation');
-    return [];
-  }
+// Only export getStaticPaths in production to avoid warning
+export const getStaticPaths: GetStaticPaths = import.meta.env.DEV 
+  ? (() => []) as any
+  : (async () => {
+      // Check if Supabase is available
+      if (!supabase) {
+        console.warn('Supabase not configured, skipping job pages generation');
+        return [];
+      }
 
   const { data: jobs } = await supabase
     .from('jobs')

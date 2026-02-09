@@ -504,7 +504,8 @@ export function TradesmenClientList({
             premiumCount: workersWithTrades.filter((w: any) => isPremiumUser(w.subscription_plan)).length,
             firstFew: workersWithTrades.slice(0, 3).map((w: any) => ({
               name: w.name,
-              subscription: w.subscription_plan
+              subscription: w.subscription_plan,
+              isPremium: isPremiumUser(w.subscription_plan)
             }))
           });
 
@@ -512,7 +513,8 @@ export function TradesmenClientList({
           workersWithTrades = workersWithTrades.filter((w: any) => isPremiumUser(w.subscription_plan));
           
           console.log('💎 After PRO-only filter:', {
-            total: workersWithTrades.length
+            total: workersWithTrades.length,
+            names: workersWithTrades.slice(0, 5).map((w: any) => w.name)
           });
 
           // Search is now done at database level, no client-side filtering needed
