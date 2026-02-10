@@ -67,11 +67,11 @@ export function generateWorkerSeoSlug(
 
 /**
  * Get worker profile URL (premium SEO-friendly)
- * Format: /meseriasi/name-trade-city-uuid
+ * Format: /tradesman/name-trade-city-uuid
  */
 export function getWorkerProfileUrl(worker: WorkerProfile, trades?: Trade[]): string {
   const slug = generateWorkerSeoSlug(worker, trades);
-  return `/meseriasi/${slug}`;
+  return `/tradesman/${slug}`;
 }
 
 /**
@@ -80,8 +80,8 @@ export function getWorkerProfileUrl(worker: WorkerProfile, trades?: Trade[]): st
 export function getWorkerProfileCanonicalUrl(
   worker: WorkerProfile, 
   trades?: Trade[],
-  baseUrl: string = 'https://www.meseriaslocal.ro'
+  baseUrl: string = 'https://www.findtrades.app'
 ): string {
   const slug = generateWorkerSeoSlug(worker, trades);
-  return `${baseUrl}/meseriasi/${slug}`;
+  return `${baseUrl}/tradesman/${slug}`;
 }

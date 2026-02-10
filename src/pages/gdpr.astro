@@ -1,5 +1,10 @@
 ---
 import Base from '../layouts/Base.astro';
+import { validateEnvironment } from '../lib/env-validation';
+
+const envConfig = validateEnvironment();
+const WEB_URL = envConfig.config.web.url;
+const APP_URL = envConfig.config.app.url;
 
 const LAST_UPDATED = '9 noiembrie 2025';
 ---
@@ -94,7 +99,7 @@ const LAST_UPDATED = '9 noiembrie 2025';
         </header>
         <p class="text-slate-600 leading-relaxed">
           Punem la dispoziție mecanisme pentru exercitarea dreptului de acces, rectificare, ștergere, restricționare, portabilitate, opoziție și de a nu face obiectul unei decizii automatizate.
-          Solicitările pot fi trimise prin email la <a href="mailto:contact@meseriaslocal.ro" class="text-emerald-600 font-semibold hover:underline">contact@meseriaslocal.ro</a> sau prin formularul de contact din aplicație.
+          Solicitările pot fi trimise prin email la <a href="mailto:contact@findtrades.app" class="text-emerald-600 font-semibold hover:underline">contact@findtrades.app</a> sau prin formularul de contact din aplicație.
           Răspundem în maximum 30 de zile și oferim suport suplimentar atunci când este necesar.
         </p>
       </article>
@@ -143,7 +148,7 @@ const LAST_UPDATED = '9 noiembrie 2025';
         </header>
         <p class="text-slate-600 leading-relaxed">
           Avem proceduri documentate pentru identificarea și raportarea incidentelor de securitate. În cazul unui incident ce poate afecta drepturile persoanelor vizate, notificăm autoritățile competente în maximum 72 de ore
-          și informăm utilizatorii impactați. Orice suspiciune poate fi raportată imediat la <a href="mailto:contact@meseriaslocal.ro" class="text-emerald-600 font-semibold hover:underline">contact@meseriaslocal.ro</a>.
+          și informăm utilizatorii impactați. Orice suspiciune poate fi raportată imediat la <a href="mailto:contact@findtrades.app" class="text-emerald-600 font-semibold hover:underline">contact@findtrades.app</a>.
         </p>
       </article>
 
@@ -191,8 +196,8 @@ const LAST_UPDATED = '9 noiembrie 2025';
           Pentru întrebări, clarificări sau raportarea unei probleme legate de protecția datelor, ne poți contacta folosind detaliile de mai jos. Răspundem prompt și colaborăm cu tine pentru a găsi soluția potrivită.
         </p>
         <ul class="text-slate-600 leading-relaxed list-disc pl-6 space-y-2">
-          <li>Email: <a href="mailto:contact@meseriaslocal.ro" class="text-emerald-600 font-semibold hover:underline">contact@meseriaslocal.ro</a></li>
-          <li>Formular online: <a href="https://app.meseriaslocal.ro/contact" class="text-emerald-600 font-semibold hover:underline">Disponibil în aplicația Meserias Local</a></li>
+          <li>Email: <a href="mailto:contact@findtrades.app" class="text-emerald-600 font-semibold hover:underline">contact@findtrades.app</a></li>
+          <li>Formular online: <a href={`${APP_URL}/contact`} class="text-emerald-600 font-semibold hover:underline" target="_blank" rel="noopener noreferrer">Available in FindTrades app</a></li>
           <li>Adresa poștală: detalii actualizate în pagina <a href="/despre-noi/" class="text-emerald-600 font-semibold hover:underline">Despre Noi</a></li>
           <li>Autoritatea competentă: <a href="https://www.dataprotection.ro/" class="text-emerald-600 font-semibold hover:underline" target="_blank" rel="noopener noreferrer">ANSPDCP</a></li>
         </ul>

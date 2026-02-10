@@ -14,8 +14,30 @@ interface Trade {
   description?: string | null;
 }
 
+interface ServiceStats {
+  totalWorkers: number;
+  totalCities: number;
+  avgRating: number;
+  recentProjects: number;
+}
+
+// Helper function to generate category slug
+const generateCategorySlug = (category: string) => {
+  return category.toLowerCase()
+    .replace(/\s+&\s+/g, '-')
+    .replace(/&/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/ș/g, 's')
+    .replace(/ț/g, 't')
+    .replace(/ă/g, 'a')
+    .replace(/â/g, 'a')
+    .replace(/î/g, 'i')
+    .replace(/[^a-z0-9-]/g, '')
+    .replace(/-+/g, '-');
+};
+
 export function generateHomepageSchema(stats: HomepageStats, trades: Trade[]) {
-  const baseUrl = "https://www.meseriaslocal.ro";
+  const baseUrl = "https://www.findtrades.app";
 
   const organization = {
     "@type": "Organization",
@@ -39,7 +61,7 @@ export function generateHomepageSchema(stats: HomepageStats, trades: Trade[]) {
       "telephone": "+447930097259",
       "contactType": "customer service",
       "availableLanguage": "Romanian",
-      "email": "contact@meseriaslocal.ro"
+      "email": "contact@findtrades.app"
     },
     "sameAs": [
       "https://www.facebook.com/localmeserias",
@@ -66,7 +88,7 @@ export function generateHomepageSchema(stats: HomepageStats, trades: Trade[]) {
       "@type": "SearchAction",
       "target": {
         "@type": "EntryPoint",
-        "urlTemplate": `${baseUrl}/meseriasi?q={search_term_string}`
+        "urlTemplate": `${baseUrl}/tradesmen/?q={search_term_string}`
       },
       "query-input": "required name=search_term_string"
     },
@@ -105,77 +127,6 @@ export function generateHomepageSchema(stats: HomepageStats, trades: Trade[]) {
       getServiceSchema(baseUrl, stats, trades),
       getFAQSchema(),
       getLocalBusinessSchema(baseUrl, stats)
-    ]
-  };
-}
-
-export function generateServicesPageSchema(totalTrades: number, totalCategories: number, trades: Trade[]) {
-  const baseUrl = "https://www.meseriaslocal.ro";
-  
-  // Helper to generate category slug
-  const generateCategorySlug = (category: string) => {
-    return category.toLowerCase()
-      .replace(/\s+&\s+/g, '-')
-      .replace(/&/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/ș/g, 's')
-      .replace(/ț/g, 't')
-      .replace(/ă/g, 'a')
-      .replace(/â/g, 'a')
-      .replace(/î/g, 'i')
-      .replace(/[^a-z0-9-]/g, '')
-      .replace(/-+/g, '-');
-  };
-
-  // Get total cities count
-  const totalCities = 143; // or import from cities.ts
-  
-  return {
-    "@context": "https://schema.org",
-    "@graph": [
-      // Breadcrumb
-      {
-        "@type": "BreadcrumbList",
-        "itemListElement": [
-          {
-            "@type": "ListItem",
-            "position": 1,
-            "name": "Acasă",
-            "item": baseUrl
-          },
-          {
-            "@type": "ListItem",
-            "position": 2,
-            "name": "Servicii",
-            "item": `${baseUrl}/servicii/`
-          }
-        ]
-      },
-      // ItemList with all services
-      {
-        "@type": "ItemList",
-        "name": "Servicii Meseriași România",
-        "description": `${totalTrades} servicii profesionale în ${totalCities} orașe`,
-        "numberOfItems": totalTrades,
-        "itemListElement": trades.map((trade, index) => {
-          const categorySlug = trade.category ? generateCategorySlug(trade.category) : 'servicii';
-          return {
-            "@type": "ListItem",
-            "position": index + 1,
-            "name": trade.name,
-            "url": `${baseUrl}/servicii/${categorySlug}/${trade.slug}/`
-          };
-        })
-      },
-      // WebPage
-      {
-        "@type": "WebPage",
-        "@id": `${baseUrl}/servicii/#webpage`,
-        "url": `${baseUrl}/servicii/`,
-        "name": `Servicii Meseriași România - ${totalTrades} Meserii în ${totalCities} Orașe`,
-        "description": `Director complet cu ${totalTrades} servicii profesionale de meseriași în ${totalCities} orașe. Găsește meseriași verificați în toată România.`,
-        "isPartOf": { "@id": `${baseUrl}/#website` }
-      }
     ]
   };
 }
@@ -228,7 +179,7 @@ function getTradesListSchema(trades: Trade[], stats: HomepageStats, baseUrl: str
       "item": {
         "@type": "Service",
         "name": trade.name,
-        "url": `${baseUrl}/meseriasi/?q=${encodeURIComponent(trade.name)}`,
+        "url": `${baseUrl}/tradesmen/?q=${encodeURIComponent(trade.name)}`,
         "description": `Găsește ${trade.name} verificați în zona ta.`,
         "provider": { "@id": `${baseUrl}/#organization` }
       }
@@ -316,7 +267,7 @@ function getLocalBusinessSchema(baseUrl: string, stats: HomepageStats) {
     "description": "Platforma #1 pentru meseriași verificați în România",
     "url": baseUrl,
     "telephone": "+447930097259",
-    "email": "contact@meseriaslocal.ro",
+    "email": "contact@findtrades.app",
     "address": {
       "@type": "PostalAddress",
       "addressCountry": "RO",
@@ -347,7 +298,7 @@ export function generateServiceCitySchema(params: {
 }) {
   const { serviceName, serviceSlug, categorySlug, cityName, citySlug, description } = params;
   const baseUrl = "https://www.meseriaslocal.ro";
-  const pageUrl = `${baseUrl}/servicii/${categorySlug}/${serviceSlug}/${citySlug}/`;
+  const pageUrl = `${baseUrl}/services/${categorySlug}/${serviceSlug}/${citySlug}/`;
   
   return {
     "@context": "https://schema.org",
@@ -372,13 +323,13 @@ export function generateServiceCitySchema(params: {
               "@type": "ListItem",
               "position": 2,
               "name": "Servicii",
-              "item": `${baseUrl}/servicii/`
+              "item": `${baseUrl}/services/`
             },
             {
               "@type": "ListItem",
               "position": 3,
               "name": serviceName,
-              "item": `${baseUrl}/servicii/${categorySlug}/${serviceSlug}/`
+              "item": `${baseUrl}/services/${categorySlug}/${serviceSlug}/`
             },
             {
               "@type": "ListItem",
@@ -409,7 +360,7 @@ export function generateServiceCitySchema(params: {
         "description": `Platformă pentru găsirea celor mai buni ${serviceName} în ${cityName}`,
         "url": pageUrl,
         "telephone": "+447930097259",
-        "email": "contact@meseriaslocal.ro",
+        "email": "contact@findtrades.app",
         "address": {
           "@type": "PostalAddress",
           "addressCountry": "RO",
@@ -421,6 +372,84 @@ export function generateServiceCitySchema(params: {
           "name": cityName,
           "addressCountry": "RO"
         }
+      }
+    ]
+  };
+}
+
+export function generateServicesPageSchema(stats: any, trades: Trade[]) {
+  const baseUrl = "https://www.findtrades.app";
+  
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": `${baseUrl}/#organization`,
+        "name": "FindTrades",
+        "url": baseUrl,
+        "logo": {
+          "@type": "ImageObject",
+          "url": `${baseUrl}/logo.png`,
+          "width": 300,
+          "height": 100
+        }
+      },
+      {
+        "@type": "WebPage",
+        "@id": `${baseUrl}/services/#webpage`,
+        "url": `${baseUrl}/services/`,
+        "name": "Professional Tradesmen Services UK | FindTrades",
+        "description": `Find verified professional tradesmen across the UK. ${stats.totalWorkers}+ experts in construction, plumbing, electrical, renovations and more.`,
+        "isPartOf": { "@id": `${baseUrl}/#website` }
+      },
+      {
+        "@type": "ItemList",
+        "name": "Professional Services",
+        "description": "Complete directory of professional tradesmen services in the UK",
+        "numberOfItems": trades.length,
+        "itemListElement": trades.map((trade, index) => ({
+          "@type": "ListItem",
+          "position": index + 1,
+          "name": trade.name,
+          "url": `${baseUrl}/services/${trade.slug}`
+        }))
+      }
+    ]
+  };
+}
+
+export function generateServicePageSchema(trade: Trade, stats: ServiceStats) {
+  const baseUrl = "https://www.findtrades.app";
+  
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": `${baseUrl}/#organization`,
+        "name": "FindTrades",
+        "url": baseUrl
+      },
+      {
+        "@type": "WebPage",
+        "@id": `${baseUrl}/services/${trade.slug}#webpage`,
+        "url": `${baseUrl}/services/${trade.slug}`,
+        "name": `${trade.name} Services UK | Find Professional ${trade.name} | FindTrades`,
+        "description": `Find verified ${trade.name.toLowerCase()} professionals across the UK. ${stats.totalWorkers}+ expert ${trade.name.toLowerCase()}s available. Get free quotes today.`,
+        "isPartOf": { "@id": `${baseUrl}/#website` }
+      },
+      {
+        "@type": "Service",
+        "name": trade.name,
+        "description": trade.description || `Professional ${trade.name.toLowerCase()} services in the UK`,
+        "provider": { "@id": `${baseUrl}/#organization` },
+        "areaServed": {
+          "@type": "Country",
+          "name": "United Kingdom"
+        },
+        "serviceType": trade.name,
+        "url": `${baseUrl}/services/${trade.slug}`
       }
     ]
   };

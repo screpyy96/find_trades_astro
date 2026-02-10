@@ -12,7 +12,7 @@ import { generateHomepageSchema } from '../lib/schema';
 
 // APP_URL not needed on homepage (uses Base layout which sets it)
 
-// Stats - în producție ar veni din API
+// Stats - in production would come from API
 const stats = {
   totalWorkers: 150,
   totalCities: 45,
@@ -25,9 +25,9 @@ const schemaData = generateHomepageSchema(stats, trades);
 ---
 
 <Base 
-  title="Meserias Local - Găsește Meseriași Profesioniști în România"
-  description="Platforma ta de încredere pentru găsirea meseriașilor profesioniști. Compară oferte, vezi recenzii reale și contactează meseriași verificați."
-  canonical="https://www.meseriaslocal.ro/"
+  title="FindTrades - Find Professional Tradesmen in the UK"
+  description="Your trusted platform for finding professional tradesmen. Compare quotes, see genuine reviews and contact verified tradesmen."
+  canonical="https://www.findtrades.app/"
 >
   <script type="application/ld+json" set:html={JSON.stringify(schemaData)} slot="head" />
   <!-- Hero Section cu React Component -->
@@ -55,8 +55,8 @@ const schemaData = generateHomepageSchema(stats, trades);
   <script is:inline>
     // Track CTA clicks
     document.addEventListener('DOMContentLoaded', () => {
-      // Track "Cere Ofertă" buttons
-      document.querySelectorAll('a[href*="cere-oferta"], button[data-action="cere-oferta"]').forEach(btn => {
+      // Track "Get Quote" buttons
+      document.querySelectorAll('a[href*="request-quote"], button[data-action="request-quote"]').forEach(btn => {
         btn.addEventListener('click', () => {
           if (window.dataLayer) {
             window.dataLayer.push({
@@ -87,7 +87,7 @@ const schemaData = generateHomepageSchema(stats, trades);
       });
 
       // Track search interactions
-      const searchInput = document.querySelector('input[type="search"], input[placeholder*="Caută"]');
+      const searchInput = document.querySelector('input[type="search"], input[placeholder*="Search"]');
       if (searchInput) {
         searchInput.addEventListener('focus', () => {
           if (window.dataLayer) {

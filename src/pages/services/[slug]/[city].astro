@@ -1,0 +1,322 @@
+---
+import Base from '../../../layouts/Base.astro';
+import { trades, type Trade } from '../../../data/trades';
+import { cities } from '../../../data/cities';
+import { supabase } from '../../../lib/supabase';
+import { generateServiceCitySchema } from '../../../lib/schema';
+import { validateEnvironment } from '../../../lib/env-validation';
+import type { GetStaticPaths } from 'astro';
+
+// Use environment variables from .env
+const envConfig = validateEnvironment();
+const APP_URL = envConfig.config.app.url;
+const WEB_URL = envConfig.config.web.url;
+
+export const prerender = true;
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const paths: any[] = [];
+  
+  // Generate paths for all trade + city combinations
+  for (const trade of trades) {
+    for (const city of cities) {
+      paths.push({
+        params: { 
+          slug: trade.slug,
+          city: city.slug
+        },
+        props: { trade, city }
+      });
+    }
+  }
+  
+  return paths;
+};
+
+interface Props {
+  trade: Trade;
+  city: typeof cities[0];
+}
+
+const { trade, city } = Astro.props;
+
+// Fetch workers for this specific trade and city
+let cityTradeStats = {
+  totalWorkers: 0,
+  avgRating: 0,
+  recentProjects: 0
+};
+
+if (supabase) {
+  try {
+    // Get workers for this specific trade
+    const { data: tradeWorkers } = await supabase
+      .from('worker_trades')
+      .select('worker_id')
+      .eq('trade_id', trade.id);
+
+    if (tradeWorkers && tradeWorkers.length > 0) {
+      const workerIds = tradeWorkers.map(wt => wt.worker_id);
+      
+      // Get verified workers in this specific city
+      const { data: workerProfiles } = await supabase
+        .from('profiles')
+        .select('id, rating, address, is_verified')
+        .eq('role', 'worker')
+        .eq('is_verified', true)
+        .in('id', workerIds)
+        .ilike('address', `%${city.name}%`);
+
+      if (workerProfiles) {
+        let totalRating = 0;
+        let ratedWorkers = 0;
+
+        workerProfiles.forEach(worker => {
+          // Calculate average rating
+          if (worker.rating && worker.rating > 0) {
+            totalRating += worker.rating;
+            ratedWorkers++;
+          }
+        });
+
+        cityTradeStats = {
+          totalWorkers: workerProfiles.length,
+          avgRating: ratedWorkers > 0 ? totalRating / ratedWorkers : 0,
+          recentProjects: Math.floor(workerProfiles.length * 2.8) // Estimated recent projects
+        };
+      }
+    }
+  } catch (error) {
+    console.error('❌ Error fetching city trade stats:', error);
+  }
+}
+
+// SEO metadata
+const title = `${trade.name} in ${city.name} | Find Verified ${trade.name}s | FindTrades`;
+const description = `Find verified ${trade.name.toLowerCase()}s in ${city.name}. ${cityTradeStats.totalWorkers}+ local ${trade.name.toLowerCase()} professionals available. Get free quotes for your ${trade.name.toLowerCase()} project in ${city.name} today.`;
+const canonical = `https://www.findtrades.app/services/${trade.slug}/${city.slug}/`;
+
+// Generate structured data for SEO
+const categorySlug = trade.category ? trade.category.toLowerCase().replace(/\s+/g, '-') : 'other';
+const schemaData = generateServiceCitySchema({
+  serviceName: trade.name,
+  serviceSlug: trade.slug,
+  categorySlug: categorySlug,
+  cityName: city.name,
+  citySlug: city.slug,
+  description: description
+});
+
+// Related services in the same city
+const relatedServices = trades.slice(0, 8);
+---
+
+<Base 
+  title={title}
+  description={description}
+  canonical={canonical}
+>
+  <script type="application/ld+json" set:html={JSON.stringify(schemaData)} slot="head" />
+
+  <!-- Hero Section -->
+  <section class="w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white" data-navbar-transparent="true">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-24">
+      <div class="text-center max-w-4xl mx-auto">
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
+          {trade.name} Services in
+          <span class="block text-amber-400">{city.name}</span>
+        </h1>
+        <p class="text-xl sm:text-2xl text-slate-300 mb-8 leading-relaxed">
+          Connect with {cityTradeStats.totalWorkers}+ verified {trade.name.toLowerCase()} professionals in {city.name}. 
+          Local experts ready to help with your project.
+        </p>
+        
+        <!-- Stats -->
+        <div class="grid grid-cols-3 gap-6 mb-12 max-w-2xl mx-auto">
+          <div class="text-center">
+            <div class="text-3xl font-bold text-amber-400">{cityTradeStats.totalWorkers}+</div>
+            <div class="text-slate-400 text-sm">Local Pros</div>
+          </div>
+          <div class="text-center">
+            <div class="text-3xl font-bold text-amber-400">{cityTradeStats.avgRating.toFixed(1)}</div>
+            <div class="text-slate-400 text-sm">Avg Rating</div>
+          </div>
+          <div class="text-center">
+            <div class="text-3xl font-bold text-amber-400">{cityTradeStats.recentProjects}+</div>
+            <div class="text-slate-400 text-sm">Recent Jobs</div>
+          </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a 
+            href={`${APP_URL}/request-quote?trade=${trade.slug}&city=${city.slug}`}
+            class="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 text-white font-bold text-lg transition-all duration-300 hover:from-amber-600 hover:to-amber-700 hover:shadow-lg hover:shadow-amber-500/25 transform hover:scale-105"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+            Get Free Quotes in {city.name}
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Service Details -->
+  <section class="w-full bg-white py-16 lg:py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        <!-- Main Content -->
+        <div class="lg:col-span-2 space-y-8">
+          <div>
+            <h2 class="text-3xl font-bold text-slate-900 mb-4">
+              Professional {trade.name} Services in {city.name}
+            </h2>
+            <p class="text-lg text-slate-600 leading-relaxed">
+              Finding a reliable {trade.name.toLowerCase()} in {city.name} is easy with FindTrades. 
+              We connect you with verified local professionals who have the skills and experience 
+              to handle your project efficiently and to the highest standards.
+            </p>
+          </div>
+
+          {trade.description && (
+            <div>
+              <h3 class="text-xl font-semibold text-slate-900 mb-3">What We Offer</h3>
+              <p class="text-slate-600 leading-relaxed">
+                {trade.description}
+              </p>
+            </div>
+          )}
+
+          <!-- Why Choose Us -->
+          <div>
+            <h3 class="text-xl font-semibold text-slate-900 mb-4">Why Choose Our {trade.name}s in {city.name}?</h3>
+            <ul class="space-y-3 text-slate-600">
+              <li class="flex items-start gap-3">
+                <svg class="w-6 h-6 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                <span>Verified professionals with proven track records</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <svg class="w-6 h-6 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                <span>Fast response times for emergency situations</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <svg class="w-6 h-6 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                <span>Competitive pricing with no hidden fees</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <svg class="w-6 h-6 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                <span>Fully insured and qualified tradesmen</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-8">
+          <!-- Quick Quote Form -->
+          <div class="bg-slate-50 rounded-xl p-6">
+            <h3 class="text-lg font-semibold text-slate-900 mb-4">Request a Quote</h3>
+            <p class="text-sm text-slate-600 mb-4">
+              Get quotes from verified {trade.name.toLowerCase()}s in {city.name}
+            </p>
+            <a 
+              href={`${APP_URL}/request-quote?trade=${trade.slug}&city=${city.slug}`}
+              class="w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 text-white font-semibold transition-all duration-300 hover:from-amber-600 hover:to-amber-700"
+            >
+              Get Free Quotes
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </a>
+          </div>
+
+          <!-- Service Areas -->
+          <div class="bg-slate-50 rounded-xl p-6">
+            <h3 class="text-lg font-semibold text-slate-900 mb-4">Nearby Areas</h3>
+            <p class="text-sm text-slate-600 mb-4">
+              We also cover these areas near {city.name}
+            </p>
+            <div class="space-y-2">
+              {cities.slice(0, 5).filter(c => c.slug !== city.slug).map((nearbyCity) => (
+                <a 
+                  href={`/services/${trade.slug}/${nearbyCity.slug}/`}
+                  class="block text-sm text-amber-600 hover:text-amber-700 transition-colors"
+                >
+                  {trade.name} in {nearbyCity.name}
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Related Services -->
+  <section class="w-full bg-slate-50 py-16 lg:py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
+          Other Services in {city.name}
+        </h2>
+        <p class="text-xl text-slate-600 max-w-3xl mx-auto">
+          Explore other professional services available in {city.name}
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {relatedServices.map((service) => (
+          <a
+            href={`/services/${service.slug}/${city.slug}/`}
+            class="group block p-6 rounded-xl border border-slate-200 hover:border-amber-300 hover:shadow-lg transition-all duration-300 bg-white"
+          >
+            <div class="flex items-start gap-4">
+              <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 text-white flex items-center justify-center text-xl font-bold flex-shrink-0">
+                {service.name.charAt(0).toUpperCase()}
+              </div>
+              <div class="flex-1 min-w-0">
+                <h4 class="text-lg font-semibold text-slate-900 group-hover:text-amber-600 transition-colors mb-2">
+                  {service.name}
+                </h4>
+                <p class="text-sm text-slate-600">
+                  Available in {city.name}
+                </p>
+              </div>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="w-full bg-gradient-to-r from-amber-500 to-amber-600 text-white py-16 lg:py-20">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-3xl sm:text-4xl font-bold mb-6">
+        Need a {trade.name} in {city.name}?
+      </h2>
+      <p class="text-xl mb-8 text-amber-100">
+        Connect with verified local professionals and get free quotes for your project.
+      </p>
+      <a
+        href={`${APP_URL}/request-quote?trade=${trade.slug}&city=${city.slug}`}
+        class="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-white text-amber-600 font-bold text-lg transition-all duration-300 hover:bg-slate-100 hover:shadow-lg transform hover:scale-105"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+        </svg>
+        Get Free Quotes Now
+      </a>
+    </div>
+  </section>
+</Base>

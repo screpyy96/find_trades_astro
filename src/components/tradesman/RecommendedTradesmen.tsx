@@ -81,7 +81,7 @@ function MobileCompactCard({ worker }: { worker: Worker }) {
   
   return (
     <a 
-      href={`/meseriasi/${worker.id}`}
+      href={`/tradesman/${worker.id}`}
       className="flex items-center gap-4 bg-white border border-slate-200 rounded-xl p-3 hover:shadow-md transition-all duration-200 hover:border-slate-300 group"
     >
       {/* Avatar */}
@@ -183,8 +183,8 @@ export function RecommendedTradesmen({
     const initSupabase = async () => {
       try {
         const { createClient } = await import('@supabase/supabase-js');
-        const url = supabaseUrlProp || import.meta.env.PUBLIC_SUPABASE_URL;
-        const key = supabaseAnonKeyProp || import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+        const url = supabaseUrlProp || import.meta.env.SUPABASE_URL;
+        const key = supabaseAnonKeyProp || import.meta.env.SUPABASE_ANON_KEY;
         
         if (url && key) {
           const client = createClient(url, key);
@@ -509,7 +509,7 @@ export function RecommendedTradesmen({
         {workers.length > 0 && !compact && (
           <div className="mt-4 pt-4 border-t border-slate-100 text-center">
             <a
-              href="/meseriasi"
+              href="/tradesmen/"
               className="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium rounded-md transition-colors"
             >
               Vezi toți meseriașii

@@ -1,6 +1,12 @@
+import { validateEnvironment } from '../../lib/env-validation';
+
+// Use environment variables from .env
+const envConfig = validateEnvironment();
+const WEB_URL = envConfig.config.web.url;
+
 export async function GET() {
   const robotsTxt = `
-# Meserias Local - Public Website (www.meseriaslocal.ro)
+# FindTrades - Public Website (www.findtrades.app)
 
 User-agent: *
 Allow: /
@@ -23,23 +29,23 @@ Disallow: /auth/
 Disallow: /login?redirectTo=
 
 # Block form pages and query parameters (not useful for SEO)
-Disallow: /cere-oferta
-Disallow: /cere-oferta?
+Disallow: /request-quote
+Disallow: /request-quote?
 
 # Block app subdomain paths if crawled here
-Disallow: /app.meseriaslocal.ro/
+Disallow: /app.findtrades.app/
 
 # Allow important resources
-Allow: /servicii/
-Allow: /meseriasi/
+Allow: /services/
+Allow: /tradesmen/
 Allow: /blog/
-Allow: /companii/
+Allow: /companies/
 Allow: /sitemap.xml
 Allow: /robots.txt
 
 # Sitemap location
-Sitemap: https://www.meseriaslocal.ro/sitemap.xml
-Sitemap: https://www.meseriaslocal.ro/sitemap-cities.xml
+Sitemap: ${WEB_URL}/sitemap.xml
+Sitemap: ${WEB_URL}/sitemap-cities.xml
 `.trim();
 
   return new Response(robotsTxt, {

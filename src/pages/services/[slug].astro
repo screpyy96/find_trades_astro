@@ -1,0 +1,473 @@
+---
+import Base from '../../layouts/Base.astro';
+import { trades, type Trade } from '../../data/trades';
+import { cities } from '../../data/cities';
+import { supabase } from '../../lib/supabase';
+import { generateServicePageSchema } from '../../lib/schema';
+import { validateEnvironment } from '../../lib/env-validation';
+import type { GetStaticPaths } from 'astro';
+
+// Use environment variables from .env
+const envConfig = validateEnvironment();
+const APP_URL = envConfig.config.app.url;
+const WEB_URL = envConfig.config.web.url;
+
+export const prerender = true;
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const paths = trades.map((trade) => ({
+    params: { slug: trade.slug },
+    props: { trade }
+  }));
+  
+  return paths;
+};
+
+interface Props {
+  trade: Trade;
+}
+
+const { trade } = Astro.props;
+
+// Fetch real stats for this specific trade
+let tradeStats = {
+  totalWorkers: 0,
+  totalCities: 0,
+  avgRating: 0,
+  recentProjects: 0
+};
+
+if (supabase) {
+  try {
+    // Get workers for this specific trade
+    const { data: tradeWorkers } = await supabase
+      .from('worker_trades')
+      .select('worker_id')
+      .eq('trade_id', trade.id);
+
+    if (tradeWorkers && tradeWorkers.length > 0) {
+      const workerIds = tradeWorkers.map(wt => wt.worker_id);
+      
+      // Get verified workers with their profiles
+      const { data: workerProfiles } = await supabase
+        .from('profiles')
+        .select('id, rating, address, is_verified')
+        .eq('role', 'worker')
+        .eq('is_verified', true)
+        .in('id', workerIds);
+
+      if (workerProfiles) {
+        const citiesSet = new Set();
+        let totalRating = 0;
+        let ratedWorkers = 0;
+
+        workerProfiles.forEach(worker => {
+          // Extract city from address
+          if (worker.address) {
+            const addressParts = worker.address.split(',');
+            if (addressParts.length > 0) {
+              const city = addressParts[addressParts.length - 1].trim();
+              if (city && city.length > 2) {
+                citiesSet.add(city);
+              }
+            }
+          }
+
+          // Calculate average rating
+          if (worker.rating && worker.rating > 0) {
+            totalRating += worker.rating;
+            ratedWorkers++;
+          }
+        });
+
+        tradeStats = {
+          totalWorkers: workerProfiles.length,
+          totalCities: citiesSet.size,
+          avgRating: ratedWorkers > 0 ? totalRating / ratedWorkers : 0,
+          recentProjects: Math.floor(workerProfiles.length * 3.2) // Estimated recent projects
+        };
+      }
+    }
+  } catch (error) {
+    console.error('❌ Error fetching trade stats:', error);
+  }
+}
+
+// Generate structured data for SEO
+const schemaData = generateServicePageSchema(trade, tradeStats);
+
+// SEO metadata - Enhanced for Electrician
+const title = trade.name === "Electrician" 
+  ? "Electrician Services UK | 24/7 Emergency Electricians | Find Verified Electricians | FindTrades"
+  : `${trade.name} Services UK | Find Professional ${trade.name} | FindTrades`;
+
+const description = trade.name === "Electrician"
+  ? `Find certified electricians across the UK. ${tradeStats.totalWorkers}+ verified electricians available for emergency repairs, installations & testing. Fast response, free quotes, NICEIC approved. Book your electrician today!`
+  : `Find verified ${trade.name.toLowerCase()} professionals across the UK. ${tradeStats.totalWorkers}+ expert ${trade.name.toLowerCase()}s available in ${tradeStats.totalCities}+ cities. Get free quotes for your ${trade.name.toLowerCase()} project today.`;
+const canonical = `https://www.findtrades.app/services/${trade.slug}`;
+
+// Related services (same category)
+const relatedServices = trades.filter(t => 
+  t.category === trade.category && 
+  t.id !== trade.id
+).slice(0, 6);
+
+// Popular cities for this service
+const popularCities = cities.slice(0, 12);
+---
+
+<Base 
+  title={title}
+  description={description}
+  canonical={canonical}
+>
+  <script type="application/ld+json" set:html={JSON.stringify(schemaData)} slot="head" />
+
+  <!-- Hero Section -->
+  <section class="w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white" data-navbar-transparent="true">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-24">
+      <div class="text-center max-w-4xl mx-auto">
+        <div class="mb-6">
+          <div class="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-amber-500 to-amber-600 text-white flex items-center justify-center text-3xl font-bold">
+            {trade.name.charAt(0).toUpperCase()}
+          </div>
+        </div>
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
+          Professional {trade.name}
+          <span class="block text-amber-400">Services in the UK</span>
+        </h1>
+        <p class="text-xl sm:text-2xl text-slate-300 mb-8 leading-relaxed">
+          Connect with {tradeStats.totalWorkers}+ verified {trade.name.toLowerCase()} professionals across {tradeStats.totalCities}+ UK cities. 
+          Quality workmanship, competitive prices, and guaranteed satisfaction.
+        </p>
+        
+        <!-- Stats -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+          <div class="text-center">
+            <div class="text-3xl font-bold text-amber-400">{tradeStats.totalWorkers}+</div>
+            <div class="text-slate-400 text-sm">Verified Professionals</div>
+          </div>
+          <div class="text-center">
+            <div class="text-3xl font-bold text-amber-400">{tradeStats.totalCities}+</div>
+            <div class="text-slate-400 text-sm">UK Cities</div>
+          </div>
+          <div class="text-center">
+            <div class="text-3xl font-bold text-amber-400">{tradeStats.recentProjects}+</div>
+            <div class="text-slate-400 text-sm">Recent Projects</div>
+          </div>
+          <div class="text-center">
+            <div class="text-3xl font-bold text-amber-400">{tradeStats.avgRating.toFixed(1)}</div>
+            <div class="text-slate-400 text-sm">Average Rating</div>
+          </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a 
+            href={`${APP_URL}/request-quote`}
+            class="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 text-white font-bold text-lg transition-all duration-300 hover:from-amber-600 hover:to-amber-700 hover:shadow-lg hover:shadow-amber-500/25 transform hover:scale-105"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+            Get {trade.name} Quotes
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Service Description -->
+  <section class="w-full bg-white py-16 lg:py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        <div class="lg:col-span-2">
+          <h2 class="text-3xl font-bold text-slate-900 mb-6">
+            Expert {trade.name} Services
+          </h2>
+          <div class="prose prose-lg max-w-none text-slate-600">
+            {trade.description ? (
+              <p class="text-lg leading-relaxed mb-6">{trade.description}</p>
+            ) : (
+              <>
+                {trade.name === "Electrician" ? (
+                  <div class="space-y-6 mb-8">
+                    <p class="text-lg leading-relaxed">
+                      Find certified electricians across the UK for all your electrical needs. From emergency repairs to complete installations, our network of NICEIC-approved electricians provides fast, reliable, and fully insured services for homes and businesses.
+                    </p>
+                    <div class="bg-amber-50 border border-amber-200 rounded-xl p-6">
+                      <h4 class="text-lg font-semibold text-amber-900 mb-3">🔌 24/7 Emergency Electrician Service</h4>
+                      <p class="text-amber-800">
+                        Electrical emergencies don't wait. Get immediate help from certified electricians available round the clock for power outages, faulty wiring, and safety hazards.
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <p class="text-lg leading-relaxed mb-6">
+                    Our network of professional {trade.name.toLowerCase()} experts provides comprehensive solutions 
+                    for residential and commercial projects across the UK. Each professional is thoroughly vetted, 
+                    verified, and committed to delivering exceptional quality and service.
+                  </p>
+                )}
+              </>
+            )}
+            
+            {trade.name === "Electrician" ? (
+              <>
+                <h3 class="text-xl font-semibold text-slate-900 mb-4 mt-8">Electrical Services We Offer:</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div class="space-y-3">
+                    <h4 class="font-semibold text-slate-900">🔌 Emergency Services</h4>
+                    <ul class="space-y-2 text-sm text-slate-600">
+                      <li>• Power outages & failures</li>
+                      <li>• Faulty wiring & short circuits</li>
+                      <li>• Electrical fires & safety hazards</li>
+                      <li>• Circuit breaker repairs</li>
+                    </ul>
+                  </div>
+                  <div class="space-y-3">
+                    <h4 class="font-semibold text-slate-900">🏠 Installation Services</h4>
+                    <ul class="space-y-2 text-sm text-slate-600">
+                      <li>• Complete rewiring</li>
+                      <li>• Lighting installations</li>
+                      <li>• Socket & switch installations</li>
+                      <li>• Consumer unit upgrades</li>
+                    </ul>
+                  </div>
+                  <div class="space-y-3">
+                    <h4 class="font-semibold text-slate-900">🔍 Testing & Inspection</h4>
+                    <ul class="space-y-2 text-sm text-slate-600">
+                      <li>• EICR certificates</li>
+                      <li>• PAT testing</li>
+                      <li>• Safety inspections</li>
+                      <li>• Landlord certificates</li>
+                    </ul>
+                  </div>
+                  <div class="space-y-3">
+                    <h4 class="font-semibold text-slate-900">⚡ Specialized Services</h4>
+                    <ul class="space-y-2 text-sm text-slate-600">
+                      <li>• EV charger installation</li>
+                      <li>• Solar panel connections</li>
+                      <li>• Smart home wiring</li>
+                      <li>• Outdoor & garden lighting</li>
+                    </ul>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <h3 class="text-xl font-semibold text-slate-900 mb-4 mt-8">What We Offer:</h3>
+                <ul class="space-y-3">
+                  <li class="flex items-start gap-3">
+                    <svg class="w-6 h-6 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>Verified and insured {trade.name.toLowerCase()} professionals</span>
+                  </li>
+                  <li class="flex items-start gap-3">
+                    <svg class="w-6 h-6 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>Free, no-obligation quotes within 24 hours</span>
+                  </li>
+                  <li class="flex items-start gap-3">
+                    <svg class="w-6 h-6 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>Quality workmanship guaranteed</span>
+                  </li>
+                  <li class="flex items-start gap-3">
+                    <svg class="w-6 h-6 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>Fully licensed and certified</span>
+                  </li>
+                </ul>
+              </>
+            )}
+          </div>
+        </div>
+
+        <!-- Quick Quote Form -->
+        <div class="lg:col-span-1">
+          <div class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-8 border border-amber-200">
+            <h3 class="text-2xl font-bold text-slate-900 mb-6">
+              Get Quick Quotes
+            </h3>
+            <p class="text-slate-600 mb-6">
+              Describe your project and receive up to 5 free quotes from verified {trade.name.toLowerCase()} professionals.
+            </p>
+            <a
+              href={`${APP_URL}/request-quote?tradeId=${trade.id}`}
+              class="w-full inline-flex items-center justify-center gap-3 px-6 py-4 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 text-white font-bold text-lg transition-all duration-300 hover:from-amber-600 hover:to-amber-700 hover:shadow-lg hover:shadow-amber-500/25 transform hover:scale-105"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+              Request Quotes Now
+            </a>
+            
+            <div class="mt-6 space-y-3 text-sm text-slate-600">
+              <div class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                <span>100% Free Service</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                <span>No Obligation</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                <span>Quick Response</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Popular Cities -->
+  <section class="w-full bg-slate-50 py-16 lg:py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
+          Find {trade.name} Professionals in Major Cities
+        </h2>
+        <p class="text-xl text-slate-600 max-w-3xl mx-auto">
+          Our network of {trade.name.toLowerCase()} experts covers the entire UK. Find verified professionals in your local area.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        {popularCities.map((city) => (
+          <a
+            href={`/services/${trade.slug}/${city.slug}/`}
+            class="block p-4 text-center rounded-lg border border-slate-200 hover:border-amber-300 hover:bg-white transition-all duration-300"
+          >
+            <div class="font-medium text-slate-900 hover:text-amber-600 transition-colors">
+              {city.name}
+            </div>
+            <div class="text-sm text-slate-500 mt-1">
+              {trade.name}s
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Related Services -->
+  {relatedServices.length > 0 && (
+    <section class="w-full bg-white py-16 lg:py-20">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
+            Related Services
+          </h2>
+          <p class="text-xl text-slate-600 max-w-3xl mx-auto">
+            Explore other professional services that might be useful for your project.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {relatedServices.map((relatedTrade) => (
+            <a
+              href={`/services/${relatedTrade.slug}`}
+              class="group block p-6 rounded-xl border border-slate-200 hover:border-amber-300 hover:shadow-lg transition-all duration-300"
+            >
+              <div class="flex items-start gap-4">
+                <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 text-white flex items-center justify-center text-xl font-bold flex-shrink-0">
+                  {relatedTrade.name.charAt(0).toUpperCase()}
+                </div>
+                <div class="flex-1 min-w-0">
+                  <h4 class="text-lg font-semibold text-slate-900 group-hover:text-amber-600 transition-colors mb-2">
+                    {relatedTrade.name}
+                  </h4>
+                  {relatedTrade.description && (
+                    <p class="text-sm text-slate-600 line-clamp-2">
+                      {relatedTrade.description}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- How It Works -->
+  <section class="w-full bg-slate-50 py-16 lg:py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
+          How It Works for {trade.name} Services
+        </h2>
+        <p class="text-xl text-slate-600 max-w-3xl mx-auto">
+          Get connected with verified {trade.name.toLowerCase()} professionals in 3 simple steps
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="text-center">
+          <div class="w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 text-white flex items-center justify-center text-2xl font-bold">
+            1
+          </div>
+          <h3 class="text-xl font-semibold text-slate-900 mb-3">Post Your {trade.name} Job</h3>
+          <p class="text-slate-600">
+            Describe your {trade.name.toLowerCase()} project requirements in detail. Free to post, no obligations.
+          </p>
+        </div>
+
+        <div class="text-center">
+          <div class="w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 text-white flex items-center justify-center text-2xl font-bold">
+            2
+          </div>
+          <h3 class="text-xl font-semibold text-slate-900 mb-3">Receive {trade.name} Quotes</h3>
+          <p class="text-slate-600">
+            Get multiple quotes from verified {trade.name.toLowerCase()} professionals in your area within hours.
+          </p>
+        </div>
+
+        <div class="text-center">
+          <div class="w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 text-white flex items-center justify-center text-2xl font-bold">
+            3
+          </div>
+          <h3 class="text-xl font-semibold text-slate-900 mb-3">Choose Your Professional</h3>
+          <p class="text-slate-600">
+            Compare quotes, check reviews, and hire the right {trade.name.toLowerCase()} professional for your project.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Final CTA -->
+  <section class="w-full bg-gradient-to-r from-amber-500 to-amber-600 text-white py-16 lg:py-20">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-3xl sm:text-4xl font-bold mb-6">
+        Ready to Start Your {trade.name} Project?
+      </h2>
+      <p class="text-xl mb-8 text-amber-100">
+        Join thousands of UK homeowners who trust FindTrades to connect with professional {trade.name.toLowerCase()} experts.
+      </p>
+      <a
+        href={`${APP_URL}/request-quote?tradeId=${trade.id}`}
+        class="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-white text-amber-600 font-bold text-lg transition-all duration-300 hover:bg-slate-100 hover:shadow-lg transform hover:scale-105"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+        </svg>
+        Get {trade.name} Quotes Now
+      </a>
+    </div>
+  </section>
+</Base>

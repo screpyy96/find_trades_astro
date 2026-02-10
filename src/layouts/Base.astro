@@ -19,9 +19,8 @@ const { title, description, canonical, ogImage, disableDefaultBreadcrumb = false
 const canonicalURL = canonical || new URL(Astro.url.pathname, Astro.site).href;
 const ogImageURL = ogImage || `${Astro.site}og-image.png`;
 
-// Use empty strings for relative URLs (stay on same domain)
-const APP_URL = 'https://app.meseriaslocal.ro';
-const WEB_URL = 'https://www.meseriaslocal.ro';
+import { APP_URL, WEB_URL } from '../lib/urls';
+
 
 const GTM_ID = import.meta.env.PUBLIC_GTM_ID;
 

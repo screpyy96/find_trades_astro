@@ -1,7 +1,7 @@
 /**
  * Static trades data from Supabase
  * Used for sitemap generation and category pages
- * Last sync: January 2026
+ * Last sync: February 2026
  */
 
 export interface Trade {
@@ -13,124 +13,54 @@ export interface Trade {
 }
 
 export const trades: Trade[] = [
-  // CONSTRUCTII & STRUCTURI (15 servicii)
-  { id: 1, name: "constructii case la rosu/la cheie", category: "constructii & structuri", slug: "constructii-case" },
-  { id: 2, name: "constructii case din lemn", category: "constructii & structuri", slug: "constructii-case-lemn" },
-  { id: 3, name: "constructii anexe si garaje", category: "constructii & structuri", slug: "constructii-anexe-garaje" },
-  { id: 4, name: "realizare fundatii", category: "constructii & structuri", slug: "realizare-fundatii" },
-  { id: 5, name: "zidarie si tencuiala", category: "constructii & structuri", slug: "zidarie-tencuiala" },
-  { id: 6, name: "montaj acoperisuri", category: "constructii & structuri", slug: "montaj-acoperisuri-pluviale" },
-  { id: 7, name: "mansardari si etajari", category: "constructii & structuri", slug: "mansardari-etajari" },
-  { id: 8, name: "consolidari si reabilitari structuri", category: "constructii & structuri", slug: "consolidari-structuri" },
-  { id: 9, name: "demolari si decopertari", category: "constructii & structuri", slug: "demolari-decopertari" },
-  { id: 10, name: "hidroizolatii si termoizolatii cladiri", category: "constructii & structuri", slug: "izolatii-cladiri" },
-  { id: 11, name: "turnare beton si sape", category: "constructii & structuri", slug: "turnare-beton-sape" },
-  { id: 88, name: "fierarie si confectii metalice", category: "constructii & structuri", slug: "fierarie-confectii-metalice", description: "Confecții metalice, balustrade, scări metalice, structuri din fier" },
-  { id: 92, name: "montaj si reparatii scari exterioare", category: "constructii & structuri", slug: "scari-exterioare", description: "Construcție și reparații scări exterioare din beton, metal sau lemn" },
-  { id: 93, name: "montaj si intretinere sisteme pluviale", category: "constructii & structuri", slug: "sisteme-pluviale-intretinere", description: "Montaj și curățare jgheaburi, burlane și sisteme de evacuare" },
-  { id: 101, name: "carotări beton", category: "constructii & structuri", slug: "carotari-beton", description: "Carotări beton și beton armat pentru instalații electrice, sanitare, ventilație și alte străpungeri." },
-
-  // AMENAJARI INTERIOARE (14 servicii)
-  { id: 12, name: "zugrav", category: "amenajari interioare", slug: "zugraveli-vopsitorii" },
-  { id: 13, name: "aplicare vopsea decorativa / tapet", category: "amenajari interioare", slug: "aplicare-decorativa-tapet" },
-  { id: 14, name: "montaj gresie, faianta, piatra naturala", category: "amenajari interioare", slug: "montaj-gresie-faianta-piatra" },
-  { id: 15, name: "montaj si reconditionare parchet", category: "amenajari interioare", slug: "montaj-reconditionare-parchet" },
-  { id: 16, name: "montaj gips-carton (rigips) si compartimentari", category: "amenajari interioare", slug: "montaj-rigips-compartimentari" },
-  { id: 17, name: "montaj usi de interior", category: "amenajari interioare", slug: "montaj-usi-interior" },
-  { id: 18, name: "gletuire si finisare pereti", category: "amenajari interioare", slug: "gletuire-finisare-pereti" },
-  { id: 19, name: "montaj tavane false / casetate / extensibile", category: "amenajari interioare", slug: "montaj-tavane" },
-  { id: 20, name: "montaj pardoseli (mocheta, linoleum, epoxidice)", category: "amenajari interioare", slug: "montaj-pardoseli" },
-  { id: 21, name: "constructie si finisare scari interioare", category: "amenajari interioare", slug: "scari-interioare" },
-  { id: 22, name: "montaj seminee si cosuri de fum", category: "amenajari interioare", slug: "montaj-seminee" },
-  { id: 91, name: "montaj parchet laminat si vinil", category: "amenajari interioare", slug: "montaj-parchet-laminat", description: "Montaj parchet laminat, vinil și alte pardoseli moderne" },
-  { id: 96, name: "montaj si finisare balcoane si logii", category: "amenajari interioare", slug: "finisare-balcoane", description: "Închidere și finisare balcoane, logii și terase acoperite" },
-
-  // INSTALATII & UTILITATI (13 servicii)
-  { id: 23, name: "instalatii electrice", category: "instalatii & utilitati", slug: "instalatii-electrice" },
-  { id: 24, name: "instalatii sanitare", category: "instalatii & utilitati", slug: "instalatii-sanitare" },
-  { id: 25, name: "instalatii termice si de incalzire", category: "instalatii & utilitati", slug: "instalatii-termice" },
-  { id: 26, name: "instalatii de gaz", category: "instalatii & utilitati", slug: "instalatii-gaz" },
-  { id: 27, name: "montaj aer conditionat si sisteme de ventilatie", category: "instalatii & utilitati", slug: "montaj-ac-ventilatie" },
-  { id: 28, name: "instalare panouri solare si fotovoltaice", category: "instalatii & utilitati", slug: "instalare-panouri-solare-fotovoltaice" },
-  { id: 29, name: "instalare pompe de caldura", category: "instalatii & utilitati", slug: "instalare-pompe-caldura" },
-  { id: 30, name: "automatizari si case inteligente (smart home)", category: "instalatii & utilitati", slug: "automatizari-smart-home" },
-  { id: 31, name: "detectare si remediere scurgeri apa/gaz", category: "instalatii & utilitati", slug: "detectare-scurgeri" },
-  { id: 32, name: "verificari si revizii tehnice periodice (vtp)", category: "instalatii & utilitati", slug: "verificari-revizii-tehnice" },
-  { id: 97, name: "montaj si reparatii sisteme de drenaj", category: "instalatii & utilitati", slug: "sisteme-drenaj", description: "Montaj sisteme de drenaj pentru fundații și terenuri" },
-  { id: 98, name: "montaj si intretinere sisteme de incalzire in pardoseala", category: "instalatii & utilitati", slug: "incalzire-pardoseala", description: "Montaj și întreținere sisteme de încălzire în pardoseală" },
-  { id: 99, name: "montaj si reparatii sisteme de ventilatie industriala", category: "instalatii & utilitati", slug: "ventilatie-industriala", description: "Montaj și reparații sisteme de ventilație pentru spații industriale" },
-
-  // AMENAJARI EXTERIOARE & GRADINA (12 servicii)
-  { id: 33, name: "amenajare peisagistica si gradinarit", category: "amenajari exterioare & gradina", slug: "amenajari-gradina" },
-  { id: 34, name: "intretinere gazon si spatii verzi", category: "amenajari exterioare & gradina", slug: "intretinere-gazon" },
-  { id: 35, name: "toaletare arbori si pomi fructiferi", category: "amenajari exterioare & gradina", slug: "toaletare-arbori" },
-  { id: 36, name: "montaj pavaje si alei", category: "amenajari exterioare & gradina", slug: "montaj-pavaje" },
-  { id: 37, name: "constructie si montaj garduri/porti", category: "amenajari exterioare & gradina", slug: "constructie-garduri-porti" },
-  { id: 38, name: "constructie terase, foisoare si pergole", category: "amenajari exterioare & gradina", slug: "constructie-terase-foisoare" },
-  { id: 39, name: "constructie si intretinere piscine", category: "amenajari exterioare & gradina", slug: "constructie-piscine" },
-  { id: 40, name: "instalare sisteme de irigatii", category: "amenajari exterioare & gradina", slug: "instalare-irigatii" },
-  { id: 41, name: "foraje puturi si fose septice", category: "amenajari exterioare & gradina", slug: "foraje-puturi-fose" },
-  { id: 42, name: "iluminat exterior si ambiental", category: "amenajari exterioare & gradina", slug: "iluminat-exterior" },
-  { id: 89, name: "montaj si reparatii porti automate", category: "amenajari exterioare & gradina", slug: "porti-automate", description: "Montaj, reparații și întreținere porți automate și bariere" },
-  { id: 94, name: "montaj si reparatii copertine", category: "amenajari exterioare & gradina", slug: "montaj-copertine", description: "Montaj copertine retractabile, fixe și sisteme de umbrire" },
-
-  // TAMPLARIE & MOBILIER (9 servicii)
-  { id: 43, name: "tamplarie pvc, aluminiu si lemn", category: "tamplarie & mobilier", slug: "tamplarie-pvc-aluminiu-lemn" },
-  { id: 44, name: "realizare mobilier la comanda", category: "tamplarie & mobilier", slug: "mobilier-la-comanda" },
-  { id: 45, name: "montaj si asamblare mobilier", category: "tamplarie & mobilier", slug: "montaj-mobilier" },
-  { id: 47, name: "tapiterie si reconditionare canapele/fotolii", category: "tamplarie & mobilier", slug: "tapiterie-reconditionare" },
-  { id: 85, name: "montaj ferestre si usi termopan", category: "tamplarie & mobilier", slug: "montaj-termopan", description: "Montaj și înlocuire ferestre și uși termopan, PVC, aluminiu" },
-  { id: 86, name: "montaj jaluzele si rulouri", category: "tamplarie & mobilier", slug: "montaj-jaluzele-rulouri", description: "Montaj jaluzele interioare, rulouri exterioare și sisteme de umbrire" },
-  { id: 87, name: "montaj si reparatii obloane", category: "tamplarie & mobilier", slug: "montaj-obloane", description: "Montaj și reparații obloane din lemn, PVC sau metal" },
-
-  // REPARATII DIVERSE (6 servicii)
-  { id: 48, name: "reparatii electrocasnice mari (masini de spalat, frigidere)", category: "reparatii diverse", slug: "reparatii-electrocasnice" },
-  { id: 49, name: "reparatii electronice (tv, audio)", category: "reparatii diverse", slug: "reparatii-electronice" },
-  { id: 50, name: "reparatii acoperisuri si jgheaburi", category: "reparatii diverse", slug: "reparatii-acoperisuri" },
-  { id: 51, name: "reparatii si intretinere centrale termice", category: "reparatii diverse", slug: "reparatii-centrale-termice" },
-  { id: 52, name: "reparatii ferestre si usi (inclusiv termopan)", category: "reparatii diverse", slug: "reparatii-ferestre-usi" },
-  { id: 53, name: "reparatii jaluzele si rulouri exterioare", category: "reparatii diverse", slug: "reparatii-jaluzele-rulouri" },
-
-  // CURATENIE & IGIENIZARE (7 servicii)
-  { id: 54, name: "curatenie generala si de intretinere", category: "curatenie & igienizare", slug: "curatenie-generala" },
-  { id: 55, name: "curatenie dupa constructor/renovare", category: "curatenie & igienizare", slug: "curatenie-dupa-constructor" },
-  { id: 56, name: "curatare covoare, canapele si tapiterii", category: "curatenie & igienizare", slug: "curatare-tapiterii" },
-  { id: 57, name: "dezinsectie, deratizare, dezinfectie (ddd)", category: "curatenie & igienizare", slug: "servicii-ddd" },
-  { id: 58, name: "curatare cosuri de fum (coserit)", category: "curatenie & igienizare", slug: "curatare-cosuri-fum" },
-  { id: 59, name: "spalare fatade si suprafete vitrate", category: "curatenie & igienizare", slug: "spalare-fatade" },
-  { id: 60, name: "igienizare si curatare sisteme de climatizare", category: "curatenie & igienizare", slug: "igienizare-climatizare" },
-
-  // SERVICII DE URGENTA (4 servicii)
-  { id: 61, name: "instalator", category: "servicii de urgenta", slug: "instalator-urgente" },
-  { id: 62, name: "electrician urgente", category: "servicii de urgenta", slug: "electrician-urgente" },
-  { id: 63, name: "lacatus / deblocari usi", category: "servicii de urgenta", slug: "lacatus-deblocari-usi" },
-  { id: 64, name: "reparatii urgente acoperis", category: "servicii de urgenta", slug: "reparatii-urgente-acoperis" },
-
-  // SECURITATE & SIGURANTA (7 servicii)
-  { id: 65, name: "instalare sisteme de alarma", category: "securitate & siguranta", slug: "instalare-sisteme-alarma" },
-  { id: 66, name: "instalare camere de supraveghere", category: "securitate & siguranta", slug: "instalare-camere-supraveghere" },
-  { id: 67, name: "montaj interfoane si videointerfoane", category: "securitate & siguranta", slug: "montaj-interfoane" },
-  { id: 68, name: "instalare sisteme de detectie incendiu/inundatie", category: "securitate & siguranta", slug: "instalare-detectie-incendiu" },
-  { id: 90, name: "montaj si intretinere sisteme de alarma", category: "securitate & siguranta", slug: "sisteme-alarma-intretinere", description: "Montaj și întreținere sisteme de alarmă și securitate" },
-  { id: 95, name: "montaj si reparatii gratii de securitate", category: "securitate & siguranta", slug: "gratii-securitate", description: "Montaj gratii de securitate pentru ferestre și uși" },
-  { id: 100, name: "montaj si intretinere sisteme de supraveghere video", category: "securitate & siguranta", slug: "supraveghere-video-intretinere", description: "Montaj și întreținere camere de supraveghere și sisteme CCTV" },
-
-  // SERVICII SPECIALIZATE & CONSULTANTA (6 servicii)
-  { id: 69, name: "design interior si decor", category: "servicii specializate & consultanta", slug: "design-interior-decor" },
-  { id: 70, name: "proiectare si arhitectura", category: "servicii specializate & consultanta", slug: "proiectare-arhitectura" },
-  { id: 71, name: "consultanta in constructii si dirigentie de santier", category: "servicii specializate & consultanta", slug: "consultanta-dirigentie" },
-  { id: 72, name: "expertize tehnice si audit energetic", category: "servicii specializate & consultanta", slug: "expertize-audit" },
-  { id: 73, name: "servicii de topografie si cadastru", category: "servicii specializate & consultanta", slug: "servicii-topografie-cadastru" },
-  { id: 74, name: "randari 3d si vizualizari arhitecturale", category: "servicii specializate & consultanta", slug: "randari-3d" },
-
-  // AUTO & UTILAJE (3 servicii)
-  { id: 75, name: "reparatii si mecanica auto", category: "auto & utilaje", slug: "reparatii-mecanica-auto" },
-  { id: 76, name: "servicii de vulcanizare si tractari auto", category: "auto & utilaje", slug: "vulcanizare-tractari" },
-  { id: 78, name: "detailing auto si cosmetica", category: "auto & utilaje", slug: "detailing-auto" },
-
-  // ALTE SERVICII (3 servicii)
-  { id: 82, name: "servicii de mutari si transport", category: "alte servicii", slug: "mutari-transport" },
-  { id: 83, name: "evacuare moloz si deseuri", category: "alte servicii", slug: "evacuare-moloz" },
-  { id: 84, name: "servicii de sudura", category: "alte servicii", slug: "servicii-sudura" },
-
+  { id: 1, name: "Plumber", category: "Building & Construction", slug: "plumber", description: null },
+  { id: 2, name: "Electrician", category: "Building & Construction", slug: "electrician", description: null },
+  { id: 3, name: "Carpenter", category: "Building & Construction", slug: "carpenter", description: null },
+  { id: 4, name: "Painter & Decorator", category: "Building & Construction", slug: "painter-decorator", description: null },
+  { id: 5, name: "Plasterer", category: "Building & Construction", slug: "plasterer", description: null },
+  { id: 6, name: "Bricklayer", category: "Building & Construction", slug: "bricklayer", description: null },
+  { id: 7, name: "Roofer", category: "Building & Construction", slug: "roofer", description: null },
+  { id: 8, name: "Tiler", category: "Building & Construction", slug: "tiler", description: null },
+  { id: 9, name: "Joiner", category: "Building & Construction", slug: "joiner", description: null },
+  { id: 10, name: "Builder", category: "Building & Construction", slug: "builder", description: null },
+  { id: 11, name: "Gas Engineer", category: "Heating & Plumbing", slug: "gas-engineer", description: null },
+  { id: 12, name: "Heating Engineer", category: "Heating & Plumbing", slug: "heating-engineer", description: null },
+  { id: 13, name: "Boiler Repair", category: "Heating & Plumbing", slug: "boiler-repair", description: null },
+  { id: 14, name: "Bathroom Fitter", category: "Heating & Plumbing", slug: "bathroom-fitter", description: null },
+  { id: 15, name: "Kitchen Fitter", category: "Interior", slug: "kitchen-fitter", description: null },
+  { id: 16, name: "Flooring Specialist", category: "Interior", slug: "flooring-specialist", description: null },
+  { id: 17, name: "Window Fitter", category: "Exterior", slug: "window-fitter", description: null },
+  { id: 18, name: "Door Fitter", category: "Interior", slug: "door-fitter", description: null },
+  { id: 19, name: "Locksmith", category: "Security", slug: "locksmith", description: null },
+  { id: 20, name: "Landscaper", category: "Garden & Outdoor", slug: "landscaper", description: null },
+  { id: 21, name: "Gardener", category: "Garden & Outdoor", slug: "gardener", description: null },
+  { id: 22, name: "Fencer", category: "Garden & Outdoor", slug: "fencer", description: null },
+  { id: 23, name: "Driveway Specialist", category: "Garden & Outdoor", slug: "driveway-specialist", description: null },
+  { id: 24, name: "Paving Specialist", category: "Garden & Outdoor", slug: "paving-specialist", description: null },
+  { id: 25, name: "Handyman", category: "General", slug: "handyman", description: null },
+  { id: 26, name: "Cleaner", category: "General", slug: "cleaner", description: null },
+  { id: 27, name: "Pest Control", category: "General", slug: "pest-control", description: null },
+  { id: 28, name: "Removal Service", category: "General", slug: "removal-service", description: null },
+  { id: 29, name: "Scaffolder", category: "Building & Construction", slug: "scaffolder", description: null },
+  { id: 30, name: "Demolition", category: "Building & Construction", slug: "demolition", description: null },
+  { id: 31, name: "Insulation Specialist", category: "Building & Construction", slug: "insulation-specialist", description: null },
+  { id: 32, name: "Damp Proofing", category: "Building & Construction", slug: "damp-proofing", description: null },
+  { id: 33, name: "Guttering Specialist", category: "Exterior", slug: "guttering-specialist", description: null },
+  { id: 34, name: "Chimney Sweep", category: "Exterior", slug: "chimney-sweep", description: null },
+  { id: 35, name: "CCTV & Security", category: "Security", slug: "cctv-security", description: null },
+  { id: 36, name: "Alarm Installer", category: "Security", slug: "alarm-installer", description: null },
+  { id: 37, name: "Solar Panel Installer", category: "Energy", slug: "solar-panel-installer", description: null },
+  { id: 38, name: "EV Charger Installer", category: "Energy", slug: "ev-charger-installer", description: null },
+  { id: 39, name: "Architect", category: "Design & Planning", slug: "architect", description: null },
+  { id: 40, name: "Interior Designer", category: "Design & Planning", slug: "interior-designer", description: null },
+  { id: 41, name: "Surveyor", category: "Design & Planning", slug: "surveyor", description: null },
+  { id: 42, name: "Drainage Specialist", category: "Heating & Plumbing", slug: "drainage-specialist", description: null },
+  { id: 43, name: "Welder", category: "Metalwork", slug: "welder", description: null },
+  { id: 44, name: "Blacksmith", category: "Metalwork", slug: "blacksmith", description: null },
+  { id: 45, name: "Glazier", category: "Building & Construction", slug: "glazier", description: null },
+  { id: 46, name: "Curtain & Blind Fitter", category: "Interior", slug: "curtain-blind-fitter", description: null },
+  { id: 47, name: "Carpet Fitter", category: "Interior", slug: "carpet-fitter", description: null },
+  { id: 48, name: "Appliance Repair", category: "General", slug: "appliance-repair", description: null },
+  { id: 49, name: "TV & Aerial Installer", category: "General", slug: "tv-aerial-installer", description: null },
+  { id: 50, name: "IT & Network Installer", category: "General", slug: "it-network-installer", description: null }
 ];

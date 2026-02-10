@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Star, MapPin, Phone, Award, CheckCircle, Camera, Grid3X3, TrendingUp, BarChart3, ExternalLink, Badge, X, CalendarDays, Shield, Zap, Users, Share2, Flag, Send, Briefcase, Crown } from 'lucide-react';
+import { Star, MapPin, Phone, Award, CheckCircle, Camera, X, CalendarDays, Share2, Flag, Send, Briefcase, Crown } from 'lucide-react';
 import { format } from 'date-fns';
-import ro from 'date-fns/locale/ro';
+import { ro } from 'date-fns/locale/ro';
 import { createClient } from '@supabase/supabase-js';
 import { AvatarModal } from './AvatarModal';
 
@@ -29,15 +29,11 @@ interface SupabaseBrowserConfig {
 const getSupabaseBrowserClient = (config?: SupabaseBrowserConfig) => {
   const url = config?.url || import.meta.env.PUBLIC_SUPABASE_URL;
   const key = config?.anonKey || import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
-  
-  if (!url || !key) {
-    return null;
-  }
-  
+  if (!url || !key) return null;
   return createClient(url, key);
 };
 
-// --- Report Profile Modal Component ---
+// --- Report Modal ---
 function ReportModal({ worker, onClose }: { worker: WorkerProfile; onClose: () => void }) {
   const [complaintType, setComplaintType] = useState('');
   const [details, setDetails] = useState('');
@@ -45,155 +41,72 @@ function ReportModal({ worker, onClose }: { worker: WorkerProfile; onClose: () =
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const complaintTypes = [
-    { value: 'fake_profile', label: 'Profil fals sau înșelător' },
-    { value: 'inappropriate_content', label: 'Conținut nepotrivit' },
-    { value: 'spam', label: 'Spam sau publicitate' },
-    { value: 'harassment', label: 'Hărțuire sau comportament abuziv' },
-    { value: 'fraud', label: 'Fraudă sau înșelăciune' },
-    { value: 'other', label: 'Altele' }
+    { value: 'fake_profile', label: 'Fake or misleading profile' },
+    { value: 'inappropriate_content', label: 'Inappropriate content' },
+    { value: 'spam', label: 'Spam or advertising' },
+    { value: 'harassment', label: 'Harassment or abuse' },
+    { value: 'fraud', label: 'Fraud or scam' },
+    { value: 'other', label: 'Other' }
   ];
 
   useEffect(() => {
-    const handleEsc = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose();
-      }
-    };
+    const handleEsc = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', handleEsc);
-    return () => {
-      window.removeEventListener('keydown', handleEsc);
-    };
+    return () => window.removeEventListener('keydown', handleEsc);
   }, [onClose]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!complaintType || !details.trim()) return;
-
     setIsSubmitting(true);
     try {
-      const response = await fetch('/api/report-profile', {
+      const res = await fetch('/api/report-profile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          profileId: worker.id,
-          complaintType,
-          details: details.trim(),
-          reference: `profile:${worker.id}`
-        })
+        body: JSON.stringify({ profileId: worker.id, complaintType, details: details.trim(), reference: `profile:${worker.id}` })
       });
-
-      if (response.ok) {
-        setIsSubmitted(true);
-        setTimeout(() => {
-          onClose();
-        }, 2000);
-      } else {
-        // Report submission failed
-      }
-    } catch (error) {
-      // Error logged to monitoring in production
-    } finally {
-      setIsSubmitting(false);
-    }
+      if (res.ok) { setIsSubmitted(true); setTimeout(onClose, 2000); }
+    } catch { /* silent */ } finally { setIsSubmitting(false); }
   };
 
   if (!worker) return null;
 
   return (
-    <div
-      className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-2 sm:p-4"
-      onClick={onClose}
-    >
-      <div
-        className="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-white rounded-xl max-w-md w-full shadow-xl" onClick={(e) => e.stopPropagation()}>
         {isSubmitted ? (
-          <div className="p-6 sm:p-8 text-center">
-            <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 inline-block mb-4">
-              <CheckCircle className="w-8 h-8 text-white" />
-            </div>
-            <h3 className="text-xl font-bold text-slate-900 mb-2">Raport trimis!</h3>
-            <p className="text-slate-600">Mulțumim pentru raport. Vom investiga în cel mai scurt timp.</p>
+          <div className="p-8 text-center">
+            <CheckCircle className="w-10 h-10 text-emerald-500 mx-auto mb-3" />
+            <h3 className="text-lg font-semibold text-slate-900 mb-1">Report submitted</h3>
+            <p className="text-slate-600 text-sm">Thank you. We'll investigate shortly.</p>
           </div>
         ) : (
           <>
-            <div className="p-4 sm:p-6 border-b border-slate-200">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-3 rounded-2xl bg-gradient-to-r from-red-500 to-orange-500">
-                    <Flag className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-slate-900">Raportează Profil</h3>
-                    <p className="text-slate-600 text-sm">Ajută-ne să menținem comunitatea sigură</p>
-                  </div>
-                </div>
-                <button onClick={onClose} className="p-2 rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors">
-                  <X className="w-6 h-6" />
-                </button>
-              </div>
+            <div className="p-5 border-b border-slate-200 flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-slate-900">Report Profile</h3>
+              <button onClick={onClose} className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600"><X className="w-5 h-5" /></button>
             </div>
-
-            <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+            <form onSubmit={handleSubmit} className="p-5 space-y-4">
               <div>
-                <label className="block text-sm font-bold text-slate-900 mb-3">Motivul raportului</label>
-                <div className="space-y-2">
+                <label className="block text-sm font-medium text-slate-700 mb-2">Reason</label>
+                <div className="space-y-1.5">
                   {complaintTypes.map((type) => (
-                    <label key={type.value} className="flex items-center gap-3 p-2 sm:p-3 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
-                      <input
-                        type="radio"
-                        name="complaintType"
-                        value={type.value}
-                        checked={complaintType === type.value}
-                        onChange={(e) => setComplaintType(e.target.value)}
-                        className="w-4 h-4 text-red-600 border-slate-300 focus:ring-red-500"
-                      />
-                      <span className="text-slate-700 font-medium">{type.label}</span>
+                    <label key={type.value} className="flex items-center gap-3 p-2.5 rounded-lg border border-slate-200 hover:bg-slate-50 cursor-pointer">
+                      <input type="radio" name="complaintType" value={type.value} checked={complaintType === type.value} onChange={(e) => setComplaintType(e.target.value)} className="w-4 h-4 text-slate-900 border-slate-300 focus:ring-slate-500" />
+                      <span className="text-sm text-slate-700">{type.label}</span>
                     </label>
                   ))}
                 </div>
               </div>
-
               <div>
-                <label htmlFor="details" className="block text-sm font-bold text-slate-900 mb-2">
-                  Detalii suplimentare
-                </label>
-                <textarea
-                  id="details"
-                  value={details}
-                  onChange={(e) => setDetails(e.target.value)}
-                  placeholder="Descrie problema în detaliu..."
-                  rows={4}
-                  className="w-full px-3 py-2 sm:px-4 sm:py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-red-500 focus:border-red-500 resize-none"
-                  required
-                />
+                <label htmlFor="details" className="block text-sm font-medium text-slate-700 mb-1.5">Details</label>
+                <textarea id="details" value={details} onChange={(e) => setDetails(e.target.value)} placeholder="Describe the issue..." rows={3} className="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-slate-400 focus:border-slate-400 resize-none" required />
               </div>
-
               <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="flex-1 px-3 py-2 sm:px-4 sm:py-3 rounded-xl bg-slate-100 text-slate-700 font-bold hover:bg-slate-200 transition-colors"
-                >
-                  Anulează
-                </button>
-                <button
-                  type="submit"
-                  disabled={!complaintType || !details.trim() || isSubmitting}
-                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 sm:px-4 sm:py-3 rounded-xl bg-gradient-to-r from-red-500 to-orange-500 text-white font-bold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Trimite...
-                    </>
-                  ) : (
-                    <>
-                      <Send className="w-4 h-4" />
-                      Trimite Raport
-                    </>
-                  )}
+                <button type="button" onClick={onClose} className="flex-1 px-4 py-2.5 rounded-lg bg-slate-100 text-slate-700 text-sm font-medium hover:bg-slate-200">Cancel</button>
+                <button type="submit" disabled={!complaintType || !details.trim() || isSubmitting} className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed">
+                  {isSubmitting ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+                  Submit
                 </button>
               </div>
             </form>
@@ -204,97 +117,41 @@ function ReportModal({ worker, onClose }: { worker: WorkerProfile; onClose: () =
   );
 }
 
-// --- Portfolio Modal Component ---
+// --- Portfolio Modal ---
 function PortfolioModal({ item, onClose }: { item: any; onClose: () => void }) {
   useEffect(() => {
-    const handleEsc = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose();
-      }
-    };
+    const handleEsc = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', handleEsc);
-    return () => {
-      window.removeEventListener('keydown', handleEsc);
-    };
+    return () => window.removeEventListener('keydown', handleEsc);
   }, [onClose]);
 
   if (!item) return null;
 
   return (
-    <div
-      className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4"
-      onClick={onClose}
-    >
-      <div
-        className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {item.images && item.images.length > 0 ? (
+    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+        {item.images?.[0] && (
           <div className="relative flex-shrink-0">
-            <img src={item.images[0]} alt={item.title} className="w-full h-80 object-cover" loading="lazy" decoding="async" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-            <div className="absolute bottom-6 left-6 right-6">
-              <h3 className="text-3xl font-bold text-white mb-2">{item.title}</h3>
-              <div className="inline-flex items-center px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm border border-white/30">
-                <span className="text-white font-medium text-sm">{item.category}</span>
-              </div>
-            </div>
-            <button onClick={onClose} className="absolute top-4 right-4 p-3 rounded-2xl text-white bg-black/50 hover:bg-black/70 transition-all backdrop-blur-sm">
-              <X className="w-6 h-6" />
-            </button>
-          </div>
-        ) : (
-          <div className="p-6 flex justify-between items-center border-b border-slate-200 flex-shrink-0">
-            <div>
-              <h3 className="text-2xl font-bold text-slate-900">{item.title}</h3>
-              <span className="text-slate-600">{item.category}</span>
-            </div>
-            <button onClick={onClose} className="p-3 rounded-2xl text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors">
-              <X className="w-6 h-6" />
-            </button>
+            <img src={item.images[0]} alt={item.title} className="w-full h-64 object-cover" loading="lazy" decoding="async" />
+            <button onClick={onClose} className="absolute top-3 right-3 p-2 rounded-lg bg-black/50 text-white hover:bg-black/70"><X className="w-5 h-5" /></button>
           </div>
         )}
-
-        <div className="p-8 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100">
-          <div className="bg-gradient-to-r from-slate-50 to-white rounded-2xl p-6 mb-8 border border-slate-200">
-            <h4 className="text-lg font-bold text-slate-900 mb-3">Descrierea Proiectului</h4>
-            <p className="text-slate-700 leading-relaxed text-lg">{item.description}</p>
-          </div>
-
-          {item.images && item.images.length > 1 && (
-            <div className="mb-8">
-              <h4 className="text-lg font-bold text-slate-900 mb-4">Galerie Foto</h4>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                {item.images.slice(1, 7).map((img: string, idx: number) => (
-                  <div key={idx} className="relative group overflow-hidden rounded-2xl">
-                    <img src={img} alt={`${item.title} ${idx + 2}`} className="w-full h-24 object-cover group-hover:scale-110 transition-transform duration-300" loading="lazy" decoding="async" />
-                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors" />
-                  </div>
-                ))}
-              </div>
+        <div className="p-6 overflow-y-auto">
+          <h3 className="text-xl font-semibold text-slate-900 mb-1">{item.title}</h3>
+          <span className="text-sm text-slate-500 mb-4 block">{item.category}</span>
+          <p className="text-slate-700 leading-relaxed mb-6">{item.description}</p>
+          {item.images?.length > 1 && (
+            <div className="grid grid-cols-3 gap-2 mb-6">
+              {item.images.slice(1, 7).map((img: string, idx: number) => (
+                <img key={idx} src={img} alt={`${item.title} ${idx + 2}`} className="w-full h-20 object-cover rounded-lg" loading="lazy" decoding="async" />
+              ))}
             </div>
           )}
-
-          <div className="space-y-4">
-            <h4 className="text-lg font-bold text-slate-900">Detalii Proiect</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-4 rounded-2xl border border-blue-200">
-                <span className="text-blue-600 font-medium text-sm">Categorie</span>
-                <p className="font-bold text-blue-900">{item.category}</p>
-              </div>
-              <div className="bg-gradient-to-r from-emerald-50 to-teal-50 p-4 rounded-2xl border border-emerald-200">
-                <span className="text-emerald-600 font-medium text-sm">Client</span>
-                <p className="font-bold text-emerald-900">{item.client_name || 'Confidențial'}</p>
-              </div>
-              <div className="bg-gradient-to-r from-slate-50 to-gray-50 p-4 rounded-2xl border border-slate-200">
-                <span className="text-orange-600 font-medium text-sm">Locație</span>
-                <p className="font-bold text-slate-900">{item.location || 'N/A'}</p>
-              </div>
-              <div className="bg-gradient-to-r from-amber-50 to-orange-50 p-4 rounded-2xl border border-amber-200">
-                <span className="text-amber-600 font-medium text-sm">Data Finalizării</span>
-                <p className="font-bold text-amber-900">{item.completion_date ? format(new Date(item.completion_date), 'dd MMM yyyy', { locale: ro }) : 'N/A'}</p>
-              </div>
-            </div>
+          <div className="grid grid-cols-2 gap-3 text-sm">
+            <div className="p-3 bg-slate-50 rounded-lg"><span className="text-slate-500 block text-xs">Category</span><span className="font-medium text-slate-900">{item.category}</span></div>
+            <div className="p-3 bg-slate-50 rounded-lg"><span className="text-slate-500 block text-xs">Location</span><span className="font-medium text-slate-900">{item.location || 'N/A'}</span></div>
+            <div className="p-3 bg-slate-50 rounded-lg"><span className="text-slate-500 block text-xs">Client</span><span className="font-medium text-slate-900">{item.client_name || 'Confidential'}</span></div>
+            <div className="p-3 bg-slate-50 rounded-lg"><span className="text-slate-500 block text-xs">Completed</span><span className="font-medium text-slate-900">{item.completion_date ? format(new Date(item.completion_date), 'dd MMM yyyy', { locale: ro }) : 'N/A'}</span></div>
           </div>
         </div>
       </div>
@@ -302,876 +159,371 @@ function PortfolioModal({ item, onClose }: { item: any; onClose: () => void }) {
   );
 }
 
-interface TradesmanProfileProps {
+export interface TradesmanProfileProps {
   worker: WorkerProfile;
   supabaseUrl?: string;
   supabaseAnonKey?: string;
 }
 
 export function TradesmanProfile({ worker, supabaseUrl, supabaseAnonKey }: TradesmanProfileProps) {
-  const [activeTab, setActiveTab] = useState<'overview' | 'portfolio' | 'reviews' | 'certifications'>('overview');
+  const [activeTab, setActiveTab] = useState<'about' | 'portfolio' | 'reviews' | 'certifications'>('about');
   const [isContactRevealed, setIsContactRevealed] = useState(false);
   const [selectedPortfolioItem, setSelectedPortfolioItem] = useState<any | null>(null);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
-  const [isOwner, setIsOwner] = useState(false);
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
-
-  // Handle share functionality
-  const handleShare = async () => {
-    const shareData = {
-      title: `${worker.name} - Meseriaș Verificat`,
-      text: `Descoperă profilul lui ${worker.name} pe Meserias Local`,
-      url: window.location.href
-    };
-
-    try {
-      // Check if Web Share API is supported
-      if (navigator.share) {
-        await navigator.share(shareData);
-      } else {
-        // Fallback: Copy to clipboard
-        await navigator.clipboard.writeText(window.location.href);
-        alert('Link copiat în clipboard!');
-      }
-    } catch (error) {
-      // User cancelled or error occurred
-    }
-  };
-
-  // Generate Schema.org structured data for rich snippets with proper capitalization
-  const workerTrades = (worker as any).trades || [];
-  const tradeNames = workerTrades.map((trade: any) =>
-    trade.name.split(' ').map((word: string) =>
-      word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-    ).join(' ')
-  ).join(', ');
-  const primaryTrade = workerTrades[0]?.name ?
-    workerTrades[0].name.split(' ').map((word: string) =>
-      word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-    ).join(' ') : 'Servicii Profesionale';
-  const location = worker.address ?
-    worker.address.split(' ').map((word: string) =>
-      word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-    ).join(' ') : '';
-  const rating = worker.rating || 0;
-  const totalJobs = (worker as any).total_jobs || 0;
-  const reviews = (worker as any).reviews || [];
-  const reviewCount = reviews.length;
-
-  // Capitalize worker name properly
-  const capitalizedWorkerName = worker.name ?
-    worker.name.split(' ').map((word: string) =>
-      word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-    ).join(' ') : 'Meseriaș';
-
-  const schemaData = {
-    "@context": "https://schema.org",
-    "@type": "Person",
-    "name": capitalizedWorkerName,
-    "jobTitle": primaryTrade,
-    "description": worker.bio || `Specialist în ${tradeNames}`,
-    "url": `https://www.meseriaslocal.ro/meseriasi/${worker.id}`,
-    "image": worker.avatar_url,
-    "telephone": worker.phone,
-    "address": worker.address ? {
-      "@type": "PostalAddress",
-      "addressLocality": location,
-      "addressCountry": "RO"
-    } : undefined,
-    "geo": worker.coordinates ? {
-      "@type": "GeoCoordinates",
-      "latitude": worker.coordinates.lat,
-      "longitude": worker.coordinates.lng
-    } : undefined,
-    "aggregateRating": rating > 0 ? {
-      "@type": "AggregateRating",
-      "ratingValue": rating,
-      "ratingCount": reviewCount > 0 ? reviewCount : (totalJobs > 0 ? totalJobs : 1),
-      "bestRating": 5,
-      "worstRating": 1
-    } : undefined,
-    "hasOccupation": {
-      "@type": "Occupation",
-      "name": primaryTrade,
-      "occupationLocation": {
-        "@type": "City",
-        "name": location || "România"
-      }
-    },
-    "knowsAbout": workerTrades.map((trade: any) =>
-      trade.name.split(' ').map((word: string) =>
-        word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-      ).join(' ')
-    ),
-    "worksFor": {
-      "@type": "Organization",
-      "name": "Meserias Local",
-      "url": "https://www.meseriaslocal.ro"
-    }
-  };
 
   const trades = (worker as any).trades || [];
   const portfolioItems = (worker as any).portfolio_items || [];
   const certifications = (worker as any).certifications || [];
+  const reviews = (worker as any).reviews || [];
+  const totalJobs = (worker as any).total_jobs || (worker as any).totalJobs || 0;
+  const rating = worker.rating || 0;
+  const reviewCount = reviews.length;
 
-  // Calculate average rating from reviews
-  const averageRating = reviews.length > 0
-    ? reviews.reduce((sum: number, review: any) => sum + (review.rating || 0), 0) / reviews.length
-    : 0;
+  const isPro = (() => {
+    const plan = worker.subscription_plan;
+    if (!plan) return false;
+    const p = plan.trim().toLowerCase();
+    return p === 'pro' || p.startsWith('enterprise');
+  })();
 
-  const stats = {
-    totalJobs: (worker as any).totalJobs || (worker as any).total_jobs || 0,
-    completedJobs: (worker as any).completedJobs || (worker as any).completed_jobs || 0,
-    rating: (worker as any).rating || averageRating,
-    reviewCount: reviews.length,
-    profileViews: (worker as any).profileViews || (worker as any).profile_views || 0,
-    phoneReveals: (worker as any).phoneReveals || (worker as any).phone_reveals || 0,
-    responseRate: (worker as any).responseRate || (worker as any).response_rate || 95
+  const tradeNames = trades.map((t: any) => t.name).join(', ');
+  const primaryTrade = trades[0]?.name || 'Professional Services';
+
+  // Schema.org
+  const schemaData = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": worker.name,
+    "jobTitle": primaryTrade,
+    "description": worker.bio || `Specialist in ${tradeNames}`,
+    "url": `https://www.findtrades.app/tradesman/${worker.id}`,
+    "image": worker.avatar_url,
+    "telephone": worker.phone,
+    "address": worker.address ? { "@type": "PostalAddress", "addressLocality": worker.address, "addressCountry": "GB" } : undefined,
+    "aggregateRating": rating > 0 ? { "@type": "AggregateRating", "ratingValue": rating, "ratingCount": reviewCount || 1, "bestRating": 5, "worstRating": 1 } : undefined,
+    "knowsAbout": trades.map((t: any) => t.name),
+    "worksFor": { "@type": "Organization", "name": "FindTrades", "url": "https://www.findtrades.app" }
   };
 
-  // Determine if current user owns this profile (for better empty states)
-  useEffect(() => {
+  const handleShare = async () => {
     try {
-      const supabase = getSupabaseBrowserClient({ url: supabaseUrl, anonKey: supabaseAnonKey });
-      if (!supabase) {
-        setIsOwner(false);
-        return;
+      if (navigator.share) {
+        await navigator.share({ title: `${worker.name} - FindTrades`, text: `Check out ${worker.name}'s profile on FindTrades`, url: window.location.href });
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        alert('Link copied to clipboard');
       }
-      supabase.auth.getUser().then(({ data }) => {
-        const uid = data?.user?.id;
-        setIsOwner(Boolean(uid && uid === worker.id));
-      }).catch(() => setIsOwner(false));
-    } catch {
-      setIsOwner(false);
-    }
-  }, [worker.id, supabaseUrl, supabaseAnonKey]);
+    } catch { /* cancelled */ }
+  };
 
   const handleContactReveal = async () => {
     try {
-      const response = await fetch('/api/track-phone-reveal', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ profileId: worker.id })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        // Tracking failed
-      } else {
-        // Tracking successful
-      }
-
-      setIsContactRevealed(true);
-      // Save to session storage
-      sessionStorage.setItem(`contact_revealed_${worker.id}`, 'true');
-    } catch (error) {
-      // Error logged to monitoring in production
-      setIsContactRevealed(true);
-      // Save to session storage
-      sessionStorage.setItem(`contact_revealed_${worker.id}`, 'true');
-    }
+      await fetch('/api/track-phone-reveal', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ profileId: worker.id }) });
+    } catch { /* silent */ }
+    setIsContactRevealed(true);
+    sessionStorage.setItem(`contact_revealed_${worker.id}`, 'true');
   };
 
   const handlePhoneCall = () => {
-    if (worker.phone) {
-      // If contact already revealed, make the call
-      if (isContactRevealed) {
-        window.location.href = `tel:${worker.phone}`;
-      } else {
-        // First reveal the contact, then make the call
-        handleContactReveal().then(() => {
-          setTimeout(() => {
-            window.location.href = `tel:${worker.phone}`;
-          }, 100);
-        });
-      }
+    if (!worker.phone) return;
+    if (isContactRevealed) {
+      window.location.href = `tel:${worker.phone}`;
+    } else {
+      handleContactReveal().then(() => setTimeout(() => { window.location.href = `tel:${worker.phone}`; }, 100));
     }
   };
 
-  // Client-side tracking as backup
+  // Track profile view
   useEffect(() => {
-    const trackView = async () => {
-      try {
-        await fetch('/api/track-profile-view', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ profileId: worker.id })
-        });
-      } catch (error) {
-        // Client-side tracking failed
-      };
-    };
-
-    // Track after a short delay to avoid double counting
-    const timer = setTimeout(trackView, 1000);
+    const timer = setTimeout(async () => {
+      try { await fetch('/api/track-profile-view', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ profileId: worker.id }) }); } catch { /* silent */ }
+    }, 1000);
     return () => clearTimeout(timer);
   }, [worker.id]);
 
-  // Reset contact reveal on page load (session-based)
+  // Restore contact reveal from session
   useEffect(() => {
-    const sessionKey = `contact_revealed_${worker.id}`;
-    const wasRevealed = sessionStorage.getItem(sessionKey);
-    if (wasRevealed === 'true') {
-      setIsContactRevealed(true);
-    }
+    if (sessionStorage.getItem(`contact_revealed_${worker.id}`) === 'true') setIsContactRevealed(true);
+  }, [worker.id]);
 
-    // Clean up on unmount
-    return () => {
-      if (isContactRevealed) {
-        sessionStorage.setItem(sessionKey, 'true');
-      }
-    };
-  }, [worker.id, isContactRevealed]);
-
-  // Check if user has premium subscription (pro or enterprise)
-  const isPremiumPlan = (plan: string | null | undefined): boolean => {
-    if (!plan) return false;
-    const normalizedPlan = plan.trim().toLowerCase();
-    return normalizedPlan === 'pro' || normalizedPlan === 'enterprise';
-  };
-  
-  const isPro = isPremiumPlan(worker.subscription_plan);
+  const tabs = [
+    { id: 'about' as const, label: 'About' },
+    { id: 'portfolio' as const, label: `Portfolio${portfolioItems.length ? ` (${portfolioItems.length})` : ''}` },
+    { id: 'reviews' as const, label: `Reviews${reviewCount ? ` (${reviewCount})` : ''}` },
+    { id: 'certifications' as const, label: `Certifications${certifications.length ? ` (${certifications.length})` : ''}` },
+  ];
 
   return (
     <>
-      {/* Schema.org structured data for rich snippets */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
-      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }} />
 
-      <div className={`min-h-screen ${
-        isPro 
-          ? 'bg-gradient-to-br from-blue-50 via-white to-indigo-50/40' 
-          : 'bg-gradient-to-br from-slate-50 via-white to-blue-50/30'
-      }`}>
-        {/* Premium Hero Section with Enhanced Background */}
-        <div className="relative overflow-hidden">
-          {/* Enhanced Background Effects for PRO */}
-          {isPro ? (
-            <>
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(59,130,246,0.12),transparent_50%)] pointer-events-none" />
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(99,102,241,0.12),transparent_50%)] pointer-events-none" />
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.06),transparent_70%)] pointer-events-none" />
-            </>
-          ) : (
-            <>
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(59,130,246,0.08),transparent_50%)] pointer-events-none" />
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(168,85,247,0.08),transparent_50%)] pointer-events-none" />
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.04),transparent_70%)] pointer-events-none" />
-            </>
-          )}
-
-          {/* Floating Elements */}
-          <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-blue-400/10 to-purple-400/10 rounded-full blur-xl animate-pulse" />
-          <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-br from-emerald-400/10 to-blue-400/10 rounded-full blur-xl animate-pulse delay-1000" />
-
-          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
-            {/* Premium Header Card */}
-            <div className={`bg-white/80 backdrop-blur-sm rounded-3xl p-4 sm:p-8 mb-4 sm:mb-6 shadow-xl relative overflow-hidden ${
-              isPro 
-                ? 'border-2 border-blue-200/60 shadow-blue-500/10' 
-                : 'border border-slate-200/60 shadow-slate-900/5'
-            }`}>
-              {/* Animated gradient border for PRO */}
-              {isPro && (
-                <div className="absolute inset-0 rounded-3xl p-[2px] bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 opacity-40 pointer-events-none">
-                  <div className="absolute inset-[2px] rounded-3xl bg-white/80 backdrop-blur-sm" />
-                </div>
-              )}
-              {/* Subtle gradient overlay */}
-              <div className={`absolute inset-0 bg-gradient-to-br pointer-events-none ${
-                isPro 
-                  ? 'from-blue-50/50 via-transparent to-indigo-50/30' 
-                  : 'from-white/50 via-transparent to-slate-50/30'
-              }`} />
-              {/* Mobile compact layout */}
-              <div className="flex sm:hidden items-start gap-4 mb-6 relative z-10">
-                <div className="relative flex-shrink-0">
-                  <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl blur opacity-30"></div>
-                  <button 
-                    onClick={() => setIsAvatarModalOpen(true)}
-                    className="relative group cursor-pointer"
-                    title="Vezi poza în fullscreen"
-                  >
-                    {worker.avatar_url ? (
-                      <img
-                        src={worker.avatar_url}
-                        alt={worker.name}
-                        loading="eager"
-                        referrerPolicy="no-referrer"
-                        className="relative w-20 h-20 rounded-2xl object-cover ring-2 ring-white shadow-lg group-hover:ring-4 group-hover:ring-blue-200 group-hover:scale-105 transition-all duration-300"
-                      />
-                    ) : (
-                      <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center ring-2 ring-white shadow-lg group-hover:ring-4 group-hover:ring-blue-200 group-hover:scale-105 transition-all duration-300">
-                        <span className="text-white font-bold text-2xl">
-                          {(worker.name || 'M').charAt(0).toUpperCase()}
-                        </span>
-                      </div>
-                    )}
-                  </button>
+      <div className="min-h-screen bg-white">
+        {/* Header */}
+        <div className="border-b border-slate-200">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+            <div className="flex flex-col sm:flex-row gap-5 sm:gap-8">
+              {/* Avatar */}
+              <div className="flex-shrink-0">
+                <button onClick={() => setIsAvatarModalOpen(true)} className="relative group">
+                  {worker.avatar_url ? (
+                    <img src={worker.avatar_url} alt={worker.name} loading="eager" referrerPolicy="no-referrer" className="w-24 h-24 sm:w-32 sm:h-32 rounded-full object-cover border-2 border-slate-200 group-hover:border-slate-300 transition-colors" />
+                  ) : (
+                    <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-slate-100 flex items-center justify-center border-2 border-slate-200">
+                      <span className="text-slate-400 font-semibold text-3xl sm:text-4xl">{(worker.name || 'T').charAt(0).toUpperCase()}</span>
+                    </div>
+                  )}
                   {worker.is_verified && (
-                    <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-emerald-500 rounded-full flex items-center justify-center ring-2 ring-white">
-                      <CheckCircle className="w-4 h-4 text-white" />
+                    <div className="absolute -bottom-0.5 -right-0.5 w-7 h-7 sm:w-8 sm:h-8 bg-emerald-500 rounded-full flex items-center justify-center ring-2 ring-white">
+                      <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                     </div>
                   )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-2">
-                    <h1 className="text-xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent truncate">{worker.name}</h1>
-                    {isPro && (
-                      <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg animate-pulse">
-                        <Crown className="w-3 h-3 text-yellow-300 fill-current" />
-                        <span className="text-xs font-bold text-white">PRO</span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex flex-col gap-1 text-sm text-slate-700">
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-3 h-3 text-slate-500" />
-                      <span className="truncate">{worker.address}</span>
-                    </div>
-                    {stats.rating > 0 && stats.reviewCount > 0 && (
-                      <div className="flex items-center gap-2">
-                        <Star className="w-3 h-3 text-amber-500 fill-current" />
-                        <span className="text-amber-600 font-semibold">{stats.rating.toFixed(1)}</span>
-                        <span className="text-slate-500">({stats.reviewCount})</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                </button>
               </div>
 
-              {/* Desktop layout */}
-              <div className="hidden sm:flex flex-col lg:flex-row items-start gap-8 relative z-10">
-                {/* Avatar and Basic Info */}
-                <div className="flex items-start gap-8">
-                  <div className="relative group">
-                    {/* Animated gradient ring */}
-                    <div className="absolute -inset-2 bg-gradient-to-r from-blue-500 via-purple-500 to-emerald-500 rounded-3xl blur opacity-40 group-hover:opacity-60 transition-opacity animate-pulse"></div>
-                    <button 
-                      onClick={() => setIsAvatarModalOpen(true)}
-                      className="relative group cursor-pointer"
-                      title="Vezi poza în fullscreen"
-                    >
-                      {worker.avatar_url ? (
-                        <img
-                          src={worker.avatar_url}
-                          alt={worker.name}
-                          loading="eager"
-                          decoding="async"
-                          referrerPolicy="no-referrer"
-                          className="relative w-32 h-32 rounded-3xl object-cover ring-4 ring-white shadow-2xl group-hover:ring-6 group-hover:ring-blue-200 group-hover:scale-105 transition-all duration-300"
-                        />
-                      ) : (
-                        <div className="relative w-32 h-32 rounded-3xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center ring-4 ring-white shadow-2xl group-hover:ring-6 group-hover:ring-blue-200 group-hover:scale-105 transition-all duration-300">
-                          <span className="text-white font-bold text-4xl">
-                            {(worker.name || 'M').charAt(0).toUpperCase()}
-                          </span>
-                        </div>
-                      )}
-                    </button>
-                    {worker.is_verified && (
-                      <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full flex items-center justify-center ring-4 ring-white shadow-lg">
-                        <CheckCircle className="w-5 h-5 text-white" />
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex-1">
-                    <div className="flex items-center gap-4 mb-3">
-                      <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 bg-clip-text text-transparent">{worker.name}</h1>
-                      <div className="flex items-center gap-2">
-                        {isPro && (
-                          <div className="relative">
-                            <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full blur-md opacity-50"></div>
-                            <div className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 shadow-lg border border-blue-400/30 animate-pulse">
-                              <Crown className="w-4 h-4 text-yellow-300 fill-current" />
-                              <span className="text-sm font-bold text-white tracking-wider">PRO</span>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-6 text-slate-700 mb-6">
-                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200">
-                        <MapPin className="w-4 h-4 text-slate-600" />
-                        <span className="font-medium">{worker.address}</span>
-                      </div>
-                      {stats.rating > 0 && (
-                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-50 border border-amber-200">
-                          <Star className="w-4 h-4 text-amber-500 fill-current" />
-                          <span className="font-bold text-amber-700">{stats.rating.toFixed(1)}</span>
-                          <span className="text-amber-600 font-medium">({stats.reviewCount} recenzii)</span>
-                        </div>
-                      )}
-                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200">
-                        <TrendingUp className="w-4 h-4 text-emerald-600" />
-                        <span className="font-medium text-emerald-700">{stats.responseRate}% răspuns</span>
-                      </div>
-                    </div>
-
-                    {/* Premium Trades Display */}
-                    {trades.length > 0 && (
-                      <div className="flex flex-wrap gap-3">
-                        {trades.slice(0, 4).map((trade: any, index: number) => {
-                          const gradients = isPro ? [
-                            'from-blue-600 via-indigo-600 to-purple-600',
-                            'from-purple-600 via-pink-600 to-rose-600',
-                            'from-emerald-600 via-teal-600 to-cyan-600',
-                            'from-orange-600 via-red-600 to-pink-600'
-                          ] : [
-                            'from-blue-500 to-cyan-500',
-                            'from-purple-500 to-pink-500',
-                            'from-emerald-500 to-teal-500',
-                            'from-orange-500 to-red-500'
-                          ];
-                          return (
-                            <div key={index} className="relative group">
-                              {isPro && (
-                                <div className={`absolute -inset-0.5 bg-gradient-to-r ${gradients[index % gradients.length]} rounded-xl blur opacity-60 group-hover:opacity-100 transition-opacity`}></div>
-                              )}
-                              <span className={`relative inline-flex items-center px-4 py-2 rounded-xl bg-gradient-to-r ${gradients[index % gradients.length]} text-white text-sm font-semibold shadow-lg hover:shadow-xl transition-all ${isPro ? 'ring-2 ring-white/50' : ''}`}>
-                                <Zap className="w-3 h-3 mr-1.5" />
-                                {trade.name}
-                              </span>
-                            </div>
-                          );
-                        })}
-                        {trades.length > 4 && (
-                          <div className="relative group">
-                            {isPro && (
-                              <div className="absolute -inset-0.5 bg-gradient-to-r from-slate-700 to-slate-900 rounded-xl blur opacity-60 group-hover:opacity-100 transition-opacity"></div>
-                            )}
-                            <span className={`relative inline-flex items-center px-4 py-2 rounded-xl bg-gradient-to-r from-slate-600 to-slate-700 text-white text-sm font-semibold shadow-lg ${isPro ? 'ring-2 ring-white/50' : ''}`}>
-                              +{trades.length - 4} mai multe
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
+              {/* Info */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-3 mb-2">
+                  <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 truncate">{worker.name}</h1>
+                  {isPro && (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-50 border border-amber-200 text-amber-700 text-xs font-semibold flex-shrink-0">
+                      <Crown className="w-3.5 h-3.5" />
+                      PRO
+                    </span>
+                  )}
                 </div>
 
-                {/* Premium Contact & Actions */}
-                <div className="flex flex-col gap-4 lg:ml-auto min-w-[280px] w-full lg:w-auto">
-                  {/* Primary Actions */}
-                  <div className="space-y-3">
-                    {worker.phone && (
-                      <button
-                        onClick={handlePhoneCall}
-                        className="w-full flex items-center justify-center gap-3 px-6 py-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-xl hover:shadow-2xl hover:from-emerald-700 hover:to-teal-700 hover:scale-105 transition-all duration-300 group"
-                      >
-                        <Phone className="w-5 h-5 text-white group-hover:animate-pulse" />
-                        <span className="font-bold text-lg">
-                          {isContactRevealed ? worker.phone : 'Afișează numărul'}
-                        </span>
-                      </button>
-                    )}
+                {worker.address && (
+                  <div className="flex items-center gap-1.5 text-slate-500 mb-3">
+                    <MapPin className="w-4 h-4" />
+                    <span className="text-sm sm:text-base">{worker.address}</span>
                   </div>
+                )}
 
-                  {/* Secondary Actions */}
-                  <div className="flex gap-2">
-                    <button 
-                      onClick={handleShare}
-                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-white border-2 border-slate-200 text-black hover:border-slate-300 hover:bg-slate-50 transition-all group"
-                    >
-                      <Share2 className="w-4 h-4 text-black group-hover:text-blue-500 transition-colors" />
-                      <span className="font-bold">Distribuie</span>
-                    </button>
-                    <button
-                      onClick={() => setIsReportModalOpen(true)}
-                      className="flex items-center justify-center px-3 py-3 rounded-xl bg-white border-2 border-slate-200 text-black hover:border-slate-300 hover:bg-slate-50 hover:text-slate-600 transition-all"
-                      title="Raportează profil"
-                    >
-                      <Flag className="w-4 h-4 text-black" />
-                    </button>
+                {/* Rating */}
+                {rating > 0 && (
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="flex items-center gap-0.5">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className={`w-4 h-4 ${i < Math.round(rating) ? 'text-amber-400 fill-current' : 'text-slate-200'}`} />
+                      ))}
+                    </div>
+                    <span className="text-sm font-medium text-slate-700">{rating.toFixed(1)}</span>
+                    {reviewCount > 0 && <span className="text-sm text-slate-400">({reviewCount} reviews)</span>}
                   </div>
+                )}
 
-                  
-                </div>
+                {/* Trades */}
+                {trades.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {trades.map((trade: any, i: number) => (
+                      <span key={i} className="px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-sm font-medium">{trade.name}</span>
+                    ))}
+                  </div>
+                )}
               </div>
 
-              {/* Mobile Trades */}
-              {trades.length > 0 && (
-                <div className="sm:hidden flex flex-wrap gap-2 mb-4">
-                  {trades.slice(0, 4).map((trade: any, index: number) => {
-                    const gradients = isPro ? [
-                      'from-blue-600 via-indigo-600 to-purple-600',
-                      'from-purple-600 via-pink-600 to-rose-600',
-                      'from-emerald-600 via-teal-600 to-cyan-600',
-                      'from-orange-600 via-red-600 to-pink-600'
-                    ] : [
-                      'from-blue-500 to-cyan-500',
-                      'from-purple-500 to-pink-500',
-                      'from-emerald-500 to-teal-500',
-                      'from-orange-500 to-red-500'
-                    ];
-                    return (
-                      <div key={index} className="relative">
-                        {isPro && (
-                          <div className={`absolute -inset-0.5 bg-gradient-to-r ${gradients[index % gradients.length]} rounded-lg blur-sm opacity-50`}></div>
-                        )}
-                        <span className={`relative inline-flex items-center px-3 py-1.5 rounded-lg bg-gradient-to-r ${gradients[index % gradients.length]} text-white text-xs font-bold shadow-md ${isPro ? 'ring-1 ring-white/40' : ''}`}>
-                          {trade.name}
-                        </span>
-                      </div>
-                    );
-                  })}
-                  {trades.length > 4 && (
-                    <div className="relative">
-                      {isPro && (
-                        <div className="absolute -inset-0.5 bg-gradient-to-r from-slate-700 to-slate-900 rounded-lg blur-sm opacity-50"></div>
-                      )}
-                      <span className={`relative inline-flex items-center px-3 py-1.5 rounded-lg bg-gradient-to-r from-slate-600 to-slate-800 text-white text-xs font-bold shadow-md ${isPro ? 'ring-1 ring-white/40' : ''}`}>
-                        +{trades.length - 4}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Mobile Premium Contact Buttons */}
-              <div className="sm:hidden space-y-3">
-                <div className="flex gap-3">
-                  {worker.phone && (
-                    <button
-                      onClick={handlePhoneCall}
-                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-2xl !bg-emerald-500 !text-white shadow-xl transition-all duration-300 relative z-20"
-                    >
-                      <Phone className="w-5 h-5 text-white drop-shadow-sm" />
-                      <span className="font-black text-lg text-white drop-shadow-sm">
-                        {isContactRevealed ? worker.phone : 'Apelează'}
-                      </span>
-                    </button>
-                  )}
-                  <button
-                    onClick={() => setIsReportModalOpen(true)}
-                    className="flex items-center justify-center p-2.5 rounded-xl bg-slate-100 text-black border border-slate-200 hover:bg-slate-200 hover:text-slate-600 transition-all duration-200"
-                  >
-                    <Flag className="w-4 h-4 text-black" />
+              {/* Actions */}
+              <div className="flex flex-col gap-2.5 sm:min-w-[200px]">
+                {worker.phone && (
+                  <button onClick={handlePhoneCall} className="flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-slate-900 text-white font-medium hover:bg-slate-800 transition-colors">
+                    <Phone className="w-4 h-4" />
+                    {isContactRevealed ? worker.phone : 'Show phone number'}
                   </button>
-                </div>
+                )}
                 <div className="flex gap-2">
-                  <button 
-                    onClick={handleShare}
-                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-white border-2 border-slate-200 text-black hover:border-slate-300 transition-all"
-                  >
-                    <Share2 className="w-3 h-3 text-black" />
-                    <span className="font-bold text-xs">Distribuie</span>
+                  <button onClick={handleShare} className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-slate-200 text-slate-700 text-sm font-medium hover:bg-slate-50 transition-colors">
+                    <Share2 className="w-4 h-4" />
+                    Share
+                  </button>
+                  <button onClick={() => setIsReportModalOpen(true)} className="flex items-center justify-center px-3 py-2.5 rounded-lg border border-slate-200 text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-colors" title="Report profile">
+                    <Flag className="w-4 h-4" />
                   </button>
                 </div>
-              </div>
-            </div>
-
-            
-            {/* Premium Tabs */}
-            <div className="bg-white/80 backdrop-blur-sm rounded-3xl border border-slate-200/60 shadow-xl shadow-slate-900/5 overflow-hidden">
-              {/* Mobile Premium Tab Navigation */}
-              <div className="flex sm:hidden overflow-x-auto gap-2 p-3 border-b border-slate-200/60 scrollbar-hide bg-gradient-to-r from-slate-50/50 to-white/50">
-                {[
-                  { id: 'overview', label: 'Info', icon: BarChart3, gradient: 'from-blue-500 to-cyan-500' },
-                  { id: 'portfolio', label: 'Portofoliu', icon: Grid3X3, gradient: 'from-purple-500 to-pink-500' },
-                  { id: 'reviews', label: 'Recenzii', icon: Star, gradient: 'from-amber-500 to-orange-500' },
-                  { id: 'certifications', label: 'Certificări', icon: Award, gradient: 'from-emerald-500 to-teal-500' }
-                ].map((tab) => {
-                  const Icon = tab.icon;
-                  return (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id as 'overview' | 'portfolio' | 'reviews' | 'certifications')}
-                      className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl font-bold transition-all duration-300 whitespace-nowrap text-sm shadow-lg ${activeTab === tab.id
-                          ? `bg-gradient-to-r ${tab.gradient} text-white shadow-xl scale-105`
-                          : 'bg-white text-black hover:bg-slate-50 hover:shadow-md border border-slate-200'
-                        }`}
-                    >
-                      <Icon className="w-4 h-4" />
-                      {tab.label}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Desktop Premium Tab Navigation */}
-              <div className="hidden sm:flex overflow-x-auto gap-3 p-4 border-b border-slate-200/60 scrollbar-hide bg-gradient-to-r from-slate-50/50 to-white/50">
-                {[
-                  { id: 'overview', label: 'Prezentare Generală', icon: BarChart3, gradient: 'from-blue-500 to-cyan-500' },
-                  { id: 'portfolio', label: 'Portofoliu', icon: Grid3X3, gradient: 'from-purple-500 to-pink-500' },
-                  { id: 'reviews', label: 'Recenzii', icon: Star, gradient: 'from-amber-500 to-orange-500' },
-                  { id: 'certifications', label: 'Certificări', icon: Award, gradient: 'from-emerald-500 to-teal-500' }
-                ].map((tab) => {
-                  const Icon = tab.icon;
-                  return (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id as 'overview' | 'portfolio' | 'reviews' | 'certifications')}
-                      className={`flex items-center gap-3 px-6 py-3 rounded-2xl font-bold transition-all duration-300 whitespace-nowrap shadow-lg ${activeTab === tab.id
-                          ? `bg-gradient-to-r ${tab.gradient} text-white shadow-xl scale-105`
-                          : 'bg-white text-black hover:bg-slate-50 hover:shadow-xl border border-slate-200'
-                        }`}
-                    >
-                      <Icon className="w-5 h-5" />
-                      {tab.label}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Premium Tab Content */}
-              <div className="p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-white to-slate-50/30">
-                {activeTab === 'overview' && (
-                  <div className="space-y-4 sm:space-y-8">
-
-                    {worker.bio ? (
-                      <div className="bg-gradient-to-br from-white to-slate-50 rounded-xl sm:rounded-2xl border border-slate-200 p-4 sm:p-6 shadow-lg">
-                        <div className="flex items-start gap-3 sm:gap-4">
-                          <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 flex-shrink-0">
-                            <Users className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="text-base sm:text-lg font-bold text-slate-900 mb-2 sm:mb-3">Prezentare Personală</h4>
-                            <div className="text-slate-800 leading-relaxed text-sm sm:text-lg whitespace-pre-wrap">{worker.bio}</div>
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="bg-gradient-to-br from-slate-50 to-white rounded-xl sm:rounded-2xl border border-slate-200 p-4 sm:p-6 shadow-lg text-center">
-                        <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-gradient-to-r from-slate-400 to-slate-500 inline-block mb-3 sm:mb-4">
-                          <Users className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
-                        </div>
-                        <p className="text-slate-600 italic text-sm sm:text-lg">Acest meseriaș nu a adăugat încă o descriere personală.</p>
-                      </div>
-                    )}
-
-                  </div>
-                )}
-
-                {activeTab === 'portfolio' && (
-                  <div className="space-y-8">
-
-                    {portfolioItems.length > 0 ? (
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {portfolioItems.map((item: any, index: number) => (
-                          <div
-                            key={index}
-                            className="group bg-white rounded-3xl border border-slate-200 overflow-hidden hover:border-slate-300 hover:shadow-2xl transition-all duration-500 cursor-pointer transform hover:-translate-y-2"
-                            onClick={() => setSelectedPortfolioItem(item)}
-                          >
-                            {item.images && item.images.length > 0 && (
-                              <div className="relative overflow-hidden">
-                                <img src={item.images[0]} alt={item.title} className="w-full h-56 object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" decoding="async" />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300" />
-                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
-                                  <div className="p-4 rounded-2xl bg-white/20 backdrop-blur-sm border border-white/30">
-                                    <ExternalLink className="w-8 h-8 text-white" />
-                                  </div>
-                                </div>
-                                {item.images.length > 1 && (
-                                  <div className="absolute top-4 right-4 bg-black/70 backdrop-blur-sm rounded-xl px-3 py-1.5">
-                                    <span className="text-white text-sm font-bold">+{item.images.length - 1}</span>
-                                  </div>
-                                )}
-                                <div className="absolute bottom-4 left-4 right-4">
-                                  <div className="bg-white/90 backdrop-blur-sm rounded-xl p-3 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                                    <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">{item.category}</span>
-                                  </div>
-                                </div>
-                              </div>
-                            )}
-                            <div className="p-6">
-                              <h4 className="font-bold text-slate-900 mb-3 text-lg">{item.title}</h4>
-                              <p className="text-slate-700 mb-4 line-clamp-2 leading-relaxed">{item.description}</p>
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                  <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                                  <span className="text-sm font-medium text-emerald-700">Finalizat</span>
-                                </div>
-                                <button className="text-blue-600 hover:text-blue-700 font-medium text-sm">
-                                  Vezi detalii →
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-16">
-                        <div className="p-6 rounded-3xl bg-gradient-to-r from-slate-100 to-slate-200 inline-block mb-6">
-                          <Camera className="w-16 h-16 text-slate-500" />
-                        </div>
-                        <h4 className="text-xl font-bold text-slate-700 mb-2">Portofoliu în construcție</h4>
-                        <p className="text-slate-500 text-lg">Acest meseriaș nu a adăugat încă proiecte în portofoliu.</p>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {activeTab === 'reviews' && (
-                  <div className="space-y-8">
-
-                    {reviews.length > 0 ? (
-                      <div className="space-y-6">
-                        {reviews.map((review: any, index: number) => (
-                          <div key={index} className="bg-gradient-to-br from-white to-slate-50 rounded-3xl border border-slate-200 p-6 shadow-lg hover:shadow-xl transition-all duration-300">
-                            <div className="flex items-start gap-6">
-                              <div className="relative">
-                                {review.profiles?.avatar_url ? (
-                                  <img
-                                    src={review.profiles.avatar_url}
-                                    alt={review.profiles?.name || 'Client'}
-                                    loading="lazy"
-                                    decoding="async"
-                                    referrerPolicy="no-referrer"
-                                    className="w-14 h-14 rounded-2xl object-cover ring-4 ring-white shadow-lg"
-                                  />
-                                ) : (
-                                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center ring-4 ring-white shadow-lg">
-                                    <span className="text-white font-bold text-lg">
-                                      {(review.profiles?.name || 'Client').charAt(0).toUpperCase()}
-                                    </span>
-                                  </div>
-                                )}
-                                <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full flex items-center justify-center ring-2 ring-white">
-                                  <CheckCircle className="w-3 h-3 text-white" />
-                                </div>
-                              </div>
-                              <div className="flex-1">
-                                <div className="flex items-center justify-between mb-3">
-                                  <div>
-                                    <span className="font-bold text-slate-900 text-lg">{review.profiles?.name || 'Client'}</span>
-                                    <div className="flex items-center gap-2 mt-1">
-                                      <div className="flex items-center gap-1">
-                                        {[...Array(5)].map((_, i) => (
-                                          <Star key={i} className={`w-4 h-4 ${i < review.rating ? 'text-amber-500 fill-current' : 'text-slate-300'}`} />
-                                        ))}
-                                      </div>
-                                      <span className="text-sm font-medium text-amber-600">{review.rating}/5</span>
-                                    </div>
-                                  </div>
-                                  <span className="text-sm text-slate-500 font-medium">
-                                    {review.created_at ?
-                                      (() => {
-                                        try {
-                                          return format(new Date(review.created_at), 'dd MMM yyyy', { locale: ro });
-                                        } catch (error) {
-                                          return 'Data invalidă';
-                                        }
-                                      })()
-                                      : 'Data necunoscută'
-                                    }
-                                  </span>
-                                </div>
-                                
-                                {/* Job info */}
-                                {review.job && (
-                                  <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-xl">
-                                    <div className="flex items-center gap-2 text-blue-700">
-                                      <Briefcase className="w-4 h-4" />
-                                      <span className="font-medium text-sm">Pentru lucrarea:</span>
-                                      <span className="font-bold text-sm">{review.job.title}</span>
-                                    </div>
-                                    {review.job.tradeType && (
-                                      <div className="flex items-center gap-2 text-blue-600 mt-1">
-                                        <span className="text-xs">•</span>
-                                        <span className="text-xs font-medium">{review.job.tradeType}</span>
-                                      </div>
-                                    )}
-                                  </div>
-                                )}
-                                
-                                <div className="bg-white rounded-2xl p-4 border border-slate-100">
-                                  <p className="text-slate-800 leading-relaxed text-lg italic">"{review.comment}"</p>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-16">
-                        <div className="p-6 rounded-3xl bg-gradient-to-r from-amber-100 to-orange-100 inline-block mb-6">
-                          <Star className="w-16 h-16 text-amber-500" />
-                        </div>
-                        <h4 className="text-xl font-bold text-slate-700 mb-2">Fii primul care lasă o recenzie!</h4>
-                        <p className="text-slate-500 text-lg">Acest meseriaș nu are încă recenzii de la clienți.</p>
-                        <button className="mt-4 px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold hover:shadow-lg transition-all">
-                          Lasă prima recenzie
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {activeTab === 'certifications' && (
-                  <div className="space-y-8">
-
-                    {certifications.length > 0 ? (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {certifications.map((cert: any, index: number) => {
-                          const gradients = [
-                            'from-emerald-500 to-teal-500',
-                            'from-blue-500 to-cyan-500',
-                            'from-purple-500 to-pink-500',
-                            'from-amber-500 to-orange-500'
-                          ];
-                          const gradient = gradients[index % gradients.length];
-                          return (
-                            <div key={index} className="group bg-gradient-to-br from-white to-slate-50 rounded-3xl border border-slate-200 p-6 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
-                              <div className="flex items-start gap-4">
-                                <div className={`p-4 rounded-2xl bg-gradient-to-r ${gradient} shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                                  <Award className="w-8 h-8 text-white" />
-                                </div>
-                                <div className="flex-1">
-                                  <h4 className="font-bold text-slate-900 mb-2 text-lg">{cert.name}</h4>
-                                  <div className="bg-white rounded-xl p-3 border border-slate-100 mb-3">
-                                    <p className="text-slate-700 font-medium">{cert.issuer}</p>
-                                  </div>
-                                  <div className="flex items-center gap-2">
-                                    <CalendarDays className="w-4 h-4 text-slate-500" />
-                                    <span className="text-slate-600 font-medium">
-                                      {cert.issued_date ?
-                                        (() => {
-                                          try {
-                                            return format(new Date(cert.issued_date), 'dd MMMM yyyy', { locale: ro });
-                                          } catch (error) {
-                                            return 'Data invalidă';
-                                          }
-                                        })()
-                                        : 'Data necunoscută'
-                                      }
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    ) : (
-                      <div className="text-center py-16">
-                        <div className="p-6 rounded-3xl bg-gradient-to-r from-emerald-100 to-teal-100 inline-block mb-6">
-                          <Award className="w-16 h-16 text-emerald-500" />
-                        </div>
-                        <h4 className="text-xl font-bold text-slate-700 mb-2">Certificări în curs de adăugare</h4>
-                        <p className="text-slate-500 text-lg">Acest meseriaș nu a adăugat încă certificări profesionale.</p>
-                      </div>
-                    )}
-                  </div>
-                )}
               </div>
             </div>
           </div>
         </div>
+
+        {/* Tabs */}
+        <div className="border-b border-slate-200 sticky top-0 bg-white z-10">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6">
+            <nav className="flex gap-0 overflow-x-auto -mb-px">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`px-4 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
+                    activeTab === tab.id
+                      ? 'border-slate-900 text-slate-900'
+                      : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </nav>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
+
+          {/* About */}
+          {activeTab === 'about' && (
+            <div className="space-y-6">
+              {worker.bio ? (
+                <div>
+                  <h2 className="text-lg font-semibold text-slate-900 mb-3">About</h2>
+                  <p className="text-slate-600 leading-relaxed whitespace-pre-wrap">{worker.bio}</p>
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <p className="text-slate-400">This tradesman hasn't added a bio yet.</p>
+                </div>
+              )}
+
+              {/* Quick stats */}
+              {(totalJobs > 0 || rating > 0) && (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-4 border-t border-slate-100">
+                  {totalJobs > 0 && (
+                    <div className="p-4 bg-slate-50 rounded-lg">
+                      <div className="text-2xl font-bold text-slate-900">{totalJobs}</div>
+                      <div className="text-sm text-slate-500">Jobs completed</div>
+                    </div>
+                  )}
+                  {rating > 0 && (
+                    <div className="p-4 bg-slate-50 rounded-lg">
+                      <div className="text-2xl font-bold text-slate-900">{rating.toFixed(1)}</div>
+                      <div className="text-sm text-slate-500">Average rating</div>
+                    </div>
+                  )}
+                  {reviewCount > 0 && (
+                    <div className="p-4 bg-slate-50 rounded-lg">
+                      <div className="text-2xl font-bold text-slate-900">{reviewCount}</div>
+                      <div className="text-sm text-slate-500">Reviews</div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Portfolio */}
+          {activeTab === 'portfolio' && (
+            <div>
+              {portfolioItems.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {portfolioItems.map((item: any, i: number) => (
+                    <div key={i} onClick={() => setSelectedPortfolioItem(item)} className="group border border-slate-200 rounded-lg overflow-hidden hover:border-slate-300 cursor-pointer transition-colors">
+                      {item.images?.[0] && (
+                        <img src={item.images[0]} alt={item.title} className="w-full h-48 object-cover" loading="lazy" decoding="async" />
+                      )}
+                      <div className="p-4">
+                        <h3 className="font-medium text-slate-900 mb-1">{item.title}</h3>
+                        <p className="text-sm text-slate-500 line-clamp-2">{item.description}</p>
+                        {item.category && <span className="inline-block mt-2 text-xs text-slate-400">{item.category}</span>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-16">
+                  <Camera className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+                  <p className="text-slate-400">No portfolio items yet.</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Reviews */}
+          {activeTab === 'reviews' && (
+            <div>
+              {reviews.length > 0 ? (
+                <div className="space-y-4">
+                  {reviews.map((review: any, i: number) => (
+                    <div key={i} className="border border-slate-200 rounded-lg p-5">
+                      <div className="flex items-start gap-4">
+                        <div className="flex-shrink-0">
+                          {review.profiles?.avatar_url ? (
+                            <img src={review.profiles.avatar_url} alt={review.profiles?.name || 'Client'} loading="lazy" decoding="async" referrerPolicy="no-referrer" className="w-10 h-10 rounded-full object-cover" />
+                          ) : (
+                            <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center">
+                              <span className="text-slate-400 font-medium text-sm">{(review.profiles?.name || 'C').charAt(0).toUpperCase()}</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="font-medium text-slate-900">{review.profiles?.name || 'Client'}</span>
+                            <span className="text-xs text-slate-400">
+                              {review.created_at ? (() => { try { return format(new Date(review.created_at), 'dd MMM yyyy', { locale: ro }); } catch { return ''; } })() : ''}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-0.5 mb-2">
+                            {[...Array(5)].map((_, j) => (
+                              <Star key={j} className={`w-3.5 h-3.5 ${j < review.rating ? 'text-amber-400 fill-current' : 'text-slate-200'}`} />
+                            ))}
+                          </div>
+                          {review.job && (
+                            <div className="flex items-center gap-1.5 text-xs text-slate-400 mb-2">
+                              <Briefcase className="w-3 h-3" />
+                              <span>{review.job.title}</span>
+                            </div>
+                          )}
+                          <p className="text-slate-600 text-sm leading-relaxed">{review.comment}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-16">
+                  <Star className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+                  <p className="text-slate-400">No reviews yet.</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Certifications */}
+          {activeTab === 'certifications' && (
+            <div>
+              {certifications.length > 0 ? (
+                <div className="space-y-3">
+                  {certifications.map((cert: any, i: number) => (
+                    <div key={i} className="flex items-start gap-4 border border-slate-200 rounded-lg p-4">
+                      <div className="p-2 bg-slate-50 rounded-lg flex-shrink-0">
+                        <Award className="w-5 h-5 text-slate-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium text-slate-900">{cert.name}</h3>
+                        <p className="text-sm text-slate-500">{cert.issuer}</p>
+                        {cert.issued_date && (
+                          <div className="flex items-center gap-1.5 mt-1 text-xs text-slate-400">
+                            <CalendarDays className="w-3 h-3" />
+                            <span>{(() => { try { return format(new Date(cert.issued_date), 'dd MMM yyyy', { locale: ro }); } catch { return ''; } })()}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-16">
+                  <Award className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+                  <p className="text-slate-400">No certifications added yet.</p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
-      {/* Render the modals */}
+
+      {/* Modals */}
       <PortfolioModal item={selectedPortfolioItem} onClose={() => setSelectedPortfolioItem(null)} />
-      {isReportModalOpen && (
-        <ReportModal worker={worker} onClose={() => setIsReportModalOpen(false)} />
-      )}
-      {isAvatarModalOpen && (
-        <AvatarModal worker={worker} onClose={() => setIsAvatarModalOpen(false)} />
-      )}
+      {isReportModalOpen && <ReportModal worker={worker} onClose={() => setIsReportModalOpen(false)} />}
+      {isAvatarModalOpen && <AvatarModal worker={worker} onClose={() => setIsAvatarModalOpen(false)} />}
     </>
   );
-} 
+}

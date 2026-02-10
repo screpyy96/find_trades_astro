@@ -22,7 +22,7 @@ export const CompanyCard = memo(({ company }: { company: CompanyProfile }) => {
   
   const profileUrl = useMemo(() => {
     const baseUrl = getWorkerProfileUrl(company, trades);
-    return baseUrl.replace('/meseriasi/', '/companii/');
+    return baseUrl.replace('/tradesman/', '/companii/');
   }, [company, trades]);
   
   const initials = useMemo(() => {

@@ -31,8 +31,8 @@ interface CompanyProfileProps {
 }
 
 const getSupabaseBrowserClient = (config?: { url?: string; anonKey?: string }) => {
-  const url = config?.url || import.meta.env.PUBLIC_SUPABASE_URL;
-  const key = config?.anonKey || import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+  const url = config?.url || import.meta.env.SUPABASE_URL;
+  const key = config?.anonKey || import.meta.env.SUPABASE_ANON_KEY;
   if (!url || !key) return null;
   return createClient(url, key);
 };

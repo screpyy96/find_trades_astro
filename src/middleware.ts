@@ -67,7 +67,7 @@ const GONE_410_HTML = `<!DOCTYPE html>
     <a href="/" class="btn">Mergi la pagina principală</a>
     <div class="links">
       <a href="/servicii/">Servicii</a>
-      <a href="/meseriasi/">Meseriași</a>
+      <a href="/tradesmen/">Tradesmen</a>
       <a href="/blog/">Blog</a>
     </div>
   </div>

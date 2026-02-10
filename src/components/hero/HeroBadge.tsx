@@ -9,7 +9,7 @@ export function HeroBadge() {
         </svg>
       </div>
       <span className="text-sm font-semibold bg-gradient-to-r from-blue-400 to-amber-400 bg-clip-text text-transparent">
-        #1 Platformă de Meseriași din România
+        #1 Tradesmen Platform in the UK
       </span>
       <div className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-pulse" />
     </div>

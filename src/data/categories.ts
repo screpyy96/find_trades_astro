@@ -24,7 +24,7 @@ export const categories: CategoryData[] = [
     slug: "amenajari-interioare",
     name: "Amenajări Interioare",
     h1: "Amenajări Interioare România – Zugrăveli, Gresie, Parchet, Rigips",
-    description: "Găsește meseriași verificați pentru amenajări interioare în orașul tău. Zugrăveli lavabil, montaj gresie faianță, parchet laminat masiv, rigips compartimentări – oferte gratuite în 24h, fără comisioane.",
+    description: "Find verified tradesmen for interior renovations in your city. Painting, tile installation, laminate solid wood flooring, drywall partitions – free quotes in 24h, no commissions.",
     keywords: ["zugrăveli lavabil", "montaj gresie faianță", "parchet laminat", "rigips compartimentări", "gletuire pereți", "montaj uși interior"],
     stats: { cereriLuna: 2400, meseriasi: 320 },
     topServices: [
@@ -58,7 +58,7 @@ export const categories: CategoryData[] = [
     slug: "instalatii-utilitati",
     name: "Instalații & Utilități",
     h1: "Instalații România – Sanitare, Electrice, Termice, Aer Condiționat",
-    description: "Găsește instalatori autorizați pentru instalații sanitare, electrice, termice, gaz și aer condiționat. Meseriași verificați ANRE/ISCIR, oferte gratuite în 24h în toată România.",
+    description: "Find authorized installers for plumbing, electrical, heating, gas and air conditioning installations. ANRE/ISCIR verified tradesmen, free quotes in 24h throughout Romania.",
     keywords: ["instalator sanitar", "electrician autorizat", "montaj aer condiționat", "centrală termică", "panouri fotovoltaice", "instalații gaz"],
     stats: { cereriLuna: 1850, meseriasi: 280 },
     topServices: [
@@ -92,7 +92,7 @@ export const categories: CategoryData[] = [
     slug: "constructii-structuri",
     name: "Construcții & Structuri",
     h1: "Construcții România – Case la Roșu, Fundații, Acoperișuri, Zidărie",
-    description: "Găsește constructori verificați pentru case la roșu/cheie, fundații, acoperișuri, zidărie și tencuială. Echipe profesioniste cu experiență, oferte gratuite în toată România.",
+    description: "Find verified builders for houses at red key/turnkey, foundations, roofs, masonry and plastering. Professional teams with experience, free quotes throughout Romania.",
     keywords: ["construcții case", "fundații beton", "acoperiș țiglă", "zidărie BCA", "tencuială", "izolații termice"],
     stats: { cereriLuna: 980, meseriasi: 185 },
     topServices: [
@@ -160,7 +160,7 @@ export const categories: CategoryData[] = [
     slug: "tamplarie-mobilier",
     name: "Tâmplărie & Mobilier",
     h1: "Tâmplărie România – Mobilier la Comandă, Termopan, Uși, Jaluzele",
-    description: "Găsește tâmplari verificați pentru mobilier la comandă, montaj termopan, uși interior/exterior, jaluzele și rulouri. Oferte gratuite de la meșteri cu experiență.",
+    description: "Find verified carpenters for custom furniture, PVC window installation, interior/exterior doors, blinds and roller shades. Free quotes from experienced craftsmen.",
     keywords: ["mobilier la comandă", "montaj termopan", "uși interior", "jaluzele", "tâmplărie PVC", "dulap dormitor"],
     stats: { cereriLuna: 650, meseriasi: 120 },
     topServices: [

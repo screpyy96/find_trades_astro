@@ -24,8 +24,10 @@ export function MobileNavbar({ currentPath, appUrl = '', webUrl = '' }: MobileNa
     if (typeof window === 'undefined') return;
     
     const isAstroSite = !window.location.hostname.includes('app.');
+    const isDevelopment = window.location.hostname === 'localhost';
     
-    if (isAstroSite && appUrl) {
+    // Skip session check in development if Remix app is not running
+    if (isAstroSite && appUrl && !isDevelopment) {
       fetch(`${appUrl}/api/session-check`, {
         credentials: 'include',
       })
@@ -45,12 +47,17 @@ export function MobileNavbar({ currentPath, appUrl = '', webUrl = '' }: MobileNa
   }, [appUrl]);
 
   const navActions = [
-    { icon: <Home className="w-6 h-6" />, label: 'Acasă', href: webUrl || '/', id: 'home' },
-    { icon: <Search className="w-6 h-6" />, label: 'Meșeriași', href: `${webUrl}/meseriasi`, id: 'search' },
-    { icon: <PlusCircle className="w-6 h-6" />, label: 'Cere ofertă', href: `${appUrl}/cere-oferta`, id: 'new-job' },
+    { icon: <Home className="w-6 h-6" />, label: 'Home', href: webUrl || '/', id: 'home' },
+    { icon: <PlusCircle className="w-6 h-6" />, label: 'Request Quote', href: `${appUrl}/request-quote`, id: 'new-job' },
+    { 
+      icon: <Search className="w-6 h-6" />, 
+      label: 'Tradesmen', 
+      href: `${webUrl}/tradesmen/`, 
+      id: 'tradesmen' 
+    },
     { 
       icon: <LogIn className="w-6 h-6" />, 
-      label: isLoggedIn ? 'Dashboard' : 'Cont', 
+      label: isLoggedIn ? 'Dashboard' : 'Account', 
       href: isLoggedIn 
         ? (userType === 'tradesman' ? `${appUrl}/dashboard/overview` : `${appUrl}/client-dashboard/overview`)
         : `${appUrl}/login`, 
@@ -58,23 +65,23 @@ export function MobileNavbar({ currentPath, appUrl = '', webUrl = '' }: MobileNa
     },
     { 
       icon: drawerOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />, 
-      label: drawerOpen ? 'Închide' : 'Meniu', 
+      label: drawerOpen ? 'Close' : 'Menu', 
       onClick: () => setDrawerOpen(!drawerOpen), 
       id: 'menu' 
     },
   ];
 
   const publicLinks = [
-    { icon: <Search className="w-5 h-5" />, label: 'Meșeriași', href: `${webUrl}/meseriasi` },
-    { icon: <Building2 className="w-5 h-5" />, label: 'Companii', href: `${webUrl}/companii` },
-    { icon: <Briefcase className="w-5 h-5" />, label: 'Solicitări', href: `${webUrl}/solicitari` },
-    { icon: <FileText className="w-5 h-5" />, label: 'Servicii', href: `${webUrl}/servicii` },
+    { icon: <Search className="w-5 h-5" />, label: 'Find Tradesmen', href: `${webUrl}/tradesmen/` },
+    { icon: <FileText className="w-5 h-5" />, label: 'Services', href: `${webUrl}/services` },
+    { icon: <PlusCircle className="w-5 h-5" />, label: 'Request Quote', href: `${appUrl}/request-quote` },
+    { icon: <Briefcase className="w-5 h-5" />, label: 'Requests', href: `${appUrl}/requests` },
   ];
 
   const informationalLinks = [
-    { icon: <Info className="w-5 h-5" />, label: 'Despre Noi', href: `${webUrl}/despre-noi` },
-    { icon: <Mail className="w-5 h-5" />, label: 'Contact', href: `${appUrl}/contact` },
-    { icon: <BookOpen className="w-5 h-5" />, label: 'Blog', href: `${webUrl}/blog` },
+    { icon: <Info className="w-5 h-5" />, label: 'About Us', href: `${webUrl}/about/` },
+    { icon: <Mail className="w-5 h-5" />, label: 'Contact', href: `${webUrl}/contact/` },
+    { icon: <BookOpen className="w-5 h-5" />, label: 'Blog', href: `${webUrl}/blog/` },
   ];
 
   return (
@@ -135,7 +142,7 @@ export function MobileNavbar({ currentPath, appUrl = '', webUrl = '' }: MobileNa
         style={{ maxHeight: '85vh' }}
         role="dialog"
         aria-modal="true"
-        aria-label="Meniu de navigare"
+        aria-label="Navigation menu"
       >
         {/* Drag Handle */}
         <div className="p-4 cursor-pointer" onClick={closeDrawer}>
@@ -156,11 +163,11 @@ export function MobileNavbar({ currentPath, appUrl = '', webUrl = '' }: MobileNa
                   Dashboard
                 </a>
                 <a 
-                  href={`${appUrl}/cere-oferta`}
+                  href={`${appUrl}/request-quote`}
                   onClick={closeDrawer} 
                   className="text-center font-bold bg-gradient-to-r from-amber-500 to-amber-600 text-white hover:from-amber-600 hover:to-amber-700 rounded-xl p-3.5 transition-all shadow-md"
                 >
-                  Cere Ofertă
+                  Get a Quote
                 </a>
               </>
             ) : (
@@ -170,14 +177,14 @@ export function MobileNavbar({ currentPath, appUrl = '', webUrl = '' }: MobileNa
                   onClick={closeDrawer} 
                   className="text-center font-bold bg-white text-slate-900 hover:bg-slate-50 rounded-xl p-3.5 transition-all border border-slate-200 shadow-sm"
                 >
-                  Autentificare
+                  Login
                 </a>
                 <a 
-                  href={`${appUrl}/cere-oferta`}
+                  href={`${appUrl}/request-quote`}
                   onClick={closeDrawer} 
                   className="text-center font-bold bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 rounded-xl p-3.5 transition-all shadow-md"
                 >
-                  Cere Ofertă
+                  Get a Quote
                 </a>
               </>
             )}
@@ -230,7 +237,7 @@ export function MobileNavbar({ currentPath, appUrl = '', webUrl = '' }: MobileNa
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
               </svg>
             </div>
-            <span className="text-sm">Înregistrare Meseriaș</span>
+            <span className="text-sm">Register as Tradesman</span>
           </a>
         </div>
       </div>

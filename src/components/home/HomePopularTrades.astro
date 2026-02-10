@@ -1,4 +1,6 @@
 ---
+import { appLink } from '../../lib/urls';
+
 interface Trade {
   id: number;
   name: string;
@@ -20,12 +22,12 @@ function normalizeString(value: string): string {
 
 // Select popular trades
 const desiredStems = [
-  "electric", // electricieni
-  "instalat", // instalatori
-  "zugrav",   // zugravi
-  "construct",// constructori/constructii
-  "tamplar",  // tâmplari
-  "parchet"   // montatori parchet
+  "electric",   // electrical installations
+  "plumbing",   // plumbing installations  
+  "painting",   // painting & decorating
+  "house",      // house construction
+  "carpentry",  // carpentry
+  "flooring"    // flooring installation
 ];
 
 const byId = new Set<number>();
@@ -71,10 +73,10 @@ function getIconForTrade(name: string) {
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-16 lg:py-20">
       <div class="text-center mb-10 sm:mb-12">
         <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 mb-3">
-          Cele mai populare meserii
+          Most popular trades
         </h2>
         <p class="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto">
-          Alege rapid o meserie și cere oferte gratuite de la meseriași verificați.
+          Choose a trade quickly and get free quotes from verified tradesmen.
         </p>
       </div>
 
@@ -84,9 +86,9 @@ function getIconForTrade(name: string) {
           return (
             <li>
               <a
-                href={`https://app.meseriaslocal.ro/cere-oferta?tradeId=${trade.id}`}
+                href={appLink(`/request-quote?tradeId=${trade.id}`)}
                 class="group block overflow-hidden rounded-2xl bg-white ring-1 ring-black/5 shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-300 hover:shadow-[0_16px_40px_rgba(0,0,0,0.10)] hover:-translate-y-0.5"
-                aria-label={`Cere ofertă pentru ${trade.name}`}
+                aria-label={`Get quote for ${trade.name}`}
               >
                 <div class="h-1 w-full bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500" />
                 <div class="p-5 sm:p-6 flex items-center gap-4">
@@ -98,7 +100,7 @@ function getIconForTrade(name: string) {
                       {trade.name}
                     </h3>
                     <div class="mt-1 inline-flex items-center gap-1.5 text-sm text-slate-600">
-                      <span>Cere oferte instant</span>
+                      <span>Get instant quotes</span>
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                       </svg>
@@ -116,7 +118,7 @@ function getIconForTrade(name: string) {
           href="/servicii"
           class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-slate-100 text-slate-900 border border-slate-200 hover:bg-slate-200 transition-colors font-semibold"
         >
-          Vezi toate serviciile
+          View all services
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
           </svg>

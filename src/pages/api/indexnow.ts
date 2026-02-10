@@ -1,7 +1,13 @@
 import type { APIRoute } from 'astro';
+import { validateEnvironment } from '../../lib/env-validation';
 
 const INDEXNOW_KEY = '80ed490583fd4cb8b5705e6e8cb33fec';
-const BASE_URL = 'https://www.meseriaslocal.ro';
+
+// Use environment variables from .env
+const envConfig = validateEnvironment();
+const WEB_URL = envConfig.config.web.url;
+
+const BASE_URL = WEB_URL;
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -21,7 +27,7 @@ export const POST: APIRoute = async ({ request }) => {
         'Content-Type': 'application/json; charset=utf-8'
       },
       body: JSON.stringify({
-        host: 'www.meseriaslocal.ro',
+        host: new URL(WEB_URL).hostname,
         key: INDEXNOW_KEY,
         keyLocation: `${BASE_URL}/${INDEXNOW_KEY}.txt`,
         urlList: urls.map(url => url.startsWith('http') ? url : `${BASE_URL}${url}`)

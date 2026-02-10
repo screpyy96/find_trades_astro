@@ -1,9 +1,13 @@
 ---
-// Admin page for IndexNow submission
-// Access: https://www.meseriaslocal.ro/admin/indexnow?key=YOUR_SECRET
-export const prerender = false;
+import Base from '../../layouts/Base.astro';
+import { validateEnvironment } from '../../lib/env-validation';
 
-const BASE_URL = 'https://www.meseriaslocal.ro';
+// Use environment variables from .env
+const envConfig = validateEnvironment();
+const WEB_URL = envConfig.config.web.url;
+
+// Access: https://www.findtrades.app/admin/indexnow?key=YOUR_SECRET
+const BASE_URL = WEB_URL;
 
 // Simple secret key protection - set this in your .env file
 const ADMIN_SECRET = import.meta.env.ADMIN_SECRET_KEY || 'meseriaslocal2026';

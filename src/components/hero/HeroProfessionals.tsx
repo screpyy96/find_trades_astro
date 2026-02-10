@@ -94,8 +94,8 @@ export function HeroProfessionals({
     const initSupabase = async () => {
       try {
         const { createClient } = await import('@supabase/supabase-js');
-        const url = supabaseUrlProp || import.meta.env.PUBLIC_SUPABASE_URL;
-        const key = supabaseAnonKeyProp || import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+        const url = supabaseUrlProp || import.meta.env.SUPABASE_URL;
+        const key = supabaseAnonKeyProp || import.meta.env.SUPABASE_ANON_KEY;
         
         if (url && key) {
           const client = createClient(url, key);
@@ -251,7 +251,7 @@ export function HeroProfessionals({
           return (
             <a
               key={professional.id}
-              href={`/meseriasi/${professional.id}`}
+              href={`/tradesman/${professional.id}`}
               className={`group relative block cursor-pointer transform hover:scale-110 transition-all duration-300 ${isCompact ? 'flex-shrink-0' : ''}`}
               style={{ animationDelay: `${index * 0.15}s` }}
             >
@@ -328,7 +328,7 @@ export function HeroProfessionals({
             <span className={`text-white ${isCompact ? 'text-xs' : 'text-sm'} font-medium`}>+{professionals.length - (isCompact ? 3 : 4)} meseriași PRO</span>
           </div>
           <a 
-            href="/meseriasi" 
+            href="/tradesmen/" 
             className={`inline-flex items-center gap-2 ${isCompact ? 'px-3 py-1.5 text-xs' : 'px-4 py-2 text-sm'} bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 text-white font-medium rounded-lg transition-all duration-200 hover:scale-105`}
           >
             <Eye className={`${isCompact ? 'w-3 h-3' : 'w-4 h-4'}`} />

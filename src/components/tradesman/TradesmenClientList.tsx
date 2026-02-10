@@ -509,8 +509,8 @@ export function TradesmenClientList({
             }))
           });
 
-          // IMPORTANT: Filter to show ONLY PRO/Enterprise users (hide basic users)
-          workersWithTrades = workersWithTrades.filter((w: any) => isPremiumUser(w.subscription_plan));
+          // IMPORTANT: Show ALL tradesmen (including free users)
+          // workersWithTrades = workersWithTrades.filter((w: any) => isPremiumUser(w.subscription_plan));
           
           console.log('💎 After PRO-only filter:', {
             total: workersWithTrades.length,
@@ -583,136 +583,117 @@ export function TradesmenClientList({
           setHasMore(false);
         }
       } else {
-        console.log('📊 No filters - loading ONLY PRO/Enterprise users');
+        console.log('📊 No filters - loading ALL verified workers (PRO users shown first)');
         
         // Apply default verified filter for main listing
         query = query.eq('is_verified', true);
 
-        // STRATEGY: Load ONLY PRO and Enterprise users (hide basic users)
+        // STRATEGY: Load ALL verified workers, PRO/Enterprise users get badges
         
-        if (pageNum === 0) {
-          // FIRST PAGE: Load only PRO/Enterprise users
-          console.log('📊 First page - loading ONLY PRO/Enterprise users');
-          
-          // Step 1: Get all PRO and Enterprise user IDs
-          const { data: proSubscriptions } = await supabase
-            .from('user_subscriptions')
-            .select('user_id, plan_id')
-            .eq('status', 'active')
-            .or('plan_id.eq.pro,plan_id.ilike.enterprise%');
-          
-          const proUserIds = proSubscriptions?.map((s: any) => s.user_id) || [];
-          const subscriptionMap = new Map(proSubscriptions?.map((s: any) => [s.user_id, s.plan_id?.trim()]) || []);
-          console.log('💎 Found PRO/Enterprise users:', proUserIds.length);
-          
-          let proWorkers: any[] = [];
-          
-          // Step 2: Fetch ONLY PRO/Enterprise workers
-          if (proUserIds.length > 0) {
-            const { data: proData } = await supabase
-              .from('profiles')
-              .select('id, name, avatar_url, address, bio, rating, is_verified, is_online, phone')
-              .eq('role', 'worker')
-              .eq('is_verified', true)
-              .in('id', proUserIds)
-              .not('name', 'is', null)
-              .order('rating', { ascending: false, nullsFirst: false });
-            
-            proWorkers = proData || [];
-            console.log('💎 PRO workers loaded:', proWorkers.length);
+        const from = pageNum * ITEMS_PER_PAGE;
+        const to = from + ITEMS_PER_PAGE - 1;
+        
+        // Fetch workers with pagination, ordered by rating
+        query = query
+          .order('rating', { ascending: false, nullsFirst: false })
+          .range(from, to);
+        
+        const { data: workersData, error: fetchError } = await query;
+        
+        if (fetchError) {
+          throw new Error(fetchError.message);
+        }
+        
+        if (workersData && workersData.length > 0) {
+          const workerIds = workersData.map((w: any) => w.id);
+
+          // Fetch worker_trades in batches
+          let workerTradesData: any[] = [];
+          const batchSize = 50;
+          for (let i = 0; i < workerIds.length; i += batchSize) {
+            const batch = workerIds.slice(i, i + batchSize);
+            const { data: batchData } = await supabase
+              .from('worker_trades')
+              .select('profile_id, trade_ids')
+              .in('profile_id', batch);
+            if (batchData) {
+              workerTradesData.push(...batchData);
+            }
           }
-          
-          // No regular workers - only PRO/Enterprise
-          const combinedData = [...proWorkers];
-          
-          if (combinedData.length > 0) {
-            // Get worker IDs
-            const workerIds = combinedData.map((w: any) => w.id);
 
-            // Fetch worker_trades for these workers in batches
-            let workerTradesData: any[] = [];
-            const batchSize = 50;
-            for (let i = 0; i < workerIds.length; i += batchSize) {
-              const batch = workerIds.slice(i, i + batchSize);
-              const { data: batchData } = await supabase
-                .from('worker_trades')
-                .select('profile_id, trade_ids')
-                .in('profile_id', batch);
-              if (batchData) {
-                workerTradesData.push(...batchData);
-              }
+          // Collect all unique trade IDs
+          const allTradeIds = new Set<number>();
+          workerTradesData?.forEach((wt: any) => {
+            if (wt.trade_ids && Array.isArray(wt.trade_ids)) {
+              wt.trade_ids.forEach((id: number) => allTradeIds.add(id));
             }
+          });
 
-            // Collect all unique trade IDs
-            const allTradeIds = new Set<number>();
-            workerTradesData?.forEach((wt: any) => {
-              if (wt.trade_ids && Array.isArray(wt.trade_ids)) {
-                wt.trade_ids.forEach((id: number) => allTradeIds.add(id));
-              }
-            });
-
-            // Fetch trade details with caching
-            let trades: any[] = [];
-            if (allTradeIds.size > 0) {
-              const tradesCacheKey = CacheKeys.trades();
-              let cachedTrades = (window as any).__WORKERS_CACHE?.get(tradesCacheKey);
+          // Fetch trade details with caching
+          let trades: any[] = [];
+          if (allTradeIds.size > 0) {
+            const tradesCacheKey = CacheKeys.trades();
+            let cachedTrades = (window as any).__WORKERS_CACHE?.get(tradesCacheKey);
+            
+            if (!cachedTrades) {
+              const tradeIdsArray = Array.from(allTradeIds);
+              const tradeBatchSize = 100;
+              trades = [];
               
-              if (!cachedTrades) {
-                const tradeIdsArray = Array.from(allTradeIds);
-                const tradeBatchSize = 100;
-                trades = [];
-                
-                for (let i = 0; i < tradeIdsArray.length; i += tradeBatchSize) {
-                  const batch = tradeIdsArray.slice(i, i + tradeBatchSize);
-                  const { data: tradeData } = await supabase
-                    .from('trades')
-                    .select('id, name, slug')
-                    .in('id', batch);
-                  if (tradeData) {
-                    trades.push(...tradeData);
-                  }
+              for (let i = 0; i < tradeIdsArray.length; i += tradeBatchSize) {
+                const batch = tradeIdsArray.slice(i, i + tradeBatchSize);
+                const { data: tradeData } = await supabase
+                  .from('trades')
+                  .select('id, name, slug')
+                  .in('id', batch);
+                if (tradeData) {
+                  trades.push(...tradeData);
                 }
-                
-                if (!(window as any).__WORKERS_CACHE) {
-                  (window as any).__WORKERS_CACHE = new Map();
-                }
-                (window as any).__WORKERS_CACHE.set(tradesCacheKey, trades);
-              } else {
-                trades = cachedTrades;
               }
+              
+              if (!(window as any).__WORKERS_CACHE) {
+                (window as any).__WORKERS_CACHE = new Map();
+              }
+              (window as any).__WORKERS_CACHE.set(tradesCacheKey, trades);
+            } else {
+              trades = cachedTrades;
             }
+          }
 
-            // Create maps
-            const tradeMap = new Map((trades || []).map((t: any) => [t.id, t]));
-            const workerTradesMap = new Map(
-              workerTradesData?.map((wt: any) => [wt.profile_id, wt.trade_ids]) || []
-            );
-            const proUserIdsSet = new Set(proUserIds);
+          // Fetch subscriptions to show PRO badges
+          const subscriptionsData = await fetchSubscriptionsInBatches(supabase, workerIds);
 
-            // Map trades and subscriptions to workers
-            const workersWithTrades = combinedData.map((worker: any) => {
-              const tradeIds = workerTradesMap.get(worker.id) || [];
-              const workerTrades = (Array.isArray(tradeIds) ? tradeIds : []).map((id: number) => tradeMap.get(id)).filter(Boolean);
-              
-              return {
-                ...worker,
-                trades: workerTrades,
-                subscription_plan: subscriptionMap.get(worker.id) || null
-              };
-            });
+          // Create maps
+          const tradeMap = new Map((trades || []).map((t: any) => [t.id, t]));
+          const workerTradesMap = new Map(
+            workerTradesData?.map((wt: any) => [wt.profile_id, wt.trade_ids]) || []
+          );
+          const subscriptionMap = new Map(
+            subscriptionsData?.map((sub: any) => [sub.user_id, sub.plan_id]) || []
+          );
 
+          // Map trades and subscriptions to workers
+          const workersWithTrades = workersData.map((worker: any) => {
+            const tradeIds = workerTradesMap.get(worker.id) || [];
+            const workerTrades = (Array.isArray(tradeIds) ? tradeIds : []).map((id: number) => tradeMap.get(id)).filter(Boolean);
+            
+            return {
+              ...worker,
+              trades: workerTrades,
+              subscription_plan: subscriptionMap.get(worker.id) || null
+            };
+          });
+
+          if (reset) {
             setWorkers(workersWithTrades as Worker[]);
-            setHasMore(false); // No more pages - only PRO users shown
-            
-            // Store PRO user IDs for reference
-            (window as any).__PRO_USER_IDS = proUserIds;
           } else {
-            setWorkers([]);
-            setHasMore(false);
+            setWorkers((prev: Worker[]) => [...prev, ...(workersWithTrades as Worker[])]);
           }
+          setHasMore(workersData.length === ITEMS_PER_PAGE);
         } else {
-          // SUBSEQUENT PAGES: No more workers to load (only PRO shown)
-          console.log('📊 Subsequent page - no more workers (only PRO users shown)');
+          if (reset) {
+            setWorkers([]);
+          }
           setHasMore(false);
         }
       }
@@ -1169,25 +1150,25 @@ export function TradesmenClientList({
             <div className="text-center py-16">
               <div className="bg-white border border-slate-200 rounded-2xl p-8 sm:p-12 max-w-lg mx-auto shadow-sm">
                 <Search className="w-12 h-12 sm:w-16 sm:h-16 text-slate-400 mx-auto mb-4" />
-                <h3 className="text-lg sm:text-xl font-semibold text-slate-900 mb-2">Niciun meseriaș PRO găsit</h3>
-                <p className="text-slate-600 text-sm sm:text-base mb-6">
+                <h3 className="text-lg sm:text-xl font-semibold text-slate-900 mb-2">No Tradesmen Found</h3>
+                <p className="text-slate-600 mb-6">
                   {searchTerm 
-                    ? `Nu am găsit meseriași PRO pentru "${searchTerm}".` 
-                    : 'Nu există meseriași PRO care să corespundă filtrelor.'}
+                    ? `No tradesmen found for "${searchTerm}".` 
+                    : 'No tradesmen found matching your filters.'}
                 </p>
                 <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
                   <p className="text-amber-800 text-sm font-medium mb-2">
-                    Vrei să găsești meseriași pentru proiectul tău?
+                    Want to find tradesmen for your project?
                   </p>
                   <p className="text-amber-700 text-xs">
-                    Postează o solicitare gratuită și primește oferte de la meseriași verificați din zona ta.
+                    Post a free request and get quotes from verified tradesmen in your area.
                   </p>
                 </div>
                 <a 
-                  href="https://app.meseriaslocal.ro/cere-oferta"
+                  href={`${import.meta.env.PUBLIC_APP_URL || 'https://app.findtrades.app'}/request-quote`}
                   className="inline-flex items-center px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-lg transition-colors shadow-sm"
                 >
-                  Postează o solicitare gratuită
+                  Post a Free Request
                   <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
@@ -1209,7 +1190,7 @@ export function TradesmenClientList({
                 Postează gratuit ce ai nevoie și primește oferte de la meseriași verificați din zona ta.
               </p>
               <a 
-                href="https://app.meseriaslocal.ro/cere-oferta"
+                href={`${import.meta.env.PUBLIC_APP_URL || 'https://app.findtrades.app'}/request-quote`}
                 className="inline-flex items-center px-6 py-3 bg-white text-orange-600 font-bold rounded-xl hover:bg-slate-100 transition-colors shadow-md"
               >
                 Postează o solicitare gratuită

@@ -78,8 +78,8 @@ export function CompactTradesmenList({
     const initSupabase = async () => {
       try {
         const { createClient } = await import('@supabase/supabase-js');
-        const url = supabaseUrlProp || import.meta.env.PUBLIC_SUPABASE_URL;
-        const key = supabaseAnonKeyProp || import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+        const url = supabaseUrlProp || import.meta.env.SUPABASE_URL;
+        const key = supabaseAnonKeyProp || import.meta.env.SUPABASE_ANON_KEY;
         
         if (url && key) {
           const client = createClient(url, key);
@@ -274,7 +274,7 @@ export function CompactTradesmenList({
 
                 {/* Action Button */}
                 <a
-                  href={`/meseriasi/${worker.id}`}
+                  href={`/tradesman/${worker.id}`}
                   className="w-full inline-flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition-colors"
                 >
                   Vezi acum
@@ -287,7 +287,7 @@ export function CompactTradesmenList({
         {workers.length > 0 && (
           <div className="text-center mt-10">
             <a
-              href="/meseriasi"
+              href="/tradesmen/"
               className="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-lg transition-colors"
             >
               Vezi toți meseriașii

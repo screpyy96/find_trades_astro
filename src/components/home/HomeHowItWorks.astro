@@ -1,28 +1,29 @@
 ---
+import { appLink } from '../../lib/urls';
 const steps = [
   {
-    title: 'Descrie lucrarea',
-    description: 'Spune-ne de ce ai nevoie în mai puțin de 60 de secunde.',
+    title: 'Describe the job',
+    description: 'Tell us what you need in less than 60 seconds.',
     step: '01',
   },
   {
-    title: 'Primește oferte',
-    description: 'Compară oferte clare de la meseriași verificați din zona ta.',
+    title: 'Receive quotes',
+    description: 'Compare clear quotes from verified tradesmen in your area.',
     step: '02',
   },
   {
-    title: 'Alege în siguranță',
-    description: 'Selectează cea mai bună ofertă și pornește lucrarea fără bătăi de cap.',
+    title: 'Choose safely',
+    description: 'Select the best quote and start the job hassle-free.',
     step: '03',
   },
 ];
 ---
 
-<section class="w-full bg-white" id="cum-functioneaza">
+<section class="w-full bg-white" id="how-it-works">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-16 lg:py-20">
     <div class="mb-10 sm:mb-12 text-center">
       <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">
-        Proiectul tău, rezolvat în 3 pași simpli
+        Your project, solved in 3 simple steps
       </h2>
     </div>
 
@@ -50,10 +51,10 @@ const steps = [
 
     <div class="text-center mt-12 sm:mt-16">
       <a
-        href="https://app.meseriaslocal.ro/cere-oferta"
+        href={appLink('/request-quote')}
         class="inline-flex items-center gap-3 px-7 sm:px-9 py-3.5 sm:py-4 rounded-full bg-gradient-to-r from-orange-500 via-amber-500 to-rose-500 text-white font-semibold transition-all duration-300 hover:brightness-110 shadow-lg"
       >
-        <span class="relative">Postează o lucrare gratuit</span>
+        <span class="relative">Post a job for free</span>
         <svg class="relative w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
         </svg>

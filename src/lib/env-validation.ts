@@ -14,12 +14,7 @@ interface EnvConfig {
   web: {
     url: string;
   };
-  sanity?: {
-    projectId: string;
-    dataset: string;
-    token: string;
-  };
-  analytics?: {
+    analytics?: {
     gtmId: string;
     clarityId: string;
   };
@@ -35,12 +30,12 @@ export function validateEnvironment(): { config: EnvConfig; errors: ValidationEr
   const errors: ValidationError[] = [];
   
   // Validate Supabase (required for core functionality)
-  const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+  const supabaseUrl = import.meta.env.SUPABASE_URL;
+  const supabaseAnonKey = import.meta.env.SUPABASE_ANON_KEY;
   
   if (!supabaseUrl) {
     errors.push({
-      field: 'PUBLIC_SUPABASE_URL',
+      field: 'SUPABASE_URL',
       message: 'Supabase URL is required for database functionality',
       isRequired: true
     });
@@ -48,21 +43,17 @@ export function validateEnvironment(): { config: EnvConfig; errors: ValidationEr
   
   if (!supabaseAnonKey) {
     errors.push({
-      field: 'PUBLIC_SUPABASE_ANON_KEY',
+      field: 'SUPABASE_ANON_KEY',
       message: 'Supabase anonymous key is required for database access',
       isRequired: true
     });
   }
   
   // Validate URLs
-  const appUrl = import.meta.env.PUBLIC_APP_URL || 'https://app.meseriaslocal.ro';
-  const webUrl = import.meta.env.PUBLIC_WEB_URL || 'https://www.meseriaslocal.ro';
+  const appUrl = import.meta.env.PUBLIC_APP_URL || 'https://app.findtrades.app';
+  const webUrl = import.meta.env.PUBLIC_WEB_URL || 'https://www.findtrades.app';
   
-  // Validate Sanity (optional but recommended)
-  const sanityProjectId = import.meta.env.SANITY_PROJECT_ID;
-  const sanityDataset = import.meta.env.SANITY_DATASET || 'production';
-  const sanityToken = import.meta.env.SANITY_TOKEN;
-  
+    
   // Validate Analytics (optional)
   const gtmId = import.meta.env.PUBLIC_GTM_ID;
   const clarityId = import.meta.env.PUBLIC_CLARITY_ID;
@@ -80,15 +71,7 @@ export function validateEnvironment(): { config: EnvConfig; errors: ValidationEr
     }
   };
   
-  // Add optional config if available
-  if (sanityProjectId) {
-    config.sanity = {
-      projectId: sanityProjectId,
-      dataset: sanityDataset,
-      token: sanityToken || ''
-    };
-  }
-  
+    
   if (gtmId || clarityId) {
     config.analytics = {
       gtmId: gtmId || '',

@@ -1,0 +1,405 @@
+---
+import Base from '../layouts/Base.astro';
+import { validateEnvironment } from '../lib/env-validation';
+
+const envConfig = validateEnvironment();
+const APP_URL = envConfig.config.app.url;
+const WEB_URL = envConfig.config.web.url;
+---
+
+<Base 
+  title="About Us - FindTrades Story"
+  description="Discover the FindTrades story - the platform connecting UK homeowners with verified professional tradesmen."
+>
+  <!-- Hero Section with Animated Background -->
+  <div class="relative overflow-hidden py-24 lg:py-40" style="background: linear-gradient(180deg, #0f172a 0%, #1e293b 50%, #334155 100%)">
+    <!-- Animated Background Elements -->
+    <div class="pointer-events-none absolute inset-0">
+      <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(251,191,36,0.15),transparent_50%)]"></div>
+      <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(59,130,246,0.15),transparent_50%)]"></div>
+      <div class="absolute top-0 left-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl animate-pulse"></div>
+      <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" style="animation-delay: 1s;"></div>
+    </div>
+    
+    <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <div class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-amber-500/20 to-blue-500/20 border border-amber-400/30 mb-8 backdrop-blur-sm animate-fade-in">
+        <span class="text-2xl">🏗️</span>
+        <span class="text-amber-300 text-sm font-semibold tracking-wide">OUR STORY</span>
+      </div>
+      
+      <h1 class="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-white mb-8 leading-tight animate-slide-up">
+        Bringing <span class="bg-gradient-to-r from-amber-400 to-blue-400 bg-clip-text text-transparent">trust</span><br />
+        to the trades industry
+      </h1>
+      
+      <p class="text-xl sm:text-2xl text-slate-300 max-w-3xl mx-auto leading-relaxed animate-fade-in" style="animation-delay: 0.2s;">
+        FindTrades is revolutionizing how UK homeowners connect with verified professional tradesmen. 
+        We're building a community based on trust, quality, and exceptional service.
+      </p>
+      
+      <div class="flex flex-col sm:flex-row gap-4 justify-center mt-12 animate-fade-in" style="animation-delay: 0.4s;">
+        <a 
+          href="/services"
+          class="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 text-white font-bold text-lg transition-all duration-300 hover:from-amber-600 hover:to-amber-700 hover:shadow-lg hover:shadow-amber-500/25 transform hover:scale-105"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+          </svg>
+          Explore Services
+        </a>
+        <a 
+          href={`${APP_URL}/request-quote`}
+          class="inline-flex items-center gap-3 px-8 py-4 rounded-full border-2 border-white/30 text-white font-bold text-lg transition-all duration-300 hover:bg-white/10 hover:border-white/50"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          Post a Job
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Story Section with Timeline -->
+  <section class="py-20 lg:py-32 bg-gradient-to-b from-white to-slate-50">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">Cum a început totul</h2>
+        <div class="w-24 h-1 bg-gradient-to-r from-emerald-500 to-blue-500 mx-auto rounded-full"></div>
+      </div>
+      
+      <div class="grid lg:grid-cols-2 gap-12 items-center mb-16">
+        <div class="space-y-6">
+          <div class="bg-white rounded-2xl p-8 shadow-lg border border-slate-200 hover:shadow-xl transition-shadow">
+            <div class="flex items-start gap-4">
+              <div class="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-red-500 to-orange-500 rounded-xl flex items-center justify-center text-2xl">
+                😤
+              </div>
+              <div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Problema</h3>
+                <p class="text-gray-600 leading-relaxed">
+                  <strong>De ce e atât de greu să găsești un meseriaș de încredere în România?</strong> 
+                  Cauți un electrician, un instalator sau un zugrav, și te lovești de aceleași probleme: 
+                  nu știi cui să te adresezi, nu ai garanții, și plătești mai mult decât ar trebui.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-2xl p-8 shadow-lg border border-slate-200 hover:shadow-xl transition-shadow">
+            <div class="flex items-start gap-4">
+              <div class="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center text-2xl">
+                💡
+              </div>
+              <div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Soluția</h3>
+                <p class="text-gray-600 leading-relaxed">
+                  În 2024, am decis să schimbăm asta. Am creat <strong>Meserias Local</strong> - o platformă unde 
+                  transparența, calitatea și încrederea sunt pe primul loc. Fiecare meseriaș este verificat, 
+                  fiecare recenzie este reală.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="relative">
+          <div class="bg-gradient-to-br from-emerald-500 to-blue-600 rounded-3xl p-10 text-white shadow-2xl transform hover:scale-105 transition-transform">
+            <div class="text-6xl mb-6">🎯</div>
+            <h3 class="text-3xl font-bold mb-4">Viziunea noastră</h3>
+            <p class="text-xl text-emerald-50 leading-relaxed mb-6">
+              Să devenim cea mai mare comunitate de meseriași verificați din România, 
+              unde fiecare proiect este o poveste de succes.
+            </p>
+            <div class="flex items-center gap-3 text-emerald-100">
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+              </svg>
+              <span class="font-semibold">Transparență totală</span>
+            </div>
+            <div class="flex items-center gap-3 text-emerald-100 mt-2">
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+              </svg>
+              <span class="font-semibold">Calitate garantată</span>
+            </div>
+            <div class="flex items-center gap-3 text-emerald-100 mt-2">
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+              </svg>
+              <span class="font-semibold">Comunitate puternică</span>
+            </div>
+          </div>
+          <!-- Decorative elements -->
+          <div class="absolute -top-4 -right-4 w-24 h-24 bg-yellow-400 rounded-full opacity-20 blur-2xl"></div>
+          <div class="absolute -bottom-4 -left-4 w-32 h-32 bg-purple-400 rounded-full opacity-20 blur-2xl"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Values Section with Enhanced Design -->
+  <section class="py-20 lg:py-32 bg-slate-900 relative overflow-hidden">
+    <!-- Background Pattern -->
+    <div class="absolute inset-0 opacity-10">
+      <div class="absolute inset-0" style="background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.15) 1px, transparent 0); background-size: 40px 40px;"></div>
+    </div>
+
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-20">
+        <h2 class="text-4xl lg:text-5xl font-bold text-white mb-6">Valorile noastre</h2>
+        <p class="text-xl text-slate-300 max-w-2xl mx-auto">
+          Principiile care ne ghidează în fiecare decizie și interacțiune
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- Încredere -->
+        <div class="group bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-8 border border-slate-700 hover:border-emerald-500 transition-all hover:shadow-2xl hover:shadow-emerald-500/20 hover:-translate-y-2">
+          <div class="w-16 h-16 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg shadow-emerald-500/50">
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+            </svg>
+          </div>
+          <h3 class="text-2xl font-bold text-white mb-3 group-hover:text-emerald-400 transition-colors">Încredere</h3>
+          <p class="text-slate-300 leading-relaxed">Verificăm fiecare meseriaș și promovăm transparența totală. Fiecare recenzie este autentică, fiecare rating este real.</p>
+        </div>
+
+        <!-- Rapiditate -->
+        <div class="group bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-8 border border-slate-700 hover:border-blue-500 transition-all hover:shadow-2xl hover:shadow-blue-500/20 hover:-translate-y-2">
+          <div class="w-16 h-16 bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg shadow-blue-500/50">
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>
+          </div>
+          <h3 class="text-2xl font-bold text-white mb-3 group-hover:text-blue-400 transition-colors">Rapiditate</h3>
+          <p class="text-slate-300 leading-relaxed">Conectăm clienții cu meseriașii în câteva minute. Timpul tău este prețios, iar noi îl respectăm.</p>
+        </div>
+
+        <!-- Calitate -->
+        <div class="group bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-8 border border-slate-700 hover:border-amber-500 transition-all hover:shadow-2xl hover:shadow-amber-500/20 hover:-translate-y-2">
+          <div class="w-16 h-16 bg-gradient-to-br from-amber-400 to-amber-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg shadow-amber-500/50">
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+            </svg>
+          </div>
+          <h3 class="text-2xl font-bold text-white mb-3 group-hover:text-amber-400 transition-colors">Calitate</h3>
+          <p class="text-slate-300 leading-relaxed">Promovăm doar meseriași cu experiență dovedită și rezultate excepționale. Excelența este standardul nostru.</p>
+        </div>
+
+        <!-- Transparență -->
+        <div class="group bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-8 border border-slate-700 hover:border-purple-500 transition-all hover:shadow-2xl hover:shadow-purple-500/20 hover:-translate-y-2">
+          <div class="w-16 h-16 bg-gradient-to-br from-purple-400 to-purple-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg shadow-purple-500/50">
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+            </svg>
+          </div>
+          <h3 class="text-2xl font-bold text-white mb-3 group-hover:text-purple-400 transition-colors">Transparență</h3>
+          <p class="text-slate-300 leading-relaxed">Prețuri clare, procese simple, comunicare deschisă. Fără surprize neplăcute sau costuri ascunse.</p>
+        </div>
+
+        <!-- Comunitate -->
+        <div class="group bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-8 border border-slate-700 hover:border-pink-500 transition-all hover:shadow-2xl hover:shadow-pink-500/20 hover:-translate-y-2">
+          <div class="w-16 h-16 bg-gradient-to-br from-pink-400 to-pink-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg shadow-pink-500/50">
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+            </svg>
+          </div>
+          <h3 class="text-2xl font-bold text-white mb-3 group-hover:text-pink-400 transition-colors">Comunitate</h3>
+          <p class="text-slate-300 leading-relaxed">Construim o comunitate puternică unde meseriașii și clienții se susțin reciproc pentru rezultate mai bune.</p>
+        </div>
+
+        <!-- Inovație -->
+        <div class="group bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-8 border border-slate-700 hover:border-cyan-500 transition-all hover:shadow-2xl hover:shadow-cyan-500/20 hover:-translate-y-2">
+          <div class="w-16 h-16 bg-gradient-to-br from-cyan-400 to-cyan-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg shadow-cyan-500/50">
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+            </svg>
+          </div>
+          <h3 class="text-2xl font-bold text-white mb-3 group-hover:text-cyan-400 transition-colors">Inovație</h3>
+          <p class="text-slate-300 leading-relaxed">Îmbunătățim constant platforma cu tehnologii moderne pentru cea mai bună experiență posibilă.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Impact Stats Section -->
+  <section class="py-20 lg:py-32 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">Impactul nostru</h2>
+        <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+          Cifrele care demonstrează angajamentul nostru față de calitate și satisfacția clienților
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div class="text-center p-8 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-3xl border border-emerald-200 hover:shadow-xl transition-shadow">
+          <div class="text-5xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-3">98%</div>
+          <div class="text-gray-700 font-semibold mb-2">Satisfacție clienți</div>
+          <div class="text-sm text-gray-500">Din recenzii verificate</div>
+        </div>
+
+        <div class="text-center p-8 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-3xl border border-blue-200 hover:shadow-xl transition-shadow">
+          <div class="text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-3">&lt;2h</div>
+          <div class="text-gray-700 font-semibold mb-2">Timp de răspuns</div>
+          <div class="text-sm text-gray-500">Medie pentru oferte</div>
+        </div>
+
+        <div class="text-center p-8 bg-gradient-to-br from-purple-50 to-pink-50 rounded-3xl border border-purple-200 hover:shadow-xl transition-shadow">
+          <div class="text-5xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-3">100%</div>
+          <div class="text-gray-700 font-semibold mb-2">Meseriași verificați</div>
+          <div class="text-sm text-gray-500">Proces de verificare riguros</div>
+        </div>
+
+        <div class="text-center p-8 bg-gradient-to-br from-amber-50 to-orange-50 rounded-3xl border border-amber-200 hover:shadow-xl transition-shadow">
+          <div class="text-5xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent mb-3">24/7</div>
+          <div class="text-gray-700 font-semibold mb-2">Disponibilitate</div>
+          <div class="text-sm text-gray-500">Platformă accesibilă oricând</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section with Enhanced Design -->
+  <section class="relative py-24 lg:py-32 overflow-hidden">
+    <!-- Gradient Background -->
+    <div class="absolute inset-0 bg-gradient-to-br from-emerald-600 via-teal-600 to-blue-700"></div>
+    
+    <!-- Animated Background Pattern -->
+    <div class="absolute inset-0 opacity-20">
+      <div class="absolute inset-0" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 50px 50px;"></div>
+    </div>
+
+    <!-- Decorative Blobs -->
+    <div class="absolute top-0 left-0 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-0 right-0 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl"></div>
+
+    <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <div class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 mb-8">
+        <span class="text-2xl">🚀</span>
+        <span class="text-white text-sm font-semibold">HAI SĂ ÎNCEPEM</span>
+      </div>
+
+      <h2 class="text-4xl lg:text-6xl font-extrabold text-white mb-6 leading-tight">
+        Alătură-te comunității<br />
+        <span class="text-emerald-200">Meserias Local</span>
+      </h2>
+      
+      <p class="text-xl lg:text-2xl text-emerald-50 mb-12 max-w-3xl mx-auto leading-relaxed">
+        Fie că ești client în căutarea unui meseriaș de încredere sau un profesionist care vrea să își dezvolte afacerea, 
+        te așteptăm cu brațele deschise!
+      </p>
+      
+      <div class="flex flex-col sm:flex-row gap-6 justify-center items-center">
+        <a href="/tradesmen/" class="group inline-flex items-center justify-center px-10 py-5 rounded-2xl bg-white text-emerald-600 font-bold text-lg hover:bg-emerald-50 transition-all hover:scale-105 shadow-2xl hover:shadow-emerald-500/50">
+          <svg class="w-6 h-6 mr-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+          Găsește un meseriaș
+        </a>
+        
+        <a href={`${APP_URL}/register`} class="group inline-flex items-center justify-center px-10 py-5 rounded-2xl bg-transparent text-white font-bold text-lg hover:bg-white/10 transition-all hover:scale-105 border-2 border-white shadow-2xl">
+          <svg class="w-6 h-6 mr-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+          </svg>
+          Înregistrează-te ca meseriaș
+        </a>
+      </div>
+
+      <!-- Trust Indicators -->
+      <div class="mt-16 flex flex-wrap justify-center items-center gap-8 text-emerald-100">
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+          </svg>
+          <span class="font-medium">Fără costuri ascunse</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+          </svg>
+          <span class="font-medium">Înregistrare gratuită</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+          </svg>
+          <span class="font-medium">Suport dedicat</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <style>
+    @keyframes fade-in {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes slide-up {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animate-fade-in {
+      animation: fade-in 0.8s ease-out;
+    }
+
+    .animate-slide-up {
+      animation: slide-up 0.8s ease-out;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 0.6;
+      }
+      50% {
+        opacity: 0.8;
+      }
+    }
+
+    .animate-pulse {
+      animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    /* Stiluri pentru liste */
+    ul {
+      list-style-type: disc;
+      padding-left: 1.5rem;
+      margin: 1rem 0;
+    }
+
+    ol {
+      list-style-type: decimal;
+      padding-left: 1.5rem;
+      margin: 1rem 0;
+    }
+
+    li {
+      margin: 0.5rem 0;
+      line-height: 1.6;
+    }
+
+    ul ul, ol ul {
+      list-style-type: circle;
+      margin-top: 0.5rem;
+    }
+
+    ul ol, ol ol {
+      list-style-type: lower-alpha;
+      margin-top: 0.5rem;
+    }
+  </style>
+</Base>

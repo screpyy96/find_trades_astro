@@ -22,13 +22,6 @@ export function getAppConfig() {
   };
 }
 
-export function getSanityConfig() {
-  return config.sanity ? {
-    projectId: config.sanity.projectId,
-    dataset: config.sanity.dataset,
-    token: config.sanity.token
-  } : null;
-}
 
 export function getAnalyticsConfig() {
   return config.analytics ? {

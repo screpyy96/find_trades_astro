@@ -75,9 +75,7 @@ export const CacheKeys = {
   metrics: (tradeId: string, serviceName: string, cityName: string) => 
     `metrics:${tradeId}:${serviceName}:${cityName}`,
   
-  sanity: (serviceSlug: string, citySlug: string) => 
-    `sanity:${serviceSlug}:${citySlug}`,
-};
+  };
 
 export class ServicePageCache {
   // Cache service page data
@@ -122,26 +120,7 @@ export class ServicePageCache {
     return data;
   }
   
-  // Cache Sanity content
-  static async getCachedSanityContent<T>(
-    serviceSlug: string, 
-    citySlug: string,
-    fetchFn: () => Promise<T>
-  ): Promise<T> {
-    const key = CacheKeys.sanity(serviceSlug, citySlug);
-    const cached = memoryCache.get<T>(key);
     
-    if (cached) {
-      return cached;
-    }
-    
-    const data = await fetchFn();
-    // Cache for 1 hour (CMS content changes rarely)
-    memoryCache.set(key, data, 60 * 60 * 1000);
-    
-    return data;
-  }
-  
   // NEW: Cache workers list
   static async getCachedWorkers<T>(
     sort: string,

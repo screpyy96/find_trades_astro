@@ -274,13 +274,13 @@
   ],
   "redirects": [
     {
-      "source": "/cere-oferta",
-      "destination": "https://app.meseriaslocal.ro/cere-oferta",
+      "source": "/request-quote",
+      "destination": "https://app.meseriaslocal.ro/request-quote",
       "permanent": true
     },
     {
-      "source": "/cere-oferta/",
-      "destination": "https://app.meseriaslocal.ro/cere-oferta",
+      "source": "/request-quote/",
+      "destination": "https://app.meseriaslocal.ro/request-quote",
       "permanent": true
     },
     

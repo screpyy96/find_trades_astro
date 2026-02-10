@@ -46,7 +46,7 @@ export function HeroSearch({ trades, isLoading, onSelectTrade, initialQuery = ''
     if (filteredTrades.length > 0) {
       handleTradeSelect(filteredTrades[0] as Trade);
     } else if (searchQuery.trim()) {
-      window.location.href = `/meseriasi?q=${encodeURIComponent(searchQuery.trim())}`;
+      window.location.href = `/tradesmen/?q=${encodeURIComponent(searchQuery.trim())}`;
     }
   }, [filteredTrades, handleTradeSelect, searchQuery]);
 
@@ -56,7 +56,7 @@ export function HeroSearch({ trades, isLoading, onSelectTrade, initialQuery = ''
         <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
           <div className="relative flex-1">
             <label htmlFor="hero-search-input" className="sr-only">
-              Caută meseriaș
+              Search for tradesmen
             </label>
             <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10 text-slate-400" aria-hidden="true">
               <svg aria-hidden="true" viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor">
@@ -67,7 +67,7 @@ export function HeroSearch({ trades, isLoading, onSelectTrade, initialQuery = ''
             <input
               ref={inputRef}
               type="text"
-              placeholder={searchQuery || 'Ce meseriaș cauți? Ex: electrician'}
+              placeholder={searchQuery || 'What tradesman are you looking for? e.g. electrician'}
               className="w-full pl-12 pr-4 py-4 text-base rounded-xl bg-white text-slate-900 placeholder-slate-500 caret-amber-500 border border-slate-200 focus:ring-2 focus:ring-amber-400/50 focus:border-amber-400 focus:outline-none font-medium transition-all duration-200 shadow-sm"
               id="hero-search-input"
               name="query"
@@ -92,14 +92,14 @@ export function HeroSearch({ trades, isLoading, onSelectTrade, initialQuery = ''
           <button
             onClick={() => {
               if (searchQuery.trim()) {
-                window.location.href = `/meseriasi?q=${encodeURIComponent(searchQuery.trim())}`;
+                window.location.href = `/tradesmen/?q=${encodeURIComponent(searchQuery.trim())}`;
               } else {
-                window.location.href = '/meseriasi';
+                window.location.href = '/tradesmen/';
               }
             }}
             className="group w-full sm:w-auto min-h-[56px] px-6 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-2"
           >
-            <span>Caută</span>
+            <span>Search</span>
             <svg className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
@@ -109,16 +109,16 @@ export function HeroSearch({ trades, isLoading, onSelectTrade, initialQuery = ''
         <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">
           <div className="flex items-center gap-1.5">
             <div className="w-1.5 h-1.5 bg-amber-400 rounded-full" />
-            <span><strong className="text-amber-300">Click pe rezultat</strong> → Cere ofertă direct</span>
+            <span><strong className="text-amber-300">Click result</strong> → Request quote directly</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-1.5 h-1.5 bg-orange-400 rounded-full" />
-            <span><strong className="text-orange-300">Buton Caută</strong> → Caută meseriași</span>
+            <span><strong className="text-orange-300">Search button</strong> → Find tradesmen</span>
           </div>
           {!hasTrades && (
             <div className="flex items-center gap-1.5">
               <div className="w-1.5 h-1.5 bg-red-400 rounded-full" />
-              <span className="text-red-300/80">Lista de meserii nu s-a încărcat încă</span>
+              <span className="text-red-300/80">Trades list not loaded yet</span>
             </div>
           )}
         </div>
@@ -127,7 +127,7 @@ export function HeroSearch({ trades, isLoading, onSelectTrade, initialQuery = ''
       {showDropdown && (
         <div className="absolute left-0 right-0 mt-2 z-[999] rounded-2xl shadow-2xl overflow-hidden border border-slate-200 bg-white">
           {isLoading ? (
-            <div className="p-4 text-center text-slate-600 font-medium">Se încarcă...</div>
+            <div className="p-4 text-center text-slate-600 font-medium">Loading...</div>
           ) : filteredTrades.length > 0 ? (
             <>
               {/* Mobile scroll hint */}
@@ -137,7 +137,7 @@ export function HeroSearch({ trades, isLoading, onSelectTrade, initialQuery = ''
                     <svg className="w-4 h-4 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
-                    <span>{filteredTrades.length} rezultate - Scroll pentru mai multe</span>
+                    <span>{filteredTrades.length} results - Scroll for more</span>
                     <svg className="w-4 h-4 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
@@ -168,12 +168,12 @@ export function HeroSearch({ trades, isLoading, onSelectTrade, initialQuery = ''
             </>
           ) : (
             <div className="p-4 text-center text-slate-600 font-medium space-y-2">
-              <div>Niciun rezultat pentru "{searchQuery}"</div>
+              <div>No results for "{searchQuery}"</div>
               <a
-                href="/meseriasi"
+                href="/tradesmen/"
                 className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 text-sm transition"
               >
-                Vezi toate meseriile
+                View all trades
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>

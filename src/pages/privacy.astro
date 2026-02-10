@@ -1,0 +1,235 @@
+---
+import Base from '../layouts/Base.astro';
+import { validateEnvironment } from '../lib/env-validation';
+
+// Use environment variables from .env
+const envConfig = validateEnvironment();
+const WEB_URL = envConfig.config.web.url;
+const APP_URL = envConfig.config.app.url;
+const LAST_UPDATED = '9 November 2025';
+---
+
+<Base
+  title="Privacy Policy | FindTrades"
+  description="Learn how FindTrades collects, uses and protects your personal data in compliance with GDPR and UK legislation."
+>
+  <section class="bg-slate-950 text-slate-100 py-16">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <p class="text-sm uppercase tracking-widest text-amber-300 font-semibold mb-4">Privacy & GDPR</p>
+      <h1 class="text-4xl sm:text-5xl font-extrabold mb-6 leading-tight">How we protect your personal data</h1>
+      <p class="text-lg text-slate-300 leading-relaxed max-w-3xl">
+        We care about your privacy. This policy explains what data we collect, why we collect it and how we keep it safe
+        when you use the <strong>FindTrades</strong> platform as a visitor, client or tradesman.
+      </p>
+      <div class="mt-8 inline-flex items-center gap-3 px-5 py-3 rounded-full bg-slate-900/60 border border-slate-700">
+        <span class="text-sm text-slate-400">Last updated</span>
+        <span class="text-amber-300 font-semibold">{LAST_UPDATED}</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-white py-16 lg:py-24">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="bg-slate-50 border-b border-slate-200 px-6 sm:px-10 py-6">
+          <h2 class="text-2xl font-semibold text-slate-900">Cuprins</h2>
+          <p class="mt-2 text-sm text-slate-500">Navighează rapid către secțiunea de interes.</p>
+        </div>
+        <div class="px-6 sm:px-10 py-8">
+          <ol class="grid gap-3 text-sm text-slate-600 sm:grid-cols-2">
+            <li><a class="hover:text-emerald-600 transition" href="#principii">1. Principii de confidențialitate</a></li>
+            <li><a class="hover:text-emerald-600 transition" href="#operator">2. Operatorul de date</a></li>
+            <li><a class="hover:text-emerald-600 transition" href="#date-colectate">3. Date colectate</a></li>
+            <li><a class="hover:text-emerald-600 transition" href="#temeiuri">4. Temeiuri legale</a></li>
+            <li><a class="hover:text-emerald-600 transition" href="#scopuri">5. Scopuri de prelucrare</a></li>
+            <li><a class="hover:text-emerald-600 transition" href="#durata">6. Durata stocării</a></li>
+            <li><a class="hover:text-emerald-600 transition" href="#partajare">7. Partajarea datelor</a></li>
+            <li><a class="hover:text-emerald-600 transition" href="#drepturi">8. Drepturile tale</a></li>
+            <li><a class="hover:text-emerald-600 transition" href="#cookie">9. Cookie-uri & tracking</a></li>
+            <li><a class="hover:text-emerald-600 transition" href="#securitate">10. Măsuri de securitate</a></li>
+            <li><a class="hover:text-emerald-600 transition" href="#minori">11. Protecția minorilor</a></li>
+            <li><a class="hover:text-emerald-600 transition" href="#transferuri">12. Transferuri internaționale</a></li>
+            <li><a class="hover:text-emerald-600 transition" href="#actualizari">13. Actualizări ale politicii</a></li>
+            <li><a class="hover:text-emerald-600 transition" href="#contact">14. Cum ne contactezi</a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-white pb-20">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
+      <article id="principii" class="space-y-5">
+        <header class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">1</div>
+          <h2 class="text-3xl font-semibold text-slate-900">Principii de confidențialitate</h2>
+        </header>
+        <p class="text-slate-600 leading-relaxed">
+          Respectăm Regulamentul (UE) 2016/679 („GDPR”) și ne bazăm pe principiile transparenței, minimizării datelor, securității și responsabilității.
+          Colectăm doar datele necesare, clarificăm scopurile prelucrării și permitem exercitarea tuturor drepturilor tale.
+        </p>
+      </article>
+
+      <article id="operator" class="space-y-5">
+        <header class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">2</div>
+          <h2 class="text-3xl font-semibold text-slate-900">Operatorul de date</h2>
+        </header>
+        <p class="text-slate-600 leading-relaxed">
+          Operatorul platformei Meserias Local este <strong>Meserias Local SRL</strong>, cu sediul în București, România. Ne poți contacta pentru întrebări legate de
+          confidențialitate la <a href="mailto:contact@findtrades.app" class="text-emerald-600 font-semibold hover:underline">contact@findtrades.app</a> sau prin pagina
+          <a href="/despre-noi/" class="text-emerald-600 font-semibold hover:underline">Despre Noi</a>.
+        </p>
+      </article>
+
+      <article id="date-colectate" class="space-y-5">
+        <header class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">3</div>
+          <h2 class="text-3xl font-semibold text-slate-900">Ce date colectăm</h2>
+        </header>
+        <p class="text-slate-600 leading-relaxed">Colectăm date în funcție de modul în care folosești platforma:</p>
+        <ul class="text-slate-600 leading-relaxed list-disc pl-6 space-y-2">
+          <li><strong>Date de identificare</strong>: nume, prenume, telefon, adresă de email, CNP (unde este cerut legal pentru meseriași).</li>
+          <li><strong>Date profesionale</strong>: domeniu de activitate, certificări, portofoliu, descrierea serviciilor oferite.</li>
+          <li><strong>Date contractuale</strong>: detalii despre cereri, oferte, feedback și istoricul colaborărilor.</li>
+          <li><strong>Date tehnice</strong>: IP, tip dispozitiv, sistem de operare, log-uri de acces, date despre sesiune.</li>
+          <li><strong>Date de marketing</strong>: preferințe privind newsletter-ul, campanii promoționale și notificări.</li>
+        </ul>
+        <p class="text-slate-600 leading-relaxed">
+          Pentru meseriași putem solicita documente justificative (autorizații, atestate), exclusiv pentru verificare și conformitate legală.
+        </p>
+      </article>
+
+      <article id="temeiuri" class="space-y-5">
+        <header class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">4</div>
+          <h2 class="text-3xl font-semibold text-slate-900">Temeiuri legale</h2>
+        </header>
+        <p class="text-slate-600 leading-relaxed">
+          Prelucrăm datele tale doar în baza unui temei legal: consimțământ, executarea contractului (Termeni și Condiții), interese legitime validate,
+          sau obligații legale (spre exemplu, păstrarea documentelor contabile și fiscale).
+        </p>
+      </article>
+
+      <article id="scopuri" class="space-y-5">
+        <header class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">5</div>
+          <h2 class="text-3xl font-semibold text-slate-900">Scopuri de prelucrare</h2>
+        </header>
+        <p class="text-slate-600 leading-relaxed">Folosim datele tale pentru:</p>
+        <ul class="text-slate-600 leading-relaxed list-disc pl-6 space-y-2">
+          <li><strong>Oferirea serviciilor platformei</strong>: creare cont, listare meseriași, trimitere cereri și oferte, comunicare în aplicație.</li>
+          <li><strong>Siguranță și prevenire</strong>: verificarea identității și prevenirea fraudelor sau a abuzurilor.</li>
+          <li><strong>Suport & asistență</strong>: răspuns la întrebări, gestionarea incidentelor și rezolvarea disputelor.</li>
+          <li><strong>Îmbunătățire & analiză</strong>: statistici privind utilizarea platformei, optimizarea serviciilor și personalizarea experienței.</li>
+          <li><strong>Comunicări comerciale</strong>: newsletter, notificări despre funcționalități și oferte speciale (doar cu acordul tău).</li>
+        </ul>
+      </article>
+
+      <article id="durata" class="space-y-5">
+        <header class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">6</div>
+          <h2 class="text-3xl font-semibold text-slate-900">Durata stocării datelor</h2>
+        </header>
+        <p class="text-slate-600 leading-relaxed">
+          Păstrăm datele doar cât este necesar atingerii scopurilor indicate sau pentru termenele prevăzute de lege. După încheierea relației contractuale,
+          anonimizăm sau ștergem datele, exceptând situațiile în care obligațiile legale impun păstrarea lor.
+        </p>
+      </article>
+
+      <article id="partajare" class="space-y-5">
+        <header class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">7</div>
+          <h2 class="text-3xl font-semibold text-slate-900">Partajarea datelor</h2>
+        </header>
+        <p class="text-slate-600 leading-relaxed">
+          Nu vindem datele tale. Putem partaja informații cu furnizori de servicii (ex. hosting, email, suport clienți), autorități publice (în baza unei obligații legale),
+          parteneri de plată sau marketing (cu acordul tău explicit) și cu meseriașii/clienții cu care intri în contact prin platformă.
+        </p>
+      </article>
+
+      <article id="drepturi" class="space-y-5">
+        <header class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">8</div>
+          <h2 class="text-3xl font-semibold text-slate-900">Drepturile tale</h2>
+        </header>
+        <p class="text-slate-600 leading-relaxed">
+          Ai dreptul de acces, rectificare, ștergere („dreptul de a fi uitat”), restricționare, portabilitate, opoziție și de a nu face obiectul unei decizii individuale automatizate.
+          Îți poți retrage consimțământul oricând. Pentru exercitarea drepturilor scrie-ne la <a href="mailto:contact@findtrades.app" class="text-emerald-600 font-semibold hover:underline">contact@findtrades.app</a> sau
+          trimite o solicitare prin <a href={`${APP_URL}/contact`} class="text-emerald-600 font-semibold hover:underline">contact form</a>.
+        </p>
+      </article>
+
+      <article id="cookie" class="space-y-5">
+        <header class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">9</div>
+          <h2 class="text-3xl font-semibold text-slate-900">Cookie-uri și tehnologii similare</h2>
+        </header>
+        <p class="text-slate-600 leading-relaxed">
+          Folosim cookie-uri esențiale pentru funcționarea platformei, cookie-uri analitice (Google Analytics, Hotjar) și cookie-uri pentru personalizarea comunicărilor.
+          Poți gestiona preferințele din banner-ul de consimțământ și din setările browserului. Mai multe detalii găsești în <a href="/politica-cookie/" class="text-emerald-600 font-semibold hover:underline">Politica Cookie</a>.
+        </p>
+      </article>
+
+      <article id="securitate" class="space-y-5">
+        <header class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">10</div>
+          <h2 class="text-3xl font-semibold text-slate-900">Măsuri de securitate</h2>
+        </header>
+        <p class="text-slate-600 leading-relaxed">
+          Implementăm măsuri tehnice și organizatorice: criptare TLS, back-up-uri regulate, controale de acces, audituri periodice și instruirea echipei privind protecția datelor.
+          În cazul unui incident de securitate notificăm autoritățile și persoanele afectate conform legii.
+        </p>
+      </article>
+
+      <article id="minori" class="space-y-5">
+        <header class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">11</div>
+          <h2 class="text-3xl font-semibold text-slate-900">Protecția minorilor</h2>
+        </header>
+        <p class="text-slate-600 leading-relaxed">
+          Serviciile platformei sunt destinate persoanelor de minimum 18 ani. Nu colectăm cu bună știință date ale minorilor. Dacă un părinte sau tutore ne anunță că un minor
+          a furnizat date personale, vom șterge informațiile în cel mai scurt timp.
+        </p>
+      </article>
+
+      <article id="transferuri" class="space-y-5">
+        <header class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">12</div>
+          <h2 class="text-3xl font-semibold text-slate-900">Transferuri internaționale</h2>
+        </header>
+        <p class="text-slate-600 leading-relaxed">
+          Dacă transferăm date în afara Spațiului Economic European, ne asigurăm că există garanții adecvate (clauze contractuale standard, decizii de adecvare, certificări).
+          Te informăm în prealabil despre astfel de transferuri și îți punem la dispoziție documentația relevantă.
+        </p>
+      </article>
+
+      <article id="actualizari" class="space-y-5">
+        <header class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">13</div>
+          <h2 class="text-3xl font-semibold text-slate-900">Actualizări ale politicii</h2>
+        </header>
+        <p class="text-slate-600 leading-relaxed">
+          Putem actualiza această politică pentru a reflecta schimbări legislative sau operaționale. Publicăm noua versiune pe această pagină și actualizăm data revizuirii.
+          Când schimbările sunt semnificative, te vom notifica prin email sau în contul tău.
+        </p>
+      </article>
+
+      <article id="contact" class="space-y-5">
+        <header class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">14</div>
+          <h2 class="text-3xl font-semibold text-slate-900">Cum ne contactezi</h2>
+        </header>
+        <p class="text-slate-600 leading-relaxed">
+          Pentru întrebări privind protecția datelor sau pentru a depune o sesizare, ne poți contacta la:
+        </p>
+        <ul class="text-slate-600 leading-relaxed list-disc pl-6 space-y-2">
+          <li>Email: <a href="mailto:contact@findtrades.app" class="text-emerald-600 font-semibold hover:underline">contact@findtrades.app</a></li>
+          <li>Formular online: <a href={`${APP_URL}/contact`} class="text-emerald-600 font-semibold hover:underline">Available in app</a></li>
+          <li>Adresa poștală: vezi datele din pagina <a href="/despre-noi/" class="text-emerald-600 font-semibold hover:underline">Despre Noi</a></li>
+          <li>Autoritatea Națională de Supraveghere a Prelucrării Datelor cu Caracter Personal (ANSPDCP) – dacă consideri că drepturile tale au fost încălcate.</li>
+        </ul>
+      </article>
+    </div>
+  </section>
+</Base>

@@ -4,9 +4,9 @@ import tailwind from '@astrojs/tailwind';
 import react from '@astrojs/react';
 
 export default defineConfig({
-  site: 'https://www.meseriaslocal.ro',
+  site: 'https://www.findtrades.app',
   output: 'server',
-  trailingSlash: 'always',
+  trailingSlash: 'ignore',
   adapter: vercel({
     webAnalytics: {
       enabled: true

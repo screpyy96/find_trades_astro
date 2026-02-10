@@ -1,36 +1,38 @@
 ---
+import { APP_URL } from '../../lib/urls';
+
 const faqs = [
   {
-    q: "Cum funcționează platforma Meserias Local?",
-    a: 'Meserias Local este o platformă gratuită care conectează clienții cu <a href="/meseriasi" class="text-blue-600 hover:text-blue-800 underline">meseriași verificați</a> din România. <a href="https://app.meseriaslocal.ro/cere-oferta" class="text-blue-600 hover:text-blue-800 underline">Postezi gratuit cererea ta</a> (electrician, instalator, zugrav, etc.), meseriașii din zona ta primesc notificări și îți trimit oferte personalizate. Compari ofertele, verifici recenziile și alegi meseriașul potrivit - totul fără costuri ascunse.',
+    q: "How does the FindTrades platform work?",
+    a: `FindTrades is a free platform that connects customers with verified professionals across the UK. <a href="${APP_URL}/request-quote" class="text-blue-600 hover:text-blue-800 underline">Post your request for free</a> (electrician, plumber, painter, etc.), professionals in your area receive notifications and send you personalised quotes. Compare quotes, check reviews and choose the right professional - all with no hidden costs.`,
   },
   {
-    q: "Este cu adevărat gratuit pentru clienți?",
-    a: 'Da, 100% gratuit! Crearea contului, <a href="https://app.meseriaslocal.ro/cere-oferta" class="text-blue-600 hover:text-blue-800 underline">postarea cererilor</a> și primirea ofertelor sunt complet gratuite. Nu există comisioane ascunse sau taxe de intermediere. Plătești direct meseriașul pentru lucrarea efectuată, exact cum ați convenit. Meserias Local câștigă doar din abonamente opționale pentru meseriași.',
+    q: "Is it really free for customers?",
+    a: `Yes, 100% free! Creating an account, <a href="${APP_URL}/request-quote" class="text-blue-600 hover:text-blue-800 underline">posting requests</a> and receiving quotes are completely free. There are no hidden commissions or intermediary fees. You pay the tradesman directly for the work done, exactly as agreed. FindTrades only earns from optional subscriptions for tradesmen.`,
   },
   {
-    q: "Cum sunt verificați meseriașii pe platformă?",
-    a: 'Toți <a href="/meseriasi" class="text-blue-600 hover:text-blue-800 underline">meseriașii</a> trec printr-un proces de verificare: validăm identitatea, verificăm datele de contact și analizăm experiența. Sistemul nostru de recenzii este transparent - doar clienții care au colaborat efectiv pot lăsa recenzii. Moderăm activ conținutul pentru a preveni recenziile false.',
+    q: "How are tradesmen verified on the platform?",
+    a: 'All professionals go through a verification process: we validate identity, verify contact details and analyse experience. Our review system is transparent - only customers who have actually worked together can leave reviews. We actively moderate content to prevent fake reviews.',
   },
   {
-    q: "Există aplicație mobilă Meserias Local?",
-    a: 'Da! Aplicația Meserias Local este disponibilă pe <a href="https://play.google.com/store/apps/details?id=com.screpyy.meserias" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline">Google Play</a> pentru Android și pe <a href="https://apps.apple.com/gb/app/meserias-local/id6755662662" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline">App Store</a> pentru iOS. Cu aplicația poți posta cereri rapid, primi notificări instant când primești oferte, comunica direct cu meseriașii și gestiona toate proiectele tale din telefon.',
+    q: "Is there a FindTrades mobile app?",
+    a: 'Yes! The FindTrades app is available on <a href="https://play.google.com/store/apps/details?id=com.screpyy.meserias" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline">Google Play</a> for Android and on <a href="https://apps.apple.com/gb/app/meserias-local/id6755662662" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline">App Store</a> for iOS. With the app you can post requests quickly, receive instant notifications when you get quotes, communicate directly with tradesmen and manage all your projects from your phone.',
   },
   {
-    q: "În ce orașe din România este disponibil Meserias Local?",
-    a: 'Meserias Local are acoperire națională în toată România. Cele mai active orașe sunt: București, Cluj-Napoca, Timișoara, Constanța, Brașov, Iași, Craiova, Galați, Ploiești, Oradea, Sibiu, Arad și multe altele. Avem <a href="/meseriasi" class="text-blue-600 hover:text-blue-800 underline">meseriași verificați</a> în peste 45 de orașe.',
+    q: "In which UK cities is FindTrades available?",
+    a: 'FindTrades has nationwide coverage across the UK. The most active cities are: London, Manchester, Birmingham, Glasgow, Liverpool, Leeds, Sheffield, Bristol, Newcastle, Nottingham, Leicester, Coventry and many more. We have verified professionals in over 45 cities.',
   },
   {
-    q: "Cât timp durează să primesc oferte de la meseriași?",
-    a: 'De obicei, primești primele oferte în câteva ore de la <a href="https://app.meseriaslocal.ro/cere-oferta" class="text-blue-600 hover:text-blue-800 underline">postarea cererii</a>. Majoritatea clienților primesc între 3-5 oferte în prima zi. Meseriașii primesc notificări instant prin aplicație și email, astfel încât răspund rapid la cererile din zona lor.',
+    q: "How long does it take to receive quotes from tradesmen?",
+    a: `Usually, you receive the first quotes within a few hours of <a href="${APP_URL}/request-quote" class="text-blue-600 hover:text-blue-800 underline">posting your request</a>. Most customers receive between 3-5 quotes on the first day. Tradesmen receive instant notifications via app and email, so they respond quickly to requests in their area.`,
   },
   {
-    q: "Ce tipuri de servicii pot solicita pe Meserias Local?",
-    a: 'Poți găsi <a href="/meseriasi" class="text-blue-600 hover:text-blue-800 underline">meseriași verificați</a> pentru orice tip de lucrare: instalații sanitare și termice, <a href="/servicii/instalatii-si-utilitati/instalatii-electrice/" class="text-blue-600 hover:text-blue-800 underline">lucrări electrice</a>, <a href="/servicii/amenajari-interioare/zugraveli-vopsitorii/" class="text-blue-600 hover:text-blue-800 underline">zugrăveli și vopsitorii</a>, construcții și renovări, <a href="/servicii/tamplarie-mobilier/tamplarie/" class="text-blue-600 hover:text-blue-800 underline">tâmplărie</a> și <a href="/servicii/tamplarie-mobilier/montaj-mobilier/" class="text-blue-600 hover:text-blue-800 underline">montaj mobilier</a>, <a href="/servicii/amenajari-interioare/montaj-gresie-faianta/" class="text-blue-600 hover:text-blue-800 underline">montaj gresie și faianță</a>, <a href="/servicii/amenajari-interioare/montaj-parchet/" class="text-blue-600 hover:text-blue-800 underline">montaj parchet</a>, <a href="/servicii/reparatii-diverse/reparatii-acoperisuri/" class="text-blue-600 hover:text-blue-800 underline">reparații acoperișuri</a>, amenajări peisagistice, curățenie și multe altele. Explorează toate <a href="/servicii" class="text-blue-600 hover:text-blue-800 underline">categoriile de servicii</a>.',
+    q: "What types of services can I request on FindTrades?",
+    a: 'You can find verified professionals for any type of work: plumbing and heating installations, <a href="/servicii/instalatii-si-utilitati/instalatii-electrice/" class="text-blue-600 hover:text-blue-800 underline">electrical work</a>, <a href="/servicii/amenajari-interioare/zugraveli-vopsitorii/" class="text-blue-600 hover:text-blue-800 underline">painting and decorating</a>, construction and renovations, <a href="/servicii/tamplarie-mobilier/tamplarie/" class="text-blue-600 hover:text-blue-800 underline">carpentry</a> and <a href="/servicii/tamplarie-mobilier/montaj-mobilier/" class="text-blue-600 hover:text-blue-800 underline">furniture assembly</a>, <a href="/servicii/amenajari-interioare/montaj-gresie-faianta/" class="text-blue-600 hover:text-blue-800 underline">tiling</a>, <a href="/servicii/amenajari-interioare/montaj-parchet/" class="text-blue-600 hover:text-blue-800 underline">flooring</a>, <a href="/servicii/reparatii-diverse/reparatii-acoperisuri/" class="text-blue-600 hover:text-blue-800 underline">roof repairs</a>, landscaping, cleaning and much more. Explore all <a href="/servicii" class="text-blue-600 hover:text-blue-800 underline">service categories</a>.',
   },
   {
-    q: "Cum aleg cel mai bun meseriaș pentru proiectul meu?",
-    a: 'Compară ofertele primite pe baza mai multor criterii: prețul ofertat, recenziile și rating-ul meseriașului, experiența în domeniu, portofoliul de lucrări anterioare și timpul de răspuns. Poți <a href="/meseriasi" class="text-blue-600 hover:text-blue-800 underline">căuta meseriași</a> și comunica direct cu ei pentru a clarifica detalii înainte de a lua o decizie.',
+    q: "How do I choose the best tradesman for my project?",
+    a: 'Compare the quotes received based on several criteria: the offered price, reviews and rating of the professional, experience in the field, portfolio of previous work and response time. You can <a href="${APP_URL}/request-quote" class="text-blue-600 hover:text-blue-800 underline">post a request</a> and communicate directly with professionals to clarify details before making a decision.',
   },
 ];
 ---
@@ -38,9 +40,9 @@ const faqs = [
 <section class="w-full bg-white">
   <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-16 lg:py-20">
     <div class="text-center mb-8 sm:mb-12">
-      <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">Întrebări frecvente</h2>
+      <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">Frequently asked questions</h2>
       <p class="mt-3 text-base sm:text-lg text-slate-600 max-w-3xl mx-auto">
-        Tot ce trebuie să știi despre platformă, meseriași verificați și siguranța proiectelor tale.
+        Everything you need to know about the platform, verified tradesmen and the safety of your projects.
       </p>
     </div>
     <div class="space-y-3">

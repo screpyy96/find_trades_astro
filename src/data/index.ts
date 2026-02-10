@@ -12,9 +12,9 @@ export function slugify(text: string): string {
 }
 
 export function generateSeoTitle(service: string, city: string): string {
-  return `${service} ${city} - Găsește Meseriași Verificați | Meserias Local`;
+  return `${service} ${city} - Find Verified Tradesmen | FindTrades`;
 }
 
 export function generateSeoDescription(service: string, city: string): string {
-  return `Caută și angajează ${service.toLowerCase()} profesioniști în ${city}. Compară oferte, vezi recenzii reale și contactează meseriași verificați. Gratuit și rapid!`;
+  return `Find and hire professional ${service.toLowerCase()} in ${city}. Compare quotes, see real reviews and contact verified tradesmen. Free and fast!`;
 }

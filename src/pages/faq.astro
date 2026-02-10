@@ -1,62 +1,66 @@
 ---
 import Base from '../layouts/Base.astro';
+import { validateEnvironment } from '../lib/env-validation';
 
-const title = "Intrebari Frecvente (FAQ) | Meserias Local";
-const description = "Raspunsuri la cele mai frecvente intrebari despre platforma Meserias Local. Cum gasesti meseriasi, cum functioneaza, preturi, garantii si siguranta.";
-const canonical = "https://www.meseriaslocal.ro/faq";
-const APP_URL = 'https://app.meseriaslocal.ro';
+const envConfig = validateEnvironment();
+const WEB_URL = envConfig.config.web.url;
+const APP_URL = envConfig.config.app.url;
+
+const title = "Frequently Asked Questions (FAQ) | FindTrades";
+const description = "Answers to the most common questions about the FindTrades platform. How to find tradesmen, how it works, prices, guarantees and safety.";
+const canonical = `${WEB_URL}/faq`;
 
 const faqCategories = [
   {
-    title: "Despre platforma",
+    title: "About the platform",
     icon: "🏠",
     faqs: [
-      { q: "Ce este Meserias Local?", a: "Meserias Local este o platforma care conecteaza clientii cu meseriasi verificati din toata Romania. Poti gasi rapid profesionisti pentru orice tip de lucrare: constructii, renovari, instalatii, curatenie si multe altele." },
-      { q: "Este gratuit sa folosesc platforma?", a: "Da, pentru clienti platforma este 100% gratuita. Poti cauta meseriasi, vizualiza profiluri si solicita oferte fara niciun cost. Meseriasii platesc un abonament pentru a fi listati." },
-      { q: "In ce orase sunteti disponibili?", a: "Acoperim toate orasele din Romania. Avem meseriasi in Bucuresti, Cluj, Timisoara, Iasi, Constanta, Brasov, Craiova si in toate celelalte judete." },
-      { q: "Cum va diferentiati de alte platforme?", a: "Verificam fiecare meserias inainte de listare, oferim recenzii reale de la clienti, nu percepem comisioane la tranzactii si avem suport dedicat pentru rezolvarea oricaror probleme." }
+      { q: "What is FindTrades?", a: "FindTrades is a platform that connects clients with verified tradesmen from across the UK. You can quickly find professionals for any type of work: construction, renovations, installations, cleaning and much more." },
+      { q: "Is it free to use the platform?", a: "Yes, the platform is 100% free for clients. You can search for tradesmen, view profiles and request quotes at no cost. Tradesmen pay a subscription to be listed." },
+      { q: "In which cities are you available?", a: "We cover all cities across the UK. We have tradesmen in London, Manchester, Birmingham, Leeds, Glasgow, Liverpool and all other regions." },
+      { q: "How do you differentiate from other platforms?", a: "We verify every tradesman before listing, offer real reviews from clients, don't charge commissions on transactions and have dedicated support for resolving any issues." }
     ]
   },
   {
-    title: "Pentru clienti",
+    title: "For clients",
     icon: "👤",
     faqs: [
-      { q: "Cum gasesc un meserias potrivit?", a: "Foloseste bara de cautare pentru a gasi meseriasi dupa serviciu si locatie. Poti filtra dupa recenzii, experienta si disponibilitate. Vizualizeaza profilurile si alege pe cel care ti se potriveste." },
-      { q: "Cum solicit o oferta?", a: "Apasa pe butonul 'Cere oferta' de pe profilul meseriasului sau completeaza formularul general. Descrie lucrarea, adauga poze daca ai si vei primi oferte in 24-48 ore." },
-      { q: "Cum stiu ca un meserias este de incredere?", a: "Toti meseriasii PRO sunt verificati de echipa noastra. Verifica badge-ul 'Verificat', recenziile de la alti clienti, portofoliul de lucrari si anii de experienta." },
-      { q: "Ce fac daca nu sunt multumit de lucrare?", a: "Contacteaza-ne la support si vom media situatia. Meseriasii verificati ofera garantie pentru lucrari. In cazuri grave, putem suspenda meseriasul de pe platforma." },
-      { q: "Pot negocia pretul cu meseriasul?", a: "Da, preturile afisate sunt orientative. Discuta direct cu meseriasul pentru a obtine un pret final bazat pe specificul lucrarii tale." }
+      { q: "How do I find a suitable tradesman?", a: "Use the search bar to find tradesmen by service and location. You can filter by reviews, experience and availability. View profiles and choose the one that suits you." },
+      { q: "How do I request a quote?", a: "Click the 'Request Quote' button on the tradesman's profile or fill out the general form. Describe the work, add photos if you have them, and you'll receive quotes within 24-48 hours." },
+      { q: "How do I know a tradesman is trustworthy?", a: "All PRO tradesmen are verified by our team. Check the 'Verified' badge, reviews from other clients, work portfolio and years of experience." },
+      { q: "What if I'm not satisfied with the work?", a: "Contact us at support and we will mediate the situation. Verified tradesmen offer guarantees for their work. In serious cases, we can suspend the tradesman from the platform." },
+      { q: "Can I negotiate the price with the tradesman?", a: "Yes, the displayed prices are indicative. Discuss directly with the tradesman to get a final price based on the specifics of your work." }
     ]
   },
   {
-    title: "Pentru meseriasi",
+    title: "For tradesmen",
     icon: "🔧",
     faqs: [
-      { q: "Cum ma inscriu ca meserias?", a: "Descarca aplicatia Meserias Local sau acceseaza app.meseriaslocal.ro. Creeaza un cont, completeaza profilul cu serviciile oferite, experienta si portofoliu, apoi alege un abonament." },
-      { q: "Cat costa sa fiu listat pe platforma?", a: "Oferim abonamente PRO incepand de la 49 lei/luna si Enterprise pentru companii. Abonamentul include profil verificat, vizibilitate in cautari si acces la solicitari de oferte." },
-      { q: "Cum primesc clienti noi?", a: "Clientii te gasesc prin cautare sau iti trimit cereri de oferta. Primesti notificari pentru fiecare solicitare noua. Cu cat ai mai multe recenzii pozitive, cu atat apari mai sus in rezultate." },
-      { q: "Ce inseamna badge-ul Verificat?", a: "Badge-ul Verificat confirma ca am verificat identitatea, experienta si calitatea lucrarilor tale. Meseriasii verificati au prioritate in rezultatele cautarilor." },
-      { q: "Pot anula abonamentul oricand?", a: "Da, poti anula abonamentul in orice moment din setarile contului. Nu exista perioada minima de contract." }
+      { q: "How do I register as a tradesman?", a: "Download the FindTrades app or access app.findtrades.app. Create an account, complete your profile with services offered, experience and portfolio, then choose a subscription." },
+      { q: "How much does it cost to be listed on the platform?", a: "We offer PRO subscriptions starting from £12/month and Enterprise for companies. The subscription includes verified profile, visibility in searches and access to quote requests." },
+      { q: "How do I get new clients?", a: "Clients find you through search or send you quote requests. You receive notifications for each new request. The more positive reviews you have, the higher you appear in results." },
+      { q: "What does the Verified badge mean?", a: "The Verified badge confirms that we have verified your identity, experience and quality of work. Verified tradesmen have priority in search results." },
+      { q: "Can I cancel my subscription anytime?", a: "Yes, you can cancel your subscription at any time from your account settings. There is no minimum contract period." }
     ]
   },
   {
-    title: "Preturi si plati",
+    title: "Prices and payments",
     icon: "💰",
     faqs: [
-      { q: "Cum se stabilesc preturile?", a: "Preturile sunt stabilite direct intre client si meserias. Platforma nu percepe comisioane la tranzactii. Afisam preturi orientative pentru a te ajuta sa estimezi costurile." },
-      { q: "Ce metode de plata acceptati?", a: "Plata pentru lucrari se face direct catre meserias, in numerar sau transfer bancar. Pentru abonamentele meseriasilor acceptam card si transfer bancar." },
-      { q: "Exista costuri ascunse?", a: "Nu. Pentru clienti platforma este gratuita. Pentru meseriasi, costul abonamentului este transparent si afisat clar inainte de achizitie." },
-      { q: "Oferiti factura pentru abonamente?", a: "Da, toate abonamentele includ factura fiscala. O primesti automat pe email dupa fiecare plata." }
+      { q: "How are prices determined?", a: "Prices are set directly between client and tradesman. The platform does not charge commissions on transactions. We display indicative prices to help you estimate costs." },
+      { q: "What payment methods do you accept?", a: "Payment for work is made directly to the tradesman, in cash or bank transfer. For tradesmen subscriptions we accept card and bank transfer." },
+      { q: "Are there hidden costs?", a: "No. The platform is free for clients. For tradesmen, the subscription cost is transparent and clearly displayed before purchase." },
+      { q: "Do you provide invoices for subscriptions?", a: "Yes, all subscriptions include a tax invoice. You receive it automatically by email after each payment." }
     ]
   },
   {
-    title: "Siguranta si garantii",
+    title: "Safety and guarantees",
     icon: "🛡️",
     faqs: [
-      { q: "Cum verificati meseriasii?", a: "Verificam identitatea, experienta declarata, portofoliul de lucrari si solicitam referinte. Meseriasii cu recenzii negative repetate sunt suspendati." },
-      { q: "Ce garantii ofera meseriasii?", a: "Meseriasii PRO ofera garantie pentru lucrari, de obicei intre 1-5 ani in functie de tipul serviciului. Discuta garantia inainte de a incepe lucrarea." },
-      { q: "Datele mele sunt in siguranta?", a: "Da, respectam GDPR si folosim criptare pentru toate datele. Nu vindem informatiile tale catre terti. Citeste Politica de Confidentialitate pentru detalii." },
-      { q: "Ce fac in caz de frauda?", a: "Raporteaza imediat la support@meseriaslocal.ro. Investigam toate cazurile si luam masuri, inclusiv suspendarea permanenta a conturilor frauduloase." }
+      { q: "How do you verify tradesmen?", a: "We verify identity, declared experience, work portfolio and request references. Tradesmen with repeated negative reviews are suspended." },
+      { q: "What guarantees do tradesmen offer?", a: "PRO tradesmen offer guarantees for work, usually between 1-5 years depending on the type of service. Discuss the guarantee before starting the work." },
+      { q: "Is my data safe?", a: "Yes, we comply with GDPR and use encryption for all data. We do not sell your information to third parties. Read the Privacy Policy for details." },
+      { q: "What do I do in case of fraud?", a: "Report immediately to support@findtrades.app. We investigate all cases and take action, including permanent suspension of fraudulent accounts." }
     ]
   }
 ];
@@ -77,7 +81,7 @@ const breadcrumbSchema = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   "itemListElement": [
-    { "@type": "ListItem", "position": 1, "name": "Acasa", "item": "https://www.meseriaslocal.ro" },
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": WEB_URL },
     { "@type": "ListItem", "position": 2, "name": "FAQ", "item": canonical }
   ]
 };
@@ -158,11 +162,11 @@ const breadcrumbSchema = {
         Echipa noastra de suport iti sta la dispozitie pentru orice intrebare sau problema.
       </p>
       <div class="flex flex-wrap justify-center gap-4">
-        <a href="mailto:support@meseriaslocal.ro" class="inline-flex items-center px-6 py-3 bg-white text-blue-600 font-semibold rounded-xl hover:bg-blue-50 transition-colors">
+        <a href="mailto:support@findtrades.app" class="inline-flex items-center px-6 py-3 bg-white text-blue-600 font-semibold rounded-xl hover:bg-blue-50 transition-colors">
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
           </svg>
-          support@meseriaslocal.ro
+          support@findtrades.app
         </a>
         <a href={APP_URL} class="inline-flex items-center px-6 py-3 bg-white/20 text-white font-semibold rounded-xl hover:bg-white/30 transition-colors border border-white/30">
           Deschide aplicatia

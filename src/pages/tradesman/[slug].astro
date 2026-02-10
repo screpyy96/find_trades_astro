@@ -1,0 +1,102 @@
+---
+import Base from '../../layouts/Base.astro';
+import { supabase } from '../../lib/supabase';
+
+// Get the slug from the URL params
+const { slug } = Astro.params;
+
+if (!slug) {
+  return Astro.redirect('/tradesmen/', 302);
+}
+
+// Extract the short UUID (last 8 chars) from the SEO slug
+const shortId = slug.slice(-8);
+
+// Find the worker by matching the end of their UUID
+let worker = null;
+let workerTrades: any[] = [];
+
+if (supabase && shortId) {
+  try {
+    // Fetch all workers and find the one whose ID ends with shortId
+    const { data: workers } = await supabase
+      .from('profiles')
+      .select('id, name, avatar_url, address, bio, rating, is_verified, is_online, phone, role')
+      .eq('role', 'worker')
+      .not('name', 'is', null);
+
+    if (workers) {
+      worker = workers.find((w: any) => w.id.endsWith(shortId)) || null;
+    }
+
+    // Fetch trades for this worker
+    if (worker) {
+      const { data: wt } = await supabase
+        .from('worker_trades')
+        .select('trade_ids')
+        .eq('profile_id', worker.id)
+        .single();
+
+      if (wt?.trade_ids?.length) {
+        const { data: trades } = await supabase
+          .from('trades')
+          .select('id, name, slug')
+          .in('id', wt.trade_ids);
+        workerTrades = trades || [];
+      }
+    }
+  } catch (err) {
+    console.error('Error fetching worker profile:', err);
+  }
+}
+
+if (!worker) {
+  return Astro.redirect('/tradesmen/', 302);
+}
+
+const tradeNames = workerTrades.map((t: any) => t.name).join(', ');
+const pageTitle = `${worker.name}${tradeNames ? ` - ${tradeNames}` : ''} | FindTrades`;
+const pageDescription = worker.bio
+  ? worker.bio.substring(0, 160)
+  : `View ${worker.name}'s professional profile, services, reviews, and contact information on FindTrades.`;
+const canonicalUrl = `https://www.findtrades.app/tradesman/${slug}`;
+---
+
+<Base 
+  title={pageTitle}
+  description={pageDescription}
+  canonical={canonicalUrl}
+>
+  <div class="min-h-screen bg-slate-50">
+    <div id="tradesman-profile-root">
+      <div class="flex items-center justify-center min-h-[400px]">
+        <div class="text-center">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500 mx-auto mb-4"></div>
+          <p class="text-slate-600">Loading profile...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</Base>
+
+<script define:vars={{ workerJson: JSON.stringify(worker), tradesJson: JSON.stringify(workerTrades) }}>
+  // Pass server data to client
+  window.__WORKER_DATA__ = JSON.parse(workerJson);
+  window.__WORKER_TRADES__ = JSON.parse(tradesJson);
+</script>
+
+<script>
+  import { TradesmanProfile } from '../../components/tradesman/TradesmanProfile.tsx';
+  import { createRoot } from 'react-dom/client';
+  import React from 'react';
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const container = document.getElementById('tradesman-profile-root');
+    const worker = (window as any).__WORKER_DATA__;
+    
+    if (container && worker) {
+      const root = createRoot(container);
+      root.render(React.createElement(TradesmanProfile, { worker }));
+    }
+  });
+</script>

@@ -1,20 +1,21 @@
 ---
 import { Navbar as NavbarReact } from '../ui/Navbar';
+import { validateEnvironment } from '../../lib/env-validation';
 
 // Get current path
 const currentPath = Astro.url.pathname;
 
-// Environment URLs
-// APP_URL points to Remix app for login/register/dashboard
-// WEB_URL is empty for relative URLs on Astro site
-const APP_URL = 'https://app.meseriaslocal.ro';
-const WEB_URL = '';
+// Use environment variables from .env
+const envConfig = validateEnvironment();
+const APP_URL = envConfig.config.app.url;
+const WEB_URL = envConfig.config.web.url;
 
 // For now, we're not logged in on the static site
 // In the future, you could check for auth cookies here
 const isLoggedIn = false;
 ---
 
+// @ts-ignore - client:idle is an Astro directive, not a prop
 <NavbarReact 
   client:idle
   isLoggedIn={isLoggedIn}

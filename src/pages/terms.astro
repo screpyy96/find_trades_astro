@@ -1,0 +1,300 @@
+---
+import Base from '../layouts/Base.astro';
+import { validateEnvironment } from '../lib/env-validation';
+
+const envConfig = validateEnvironment();
+const WEB_URL = envConfig.config.web.url;
+
+const LAST_UPDATED = '9 November 2025';
+---
+
+<Base
+  title="Terms and Conditions | FindTrades"
+  description="Read FindTrades terms and conditions for platform usage, user obligations and applicable policies."
+>
+  <section class="bg-slate-950 text-slate-100 py-16">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <p class="text-sm uppercase tracking-widest text-amber-300 font-semibold mb-4">Terms and conditions</p>
+      <h1 class="text-4xl sm:text-5xl font-extrabold mb-6 leading-tight">Your contract with FindTrades</h1>
+      <p class="text-lg text-slate-300 leading-relaxed max-w-3xl">
+        This document describes the rules by which we collect, provide and protect services within the <strong>FindTrades</strong> platform.
+        By accessing the website or mobile application, whether you are a client or tradesman, you confirm that you have read, understood and agree to these terms.
+      </p>
+      <div class="mt-8 inline-flex items-center gap-3 px-5 py-3 rounded-full bg-slate-900/60 border border-slate-700">
+        <span class="text-sm text-slate-400">Last updated</span>
+        <span class="text-amber-300 font-semibold">{LAST_UPDATED}</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-white py-16 lg:py-24">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="bg-slate-50 border-b border-slate-200 px-6 sm:px-10 py-6">
+          <h2 class="text-2xl font-semibold text-slate-900">Cuprins</h2>
+          <p class="mt-2 text-sm text-slate-500">Folosește lista pentru a naviga rapid la secțiunea dorită.</p>
+        </div>
+        <div class="px-6 sm:px-10 py-8">
+          <ol class="grid gap-3 text-sm text-slate-600 sm:grid-cols-2">
+            <li><a class="hover:text-emerald-600 transition" href="#definitii">1. Definiții</a></li>
+            <li><a class="hover:text-emerald-600 transition" href="#acceptare">2. Acceptarea termenilor</a></li>
+            <li><a class="hover:text-emerald-600 transition" href="#servicii">3. Serviciile oferite</a></li>
+            <li><a class="hover:text-emerald-600 transition" href="#conturi">4. Conturi și eligibilitate</a></li>
+            <li><a class="hover:text-emerald-600 transition" href="#obligatii-clienti">5. Obligațiile clienților</a></li>
+            <li><a class="hover:text-emerald-600 transition" href="#obligatii-meseriasi">6. Obligațiile meseriașilor</a></li>
+            <li><a class="hover:text-emerald-600 transition" href="#plati">7. Plăți și comisioane</a></li>
+            <li><a class="hover:text-emerald-600 transition" href="#comunicare">8. Comunicare și feedback</a></li>
+            <li><a class="hover:text-emerald-600 transition" href="#proprietate">9. Proprietate intelectuală</a></li>
+            <li><a class="hover:text-emerald-600 transition" href="#confidentialitate">10. Confidențialitate și protecția datelor</a></li>
+            <li><a class="hover:text-emerald-600 transition" href="#garantii">11. Limitarea responsabilității</a></li>
+            <li><a class="hover:text-emerald-600 transition" href="#forta-majora">12. Forță majoră</a></li>
+            <li><a class="hover:text-emerald-600 transition" href="#modificari">13. Modificarea termenilor</a></li>
+            <li><a class="hover:text-emerald-600 transition" href="#lege">14. Legea aplicabilă</a></li>
+            <li><a class="hover:text-emerald-600 transition" href="#contact">15. Contact</a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-white pb-20">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
+      <article id="definitii" class="space-y-5">
+        <header class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">1</div>
+          <h2 class="text-3xl font-semibold text-slate-900">Definiții</h2>
+        </header>
+        <p class="text-slate-600 leading-relaxed">
+          În cadrul prezentului document, următorii termeni vor avea semnificațiile de mai jos:
+        </p>
+        <ul class="text-slate-600 leading-relaxed list-disc pl-6">
+          <li><strong>Platforma</strong> – website-ul și aplicația mobilă Meserias Local, precum și toate serviciile asociate.</li>
+          <li><strong>Utilizator</strong> – orice persoană fizică sau juridică ce accesează platforma, indiferent de calitatea de client sau meseriaș.</li>
+          <li><strong>Client</strong> – utilizatorul care postează o solicitare de servicii sau contactează meseriași pentru colaborare.</li>
+          <li><strong>Meseriaș</strong> – utilizatorul profesionist care își oferă serviciile prin intermediul platformei.</li>
+          <li><strong>Servicii</strong> – activități prestate de meseriași și facilitate de platformă, incluzând comunicare, programare și feedback.</li>
+          <li><strong>Contract</strong> – acordul juridic stabilit direct între client și meseriaș pentru realizarea unui proiect.</li>
+        </ul>
+      </article>
+
+      <article id="acceptare" class="space-y-5">
+        <header class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">2</div>
+          <h2 class="text-3xl font-semibold text-slate-900">Acceptarea termenilor</h2>
+        </header>
+        <p class="text-slate-600 leading-relaxed">
+          Accesarea platformei implică acceptarea integrală a prezentelor Termeni și Condiții. Dacă nu ești de acord cu una sau mai multe prevederi,
+          te rugăm să nu utilizezi serviciile Meserias Local. Putem solicita confirmarea expresă a acordului în momentul creării contului sau
+          la actualizări majore ale politicilor noastre.
+        </p>
+        <p class="text-slate-600 leading-relaxed">
+          Meserias Local poate restricționa accesul la platformă ori de câte ori sesizăm o utilizare abuzivă, neregulamentară sau contrară legii.
+        </p>
+      </article>
+
+      <article id="servicii" class="space-y-5">
+        <header class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">3</div>
+          <h2 class="text-3xl font-semibold text-slate-900">Serviciile oferite</h2>
+        </header>
+        <p class="text-slate-600 leading-relaxed">
+          Platforma oferă un spațiu digital în care clienții și meseriașii pot intra în contact pentru a discuta, programa și evalua proiecte.
+          Meserias Local facilitează:
+        </p>
+        <ul class="text-slate-600 leading-relaxed list-disc pl-6">
+          <li>publicarea solicitărilor de lucrări și descrierea cerințelor proiectului;</li>
+          <li>conectarea rapidă cu meseriași verificați și disponibili în zona utilizatorului;</li>
+          <li>gestionarea mesajelor și a ofertelor în aplicație;</li>
+          <li>evaluarea serviciilor prin recenzii și rating-uri reale;</li>
+          <li>accesul la resurse educaționale și ghiduri pentru colaborări eficiente.</li>
+        </ul>
+        <p class="text-slate-600 leading-relaxed">
+          Meserias Local nu este parte în contractele dintre clienți și meseriași și nu garantează executarea lucrărilor.
+          Responsabilitatea pentru negocierea, realizarea și plata serviciilor revine exclusiv părților implicate.
+        </p>
+      </article>
+
+      <article id="conturi" class="space-y-5">
+        <header class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">4</div>
+          <h2 class="text-3xl font-semibold text-slate-900">Conturi și eligibilitate</h2>
+        </header>
+        <p class="text-slate-600 leading-relaxed">
+          Pentru a utiliza funcționalitățile platformei este necesară crearea unui cont. Declari că informațiile furnizate sunt reale,
+          complete și actualizate. Ești responsabil de păstrarea confidențialității datelor de autentificare și de orice activitate
+          desfășurată în contul tău.
+        </p>
+        <ul class="text-slate-600 leading-relaxed list-disc pl-6">
+          <li>Utilizarea platformei este permisă persoanelor cu vârsta de minimum 18 ani sau entităților juridice legal constituite.</li>
+          <li>Ne rezervăm dreptul de a solicita documente suplimentare pentru verificarea identității și a calificărilor meseriașilor.</li>
+          <li>Meserias Local poate suspenda sau închide conturile care încalcă termenii, furnizează informații false sau afectează
+            experiența altor utilizatori.</li>
+        </ul>
+      </article>
+
+      <article id="obligatii-clienti" class="space-y-5">
+        <header class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">5</div>
+          <h2 class="text-3xl font-semibold text-slate-900">Obligațiile clienților</h2>
+        </header>
+        <ul class="text-slate-600 leading-relaxed list-disc pl-6">
+          <li>Furnizează informații clare și complete despre proiect, buget și termen.</li>
+          <li>Respectă programările stabilite cu meseriașii și anunță din timp orice modificare.</li>
+          <li>Achită la timp serviciile prestate conform acordului stabilit cu meseriașul.</li>
+          <li>Nu solicita și nu promovează activități ilegale sau contrare normelor de siguranță.</li>
+          <li>Oferă feedback onest, bazat pe experiențe reale, fără limbaj injurios sau discriminare.</li>
+        </ul>
+      </article>
+
+      <article id="obligatii-meseriasi" class="space-y-5">
+        <header class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">6</div>
+          <h2 class="text-3xl font-semibold text-slate-900">Obligațiile meseriașilor</h2>
+        </header>
+        <ul class="text-slate-600 leading-relaxed list-disc pl-6">
+          <li>Prezintă informații reale despre calificări, autorizații și experiență profesională.</li>
+          <li>Respectă legislația aplicabilă domeniului de activitate, inclusiv normele de protecție a muncii și cele fiscale.</li>
+          <li>Elaborează oferte transparente, cu detalii privind costurile și durata estimată.</li>
+          <li>Execută lucrările la calitatea convenită și remediază orice neconformități asumate.</li>
+          <li>Respectă confidențialitatea datelor primite de la clienți.</li>
+        </ul>
+        <p class="text-slate-600 leading-relaxed">
+          Meserias Local poate retrage statutul de profesionist verificat în cazul constatării unor abateri grave sau repetate.
+        </p>
+      </article>
+
+      <article id="plati" class="space-y-5">
+        <header class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">7</div>
+          <h2 class="text-3xl font-semibold text-slate-900">Plăți și comisioane</h2>
+        </header>
+        <p class="text-slate-600 leading-relaxed">
+          În prezent, Meserias Local nu procesează plăți în numele meseriașilor. Plățile se efectuează direct între părți conform acordului stabilit.
+          Dacă în viitor vom introduce soluții integrate de plată, acestea vor fi comunicate în prealabil și vor fi însoțite de termeni suplimentari.
+        </p>
+        <p class="text-slate-600 leading-relaxed">
+          Putem percepe comisioane pentru funcționalități premium, vizibilitate sporită sau servicii de administrare. Tarifele și modalitățile de aplicare
+          vor fi prezentate transparent în contul utilizatorului, înainte de achiziție.
+        </p>
+      </article>
+
+      <article id="comunicare" class="space-y-5">
+        <header class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">8</div>
+          <h2 class="text-3xl font-semibold text-slate-900">Comunicare și feedback</h2>
+        </header>
+        <p class="text-slate-600 leading-relaxed">
+          Platforma oferă instrumente de comunicare în aplicație pentru a păstra istoricul discuțiilor și a rezolva eventualele neînțelegeri.
+          Utilizatorii sunt responsabili pentru conținutul mesajelor, iar Meserias Local își rezervă dreptul de a modera sau restricționa accesul
+          la chat în caz de abuz.
+        </p>
+        <p class="text-slate-600 leading-relaxed">
+          Recenziile publicate trebuie să reflecte experiențe reale și să respecte un limbaj civilizat. Ne rezervăm dreptul de a elimina conținutul
+          care conține informații false, defăimătoare sau care încalcă drepturile altor persoane.
+        </p>
+      </article>
+
+      <article id="proprietate" class="space-y-5">
+        <header class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">9</div>
+          <h2 class="text-3xl font-semibold text-slate-900">Proprietate intelectuală</h2>
+        </header>
+        <p class="text-slate-600 leading-relaxed">
+          Întreg conținutul platformei – elemente de design, texte, imagini, mărci, funcționalități software – este protejat prin drepturi de autor
+          și alte drepturi de proprietate intelectuală. Utilizatorii nu pot copia, distribui sau modifica conținutul fără acordul nostru scris.
+        </p>
+        <p class="text-slate-600 leading-relaxed">
+          Documentele încărcate de meseriași rămân proprietatea acestora, dar acordă Meserias Local o licență limitată pentru a afișa informațiile
+          în scopul promovării serviciilor lor.
+        </p>
+      </article>
+
+      <article id="confidentialitate" class="space-y-5">
+        <header class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">10</div>
+          <h2 class="text-3xl font-semibold text-slate-900">Confidențialitate și protecția datelor</h2>
+        </header>
+        <p class="text-slate-600 leading-relaxed">
+          Tratăm cu seriozitate confidențialitatea datelor personale. Prelucrarea datelor se realizează conform Regulamentului (UE) 2016/679 (GDPR)
+          și a legislației naționale în vigoare. Pentru detalii privind categoriile de date colectate, scopurile și drepturile tale, te rugăm să consulți
+          <a class="text-emerald-600 font-semibold hover:underline" href="/politica-confidentialitate/">Politica de Confidențialitate</a> și
+          <a class="text-emerald-600 font-semibold hover:underline" href="/gdpr/">Ghidul GDPR</a>.
+        </p>
+        <p class="text-slate-600 leading-relaxed">
+          Meserias Local implementează măsuri tehnice și organizatorice pentru protejarea datelor, însă nu poate garanta securitatea absolută
+          a comunicațiilor transmise prin internet. Utilizatorii sunt responsabili pentru securizarea dispozitivelor și a rețelelor proprii.
+        </p>
+      </article>
+
+      <article id="garantii" class="space-y-5">
+        <header class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">11</div>
+          <h2 class="text-3xl font-semibold text-slate-900">Limitarea responsabilității</h2>
+        </header>
+        <p class="text-slate-600 leading-relaxed">
+          Platforma este furnizată „ca atare" și „în funcție de disponibilitate". Nu garantăm că serviciile vor fi neîntrerupte, lipsite de erori
+          sau complet sigure. Meserias Local nu poate fi trasă la răspundere pentru daune directe, indirecte, accidentale sau consecvente ce decurg din:
+        </p>
+        <ul class="text-slate-600 leading-relaxed list-disc pl-6">
+          <li>utilizarea sau imposibilitatea utilizării platformei;</li>
+          <li>conținutul și calitatea serviciilor furnizate de meseriași;</li>
+          <li>negocierile și contractele dintre clienți și meseriași;</li>
+          <li>pierderi de date, profit sau reputație.</li>
+        </ul>
+        <p class="text-slate-600 leading-relaxed">
+          În orice situație, răspunderea noastră este limitată la suma taxelor plătite către Meserias Local în ultimele 12 luni, acolo unde se aplică.
+        </p>
+      </article>
+
+      <article id="forta-majora" class="space-y-5">
+        <header class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">12</div>
+          <h2 class="text-3xl font-semibold text-slate-900">Forță majoră</h2>
+        </header>
+        <p class="text-slate-600 leading-relaxed">
+          Nicio parte nu va fi răspunzătoare pentru neîndeplinirea obligațiilor contractuale dacă aceasta se datorează unor evenimente de forță majoră,
+          așa cum sunt ele definite de lege, care sunt în afara controlului rezonabil și nu puteau fi prevăzute sau evitate.
+        </p>
+      </article>
+
+      <article id="modificari" class="space-y-5">
+        <header class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">13</div>
+          <h2 class="text-3xl font-semibold text-slate-900">Modificarea termenilor</h2>
+        </header>
+        <p class="text-slate-600 leading-relaxed">
+          Meserias Local poate actualiza periodic Termenii și Condițiile pentru a reflecta schimbări legislative, tehnice sau de business. Versiunea
+          actualizată va fi publicată pe această pagină, cu menționarea datei ultimei modificări. Continuarea utilizării platformei după modificare
+          reprezintă acceptarea noilor prevederi.
+        </p>
+      </article>
+
+      <article id="lege" class="space-y-5">
+        <header class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">14</div>
+          <h2 class="text-3xl font-semibold text-slate-900">Legea aplicabilă și soluționarea disputelor</h2>
+        </header>
+        <p class="text-slate-600 leading-relaxed">
+          Prezentul document este guvernat de legislația din România. Orice dispută va fi soluționată pe cale amiabilă. În lipsa unui acord, litigiile vor fi
+          înaintate instanțelor competente din București. Utilizatorii persoane fizice pot apela și la mecanismele de soluționare alternativă a litigiilor
+          (SAL) sau la platforma europeană SOL.
+        </p>
+      </article>
+
+      <article id="contact" class="space-y-5">
+        <header class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">15</div>
+          <h2 class="text-3xl font-semibold text-slate-900">Contact</h2>
+        </header>
+        <p class="text-slate-600 leading-relaxed">
+          Pentru întrebări suplimentare legate de Termeni și Condiții sau pentru a raporta o problemă, ne poți contacta prin:
+        </p>
+        <ul class="text-slate-600 leading-relaxed list-disc pl-6">
+          <li>email: <a class="text-emerald-600 font-semibold hover:underline" href="mailto:contact@findtrades.app">contact@findtrades.app</a></li>
+          <li>formularul de contact din aplicația Meserias Local;</li>
+          <li>adresa poștală disponibilă în pagina <a class="text-emerald-600 font-semibold hover:underline" href="/despre-noi/">Despre Noi</a>.</li>
+        </ul>
+      </article>
+    </div>
+  </section>
+</Base>
