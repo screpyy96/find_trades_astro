@@ -70,7 +70,7 @@ if (isUuid) {
     trades = tradeData || [];
   }
 
-  const seoUrl = `/companii/${getWorkerProfileUrl(company, trades).replace('/tradesman/', '')}`;
+  const seoUrl = `/companii/${getWorkerProfileUrl(company, trades).replace('/tradesmen/', '')}`;
   return Astro.redirect(seoUrl, 301);
 }
 

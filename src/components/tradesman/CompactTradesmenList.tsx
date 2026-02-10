@@ -78,8 +78,8 @@ export function CompactTradesmenList({
     const initSupabase = async () => {
       try {
         const { createClient } = await import('@supabase/supabase-js');
-        const url = supabaseUrlProp || import.meta.env.SUPABASE_URL;
-        const key = supabaseAnonKeyProp || import.meta.env.SUPABASE_ANON_KEY;
+        const url = supabaseUrlProp || import.meta.env.PUBLIC_SUPABASE_URL;
+        const key = supabaseAnonKeyProp || import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
         
         if (url && key) {
           const client = createClient(url, key);
@@ -274,7 +274,7 @@ export function CompactTradesmenList({
 
                 {/* Action Button */}
                 <a
-                  href={`/tradesman/${worker.id}`}
+                  href={`/tradesmen/${worker.id}`}
                   className="w-full inline-flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition-colors"
                 >
                   Vezi acum

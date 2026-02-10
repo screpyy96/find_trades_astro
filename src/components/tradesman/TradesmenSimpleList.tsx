@@ -33,8 +33,8 @@ export function TradesmenSimpleList({
       setLoading(true);
       try {
         const { createClient } = await import('@supabase/supabase-js');
-        const url = supabaseUrlProp || import.meta.env.SUPABASE_URL;
-        const key = supabaseAnonKeyProp || import.meta.env.SUPABASE_ANON_KEY;
+        const url = supabaseUrlProp || import.meta.env.PUBLIC_SUPABASE_URL;
+        const key = supabaseAnonKeyProp || import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
         
         if (!url || !key) {
           setWorkers([]);
@@ -134,7 +134,7 @@ export function TradesmenSimpleList({
         {workers.map((worker) => (
           <a
             key={worker.id}
-            href={`${import.meta.env.PUBLIC_APP_URL || 'https://app.findtrades.app'}/tradesman/${worker.id}`}
+            href={`${import.meta.env.PUBLIC_APP_URL || 'https://app.findtrades.app'}/tradesmen/${worker.id}`}
             className="bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition"
           >
             <div className="flex items-start gap-4">

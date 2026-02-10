@@ -90,8 +90,8 @@ export function CompaniesClientList({
     const initSupabase = async () => {
       try {
         const { createClient } = await import('@supabase/supabase-js');
-        const url = supabaseUrlProp || import.meta.env.SUPABASE_URL;
-        const key = supabaseAnonKeyProp || import.meta.env.SUPABASE_ANON_KEY;
+        const url = supabaseUrlProp || import.meta.env.PUBLIC_SUPABASE_URL;
+        const key = supabaseAnonKeyProp || import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
         
         if (url && key) {
           setSupabase(createClient(url, key));

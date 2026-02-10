@@ -2,6 +2,9 @@
 import Base from '../../layouts/Base.astro';
 import { APP_URL } from '~/lib/urls';
 import { TradesmenClientList } from '../../components/tradesman/TradesmenClientList.tsx';
+
+const supabaseUrl = import.meta.env.SUPABASE_URL || import.meta.env.PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = import.meta.env.SUPABASE_ANON_KEY || import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
 ---
 
 <Base 
@@ -92,7 +95,7 @@ import { TradesmenClientList } from '../../components/tradesman/TradesmenClientL
 
     <!-- Tradesmen List -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <TradesmenClientList client:load />
+      <TradesmenClientList client:load supabaseUrl={supabaseUrl} supabaseAnonKey={supabaseAnonKey} />
     </div>
   </div>
 </Base>

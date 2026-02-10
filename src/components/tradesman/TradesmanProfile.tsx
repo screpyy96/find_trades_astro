@@ -197,7 +197,7 @@ export function TradesmanProfile({ worker, supabaseUrl, supabaseAnonKey }: Trade
     "name": worker.name,
     "jobTitle": primaryTrade,
     "description": worker.bio || `Specialist in ${tradeNames}`,
-    "url": `https://www.findtrades.app/tradesman/${worker.id}`,
+    "url": `https://www.findtrades.app/tradesmen/${worker.id}`,
     "image": worker.avatar_url,
     "telephone": worker.phone,
     "address": worker.address ? { "@type": "PostalAddress", "addressLocality": worker.address, "addressCountry": "GB" } : undefined,

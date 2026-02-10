@@ -7,6 +7,9 @@ export default defineConfig({
   site: 'https://www.findtrades.app',
   output: 'server',
   trailingSlash: 'ignore',
+  redirects: {
+    '/tradesman/[...slug]': '/tradesmen/[...slug]'
+  },
   adapter: vercel({
     webAnalytics: {
       enabled: true

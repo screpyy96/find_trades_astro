@@ -67,11 +67,11 @@ export function generateWorkerSeoSlug(
 
 /**
  * Get worker profile URL (premium SEO-friendly)
- * Format: /tradesman/name-trade-city-uuid
+ * Format: /tradesmen/name-trade-city-uuid
  */
 export function getWorkerProfileUrl(worker: WorkerProfile, trades?: Trade[]): string {
   const slug = generateWorkerSeoSlug(worker, trades);
-  return `/tradesman/${slug}`;
+  return `/tradesmen/${slug}`;
 }
 
 /**
@@ -83,5 +83,5 @@ export function getWorkerProfileCanonicalUrl(
   baseUrl: string = 'https://www.findtrades.app'
 ): string {
   const slug = generateWorkerSeoSlug(worker, trades);
-  return `${baseUrl}/tradesman/${slug}`;
+  return `${baseUrl}/tradesmen/${slug}`;
 }

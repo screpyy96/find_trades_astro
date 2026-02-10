@@ -94,8 +94,8 @@ export function HeroProfessionals({
     const initSupabase = async () => {
       try {
         const { createClient } = await import('@supabase/supabase-js');
-        const url = supabaseUrlProp || import.meta.env.SUPABASE_URL;
-        const key = supabaseAnonKeyProp || import.meta.env.SUPABASE_ANON_KEY;
+        const url = supabaseUrlProp || import.meta.env.PUBLIC_SUPABASE_URL;
+        const key = supabaseAnonKeyProp || import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
         
         if (url && key) {
           const client = createClient(url, key);
@@ -251,7 +251,7 @@ export function HeroProfessionals({
           return (
             <a
               key={professional.id}
-              href={`/tradesman/${professional.id}`}
+              href={`/tradesmen/${professional.id}`}
               className={`group relative block cursor-pointer transform hover:scale-110 transition-all duration-300 ${isCompact ? 'flex-shrink-0' : ''}`}
               style={{ animationDelay: `${index * 0.15}s` }}
             >
