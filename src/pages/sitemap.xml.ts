@@ -1,4 +1,5 @@
 import { trades } from '../data/trades.js';
+import { cities } from '../data/cities.js';
 import { getCollection } from 'astro:content';
 
 // Prerender this page at build time instead of on every request
@@ -48,13 +49,6 @@ const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 
   <!-- Main Pages -->
   <url>
-    <loc>${ensureTrailingSlash(baseUrl)}tradesmen/</loc>
-    <lastmod>${new Date().toISOString()}</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>
-
-  <url>
     <loc>${ensureTrailingSlash(baseUrl)}services/</loc>
     <lastmod>${new Date().toISOString()}</lastmod>
     <changefreq>weekly</changefreq>
@@ -100,15 +94,15 @@ const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
     <priority>0.7</priority>
   </url>`).join('')}
 
-  <!-- Service Category Pages -->
+  <!-- Service City Pages -->
   ${trades.flatMap(trade => 
-    trade.category ? [`
+    cities.slice(0, 10).map(city => `
   <url>
-    <loc>${ensureTrailingSlash(baseUrl)}services/${slugify(trade.name)}/${slugify(trade.category)}/</loc>
+    <loc>${ensureTrailingSlash(baseUrl)}services/${slugify(trade.name)}/${slugify(city.name)}/</loc>
     <lastmod>${new Date().toISOString()}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
-  </url>`] : []
+  </url>`).join('')
   ).join('')}
 </urlset>`;
 
