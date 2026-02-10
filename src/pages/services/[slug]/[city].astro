@@ -17,9 +17,12 @@ export const prerender = true;
 export const getStaticPaths: GetStaticPaths = async () => {
   const paths: any[] = [];
   
-  // Generate paths for all trade + city combinations
+  // Limităm la primele 10 orașe pentru a reduce timpul de build
+  const topCities = cities.slice(0, 10);
+  
+  // Generate paths for trade + city combinations (limited)
   for (const trade of trades) {
-    for (const city of cities) {
+    for (const city of topCities) {
       paths.push({
         params: { 
           slug: trade.slug,
