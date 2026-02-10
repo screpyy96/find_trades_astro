@@ -6,7 +6,7 @@
  */
 
 /** Remix app base URL (e.g. http://localhost:5173 or https://app.findtrades.app) */
-export const APP_URL = (import.meta.env.PUBLIC_APP_URL || 'https://app.findtrades.app').replace(/\/$/, '');
+export const APP_URL = (import.meta.env.PUBLIC_APP_URL || 'https://app.findtrades.app').replace(/^http:\/\//, 'https://').replace(/\/$/, '');
 
 /** Landing/web base URL (e.g. http://localhost:4321 or https://www.findtrades.app) */
 export const WEB_URL = (import.meta.env.PUBLIC_WEB_URL || 'https://www.findtrades.app').replace(/\/$/, '');
