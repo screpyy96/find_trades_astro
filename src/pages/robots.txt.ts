@@ -1,4 +1,4 @@
-import { validateEnvironment } from '../../lib/env-validation';
+import { validateEnvironment } from '../lib/env-validation';
 
 // Use environment variables from .env
 const envConfig = validateEnvironment();
