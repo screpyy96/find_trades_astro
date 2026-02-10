@@ -34,7 +34,6 @@ Disallow: /request-quote?
 Allow: /services/
 Allow: /tradesmen/
 Allow: /blog/
-Allow: /companies/
 Allow: /sitemap.xml
 Allow: /robots.txt
 

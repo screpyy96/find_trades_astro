@@ -74,14 +74,6 @@ const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
     <priority>0.9</priority>
   </url>
 
-  <!-- Companies Directory -->
-  <url>
-    <loc>${ensureTrailingSlash(baseUrl)}companies/</loc>
-    <lastmod>${new Date().toISOString()}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-
   <!-- Legal & Info Pages -->
   <url>
     <loc>${ensureTrailingSlash(baseUrl)}faq/</loc>
