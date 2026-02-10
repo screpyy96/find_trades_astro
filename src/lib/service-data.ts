@@ -25,7 +25,7 @@ function generateFakeReviews(rating: number, count: number) {
       "Profesionist decent, a livrat ce a promis. A curățat sistemul de ventilație și a funcționat bine. A fost punctual și a respectat termenul. Comunicarea a fost pe măsură, rezultat mulțumitor.",
       "Lucrare de calitate, comunicare bună cu clientul. A reparat peretele crăpat și a făcut o treabă bună. A pregătit suprafața corect și finisajele arată bine. Recomand pentru lucrări de finisaje.",
       "A terminat la timp, rezultat conform așteptărilor. A schimbat întrerupătorul defect și a funcționat perfect. Lucrare simplă dar executată corect. Preț corect, servicii decente.",
-      "Servicii bune, preț corect, recomand. A montat un raft în garaj și a făcut o treabă solidă. A fost rapid și eficient. Nu a fost ceva complex dar a executat cu seriozitate.",
+      "Services bune, preț corect, recomand. A montat un raft în garaj și a făcut o treabă solidă. A fost rapid și eficient. Nu a fost ceva complex dar a executat cu seriozitate.",
       "Profesionist competent, ar putea fi mai rapid. A reparat instalația electrică și a rezolvat problema, dar a durat mai mult decât era programat. În calitate a fost ok, dar viteza de execuție ar putea fi îmbunătățită.",
       "Calitate satisfăcătoare, relaționare bună cu clientul. A vopsit o cameră și a făcut o treabă decentă. Comunicarea a fost bună, a ascultat cerințele. Preț rezonabil pentru calitatea oferită."
     ],
@@ -38,7 +38,7 @@ function generateFakeReviews(rating: number, count: number) {
       "Lucrare standard, nimic excepțional dar corectă. A înlocuit un bec cu probleme și a funcționat. Lucrare simplă, executată fără probleme. Nu au fost complicații, dar nici ceva deosebit.",
       "Preț pe măsură, calitate medie, a respectat termenul. A reparat robinetul care picura și a rezolvat, dar după câteva săptămâni a început să picure din nou. Ok pentru reparație temporară.",
       "Acceptabil, au fost mici întârzieri dar a terminat. A montat un suport pentru TV și a făcut treaba, dar a întârziat cu o oră. Rezultatul e funcțional, dar planificarea ar putea fi mai bună.",
-      "Servicii decente, se putea mai bine la curățenie. A schimbat filtrul la aerul condiționat și a funcționat, dar a lăsat mizerie în jur. Tehnic ok, dar curățenia lasă de dorit după terminare.",
+      "Services decente, se putea mai bine la curățenie. A schimbat filtrul la aerul condiționat și a funcționat, dar a lăsat mizerie în jur. Tehnic ok, dar curățenia lasă de dorit după terminare.",
       "Rezultat mulțumitor, comunicare ok. A reparat întrerupătorul și funcționează corect. A fost politicos și a explicat ce face. Lucrare standard fără probleme, preț decent pentru serviciile oferite."
     ]
   };
@@ -84,7 +84,7 @@ interface ServiceMetrics {
   avgRating: number;
   jobsLast30Days: number;
   avgBudget: number;
-  ratedProfilesCount: number;
+  ratedProfileesCount: number;
   fakeReviews: Array<{
     id: string;
     author: string;
@@ -101,7 +101,7 @@ interface ServiceMetricsParams {
   cityName: string;
 }
 
-interface WorkerProfile {
+interface WorkerProfilee {
   id: string;
   rating: number | null;
   is_verified: boolean | null;
@@ -187,7 +187,7 @@ export async function fetchServiceMetrics(params: ServiceMetricsParams): Promise
         avgRating: 0,
         jobsLast30Days: 0,
         avgBudget: 0,
-        ratedProfilesCount: 0,
+        ratedProfileesCount: 0,
         fakeReviews: []
       };
 
@@ -219,7 +219,7 @@ export async function fetchServiceMetrics(params: ServiceMetricsParams): Promise
         let workerCount = 0;
         let verifiedCount = 0;
         let avgRating = 0;
-        let ratedProfilesCount = 0;
+        let ratedProfileesCount = 0;
 
         if (!workersResult.error && workersResult.data) {
           const profileIds = workersResult.data.map(row => row.profile_id);
@@ -235,12 +235,12 @@ export async function fetchServiceMetrics(params: ServiceMetricsParams): Promise
               workerCount = profiles.length;
               verifiedCount = profiles.filter(profile => profile.is_verified).length;
               
-              const ratedProfiles = profiles.filter(profile => typeof profile.rating === 'number');
-              ratedProfilesCount = ratedProfiles.length;
+              const ratedProfilees = profiles.filter(profile => typeof profile.rating === 'number');
+              ratedProfileesCount = ratedProfilees.length;
               
-              if (ratedProfiles.length > 0) {
-                const totalRating = ratedProfiles.reduce((sum, profile) => sum + (profile.rating || 0), 0);
-                avgRating = totalRating / ratedProfiles.length;
+              if (ratedProfilees.length > 0) {
+                const totalRating = ratedProfilees.reduce((sum, profile) => sum + (profile.rating || 0), 0);
+                avgRating = totalRating / ratedProfilees.length;
               }
             }
           }
@@ -275,9 +275,9 @@ export async function fetchServiceMetrics(params: ServiceMetricsParams): Promise
           avgRating,
           jobsLast30Days,
           avgBudget,
-          ratedProfilesCount,
-          fakeReviews: ratedProfilesCount > 0 && avgRating > 0 
-            ? generateFakeReviews(avgRating, Math.min(ratedProfilesCount, 8))
+          ratedProfileesCount,
+          fakeReviews: ratedProfileesCount > 0 && avgRating > 0 
+            ? generateFakeReviews(avgRating, Math.min(ratedProfileesCount, 8))
             : []
         };
       } catch (error) {

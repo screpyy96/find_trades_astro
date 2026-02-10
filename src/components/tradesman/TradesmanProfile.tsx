@@ -5,7 +5,7 @@ import { ro } from 'date-fns/locale/ro';
 import { createClient } from '@supabase/supabase-js';
 import { AvatarModal } from './AvatarModal';
 
-interface WorkerProfile {
+interface WorkerProfilee {
   id: string;
   name: string;
   email?: string;
@@ -34,7 +34,7 @@ const getSupabaseBrowserClient = (config?: SupabaseBrowserConfig) => {
 };
 
 // --- Report Modal ---
-function ReportModal({ worker, onClose }: { worker: WorkerProfile; onClose: () => void }) {
+function ReportModal({ worker, onClose }: { worker: WorkerProfilee; onClose: () => void }) {
   const [complaintType, setComplaintType] = useState('');
   const [details, setDetails] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -83,7 +83,7 @@ function ReportModal({ worker, onClose }: { worker: WorkerProfile; onClose: () =
         ) : (
           <>
             <div className="p-5 border-b border-slate-200 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-slate-900">Report Profile</h3>
+              <h3 className="text-lg font-semibold text-slate-900">Report Profilee</h3>
               <button onClick={onClose} className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600"><X className="w-5 h-5" /></button>
             </div>
             <form onSubmit={handleSubmit} className="p-5 space-y-4">
@@ -159,13 +159,13 @@ function PortfolioModal({ item, onClose }: { item: any; onClose: () => void }) {
   );
 }
 
-export interface TradesmanProfileProps {
-  worker: WorkerProfile;
+export interface TradesmanProfileeProps {
+  worker: WorkerProfilee;
   supabaseUrl?: string;
   supabaseAnonKey?: string;
 }
 
-export function TradesmanProfile({ worker, supabaseUrl, supabaseAnonKey }: TradesmanProfileProps) {
+export function TradesmanProfilee({ worker, supabaseUrl, supabaseAnonKey }: TradesmanProfileeProps) {
   const [activeTab, setActiveTab] = useState<'about' | 'portfolio' | 'reviews' | 'certifications'>('about');
   const [isContactRevealed, setIsContactRevealed] = useState(false);
   const [selectedPortfolioItem, setSelectedPortfolioItem] = useState<any | null>(null);

@@ -2,7 +2,7 @@
  * SEO URL utilities for generating and managing SEO-friendly URLs
  */
 
-export interface WorkerProfile {
+export interface WorkerProfilee {
   id: string;
   name?: string | null;
   address?: string | null;
@@ -39,7 +39,7 @@ export function generateSlug(text: string, maxLength: number = 50): string {
  * Format: name-trade-city-shortid
  */
 export function generateWorkerSeoSlug(
-  worker: WorkerProfile, 
+  worker: WorkerProfilee, 
   trades?: Trade[]
 ): string {
   if (!worker.name) return worker.id;
@@ -69,7 +69,7 @@ export function generateWorkerSeoSlug(
  * Get worker profile URL (premium SEO-friendly)
  * Format: /tradesmen/name-trade-city-uuid
  */
-export function getWorkerProfileUrl(worker: WorkerProfile, trades?: Trade[]): string {
+export function getWorkerProfileeUrl(worker: WorkerProfilee, trades?: Trade[]): string {
   const slug = generateWorkerSeoSlug(worker, trades);
   return `/tradesmen/${slug}`;
 }
@@ -77,8 +77,8 @@ export function getWorkerProfileUrl(worker: WorkerProfile, trades?: Trade[]): st
 /**
  * Get worker profile canonical URL
  */
-export function getWorkerProfileCanonicalUrl(
-  worker: WorkerProfile, 
+export function getWorkerProfileeCanonicalUrl(
+  worker: WorkerProfilee, 
   trades?: Trade[],
   baseUrl: string = 'https://www.findtrades.app'
 ): string {

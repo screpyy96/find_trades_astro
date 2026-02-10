@@ -82,7 +82,7 @@ export const GET: APIRoute = async () => {
     </p>
     <a href="/" class="btn">Mergi la pagina principală</a>
     <div class="links">
-      <a href="/servicii/">Servicii</a>
+      <a href="/servicii/">Services</a>
       <a href="/tradesmen/">Tradesmen</a>
       <a href="/blog/">Blog</a>
     </div>

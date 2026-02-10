@@ -701,7 +701,7 @@ export function TradesmenClientList({
       console.error('❌ Error fetching workers:', err);
       const errorMessage = err instanceof Error ? err.message : 'Eroare necunoscută';
       console.error('Error details:', errorMessage);
-      setError(`Nu am putut încărca meseriașii: ${errorMessage}`);
+      setError(`Could not load tradesmen: ${errorMessage}`);
     } finally {
       setIsLoading(false);
       console.log('✅ Fetch complete');
@@ -849,7 +849,7 @@ export function TradesmenClientList({
   }, []);
 
   return (
-    <div className="relative max-w-screen-2xl mx-auto px-4 py-8 pb-16 sm:px-6 lg:px-8 xl:px-12">
+    <div className="relative max-w-screen-2xl mx-auto px-3 py-6 pb-16 sm:px-4 lg:px-8 xl:px-12">
       {/* Mobile filter toggle */}
       <div className="lg:hidden mb-4">
         <button
@@ -857,20 +857,20 @@ export function TradesmenClientList({
           className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white border border-slate-200 rounded-xl shadow-sm text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
         >
           <Filter className="w-5 h-5" />
-          {showFilters ? 'Ascunde filtrele' : 'Afișează filtrele'}
+          {showFilters ? 'Hide filters' : 'Show filters'}
         </button>
       </div>
 
       {/* Layout with sidebar */}
-      <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+      <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
         {/* Filters sidebar */}
         <aside className={`lg:w-64 xl:w-72 flex-shrink-0 ${showFilters ? 'block' : 'hidden lg:block'}`}>
-          <div className="sticky top-8 bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-6">
+          <div className="sticky top-4 lg:top-8 bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-sm p-4 lg:p-6 space-y-4 lg:space-y-6">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold text-slate-900">Filtrează rezultatele</h3>
+              <h3 className="text-lg font-bold text-slate-900">Filter Results</h3>
               {(selectedCity !== activeCity || selectedTrade !== activeTrade || minRating !== activeMinRating || onlyVerified !== activeOnlyVerified || onlyOnline !== activeOnlyOnline) && (
                 <span className="px-2 py-1 bg-amber-100 text-amber-700 text-xs font-semibold rounded-full">
-                  Modificat
+                  Modified
                 </span>
               )}
             </div>
@@ -878,14 +878,14 @@ export function TradesmenClientList({
             {/* City filter */}
             <div>
               <label htmlFor="city" className="block text-sm font-semibold text-slate-700 mb-2">
-                Oraș
+                City
               </label>
               <input
-                id="city"
                 type="text"
+                id="city"
                 value={selectedCity}
                 onChange={(e) => setSelectedCity(e.target.value)}
-                placeholder="Ex: București, Cluj..."
+                placeholder="Ex: London, Manchester..."
                 className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
               />
             </div>
@@ -893,7 +893,7 @@ export function TradesmenClientList({
             {/* Trade filter with autocomplete */}
             <div className="trade-autocomplete">
               <label htmlFor="trade" className="block text-sm font-semibold text-slate-700 mb-2">
-                Meserie
+                Trade
               </label>
               <div className="relative">
                 {/* Input field */}
@@ -908,7 +908,7 @@ export function TradesmenClientList({
                       setShowTradeDropdown(true);
                     }}
                     onFocus={() => setShowTradeDropdown(true)}
-                    placeholder="Caută meserie..."
+                    placeholder="Search trade..."
                     className="w-full px-4 py-2 pr-10 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   />
                   {selectedTrade && (
@@ -971,7 +971,7 @@ export function TradesmenClientList({
                             {isLoadingTrades ? (
                               <Loader2 className="w-3 h-3 animate-spin mr-1" />
                             ) : (
-                              'Încarcă mai multe...'
+                              'Load more...'
                             )}
                           </button>
                         </div>
@@ -980,7 +980,7 @@ export function TradesmenClientList({
                       {/* No results */}
                       {!isLoadingTrades && filteredTrades.length === 0 && tradeSearchQuery && (
                         <div className="px-4 py-3 text-sm text-slate-500 text-center">
-                          Nu am găsit nicio meserie pentru "{tradeSearchQuery}"
+                          No trades found for "{tradeSearchQuery}"
                         </div>
                       )}
                     </div>
@@ -999,7 +999,7 @@ export function TradesmenClientList({
                   className="w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
                 />
                 <span className="text-sm font-medium text-slate-700 group-hover:text-slate-900">
-                  Doar verificați
+                  Verified only
                 </span>
               </label>
 
@@ -1011,7 +1011,7 @@ export function TradesmenClientList({
                   className="w-5 h-5 rounded border-slate-300 text-green-600 focus:ring-green-500"
                 />
                 <span className="text-sm font-medium text-slate-700 group-hover:text-slate-900">
-                  Doar online acum
+Online only
                 </span>
               </label>
             </div>
@@ -1019,11 +1019,11 @@ export function TradesmenClientList({
             {/* Rating filter */}
             <div className="pt-4 border-t border-slate-200">
               <label className="block text-sm font-semibold text-slate-700 mb-3">
-                Rating minim
+                Minimum Rating
               </label>
               <div className="space-y-2">
                 {[
-                  { value: undefined, label: 'Orice rating' },
+                  { value: undefined, label: 'Any rating' },
                   { value: 3, label: '3.0+' },
                   { value: 4, label: '4.0+' },
                   { value: 4.5, label: '4.5+' },
@@ -1047,7 +1047,7 @@ export function TradesmenClientList({
             {/* Sort */}
             <div className="pt-4 border-t border-slate-200">
               <label htmlFor="sort" className="block text-sm font-semibold text-slate-700 mb-2">
-                Sortează după
+                Sort by
               </label>
               <select
                 id="sort"
@@ -1055,9 +1055,9 @@ export function TradesmenClientList({
                 onChange={(e) => setSortMethod(e.target.value)}
                 className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
               >
-                <option value="rating">Rating (cel mai mare)</option>
-                <option value="newest">Cei mai noi</option>
-                <option value="name">Nume (A-Z)</option>
+                <option value="rating">Rating (highest)</option>
+                <option value="newest">Newest first</option>
+                <option value="name">Name (A-Z)</option>
               </select>
             </div>
 
@@ -1068,7 +1068,7 @@ export function TradesmenClientList({
                 className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors shadow-sm"
               >
                 <Search className="w-4 h-4" />
-                Aplică filtrele
+                Apply filters
               </button>
               
               {(selectedCity || selectedTrade || minRating || !onlyVerified || onlyOnline) && (
@@ -1076,7 +1076,7 @@ export function TradesmenClientList({
                   onClick={resetFilters}
                   className="w-full px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors border border-slate-200"
                 >
-                  Resetează filtrele
+                  Reset filters
                 </button>
               )}
             </div>
@@ -1084,13 +1084,13 @@ export function TradesmenClientList({
             {/* Active filters display */}
             {(activeCity || activeTrade || activeMinRating || !activeOnlyVerified || activeOnlyOnline) && (
               <div className="pt-4 border-t border-slate-200">
-                <p className="text-sm font-semibold text-slate-700 mb-2">Filtre active:</p>
+                <p className="text-sm font-semibold text-slate-700 mb-2">Active filters:</p>
                 <div className="space-y-1 text-xs text-slate-600">
-                  {activeCity && <div>📍 Oraș: {activeCity}</div>}
-                  {activeTrade && <div>🔧 Meserie: {activeTrade}</div>}
-                  {activeMinRating && <div>⭐ Rating minim: {activeMinRating}+</div>}
-                  {activeOnlyVerified && <div>✅ Doar verificați</div>}
-                  {activeOnlyOnline && <div>🟢 Doar online</div>}
+                  {activeCity && <div>📍 City: {activeCity}</div>}
+                  {activeTrade && <div>🔧 Trade: {activeTrade}</div>}
+                  {activeMinRating && <div>⭐ Min Rating: {activeMinRating}+</div>}
+                  {activeOnlyVerified && <div>✅ Verified only</div>}
+                  {activeOnlyOnline && <div>🟢 Online only</div>}
                 </div>
               </div>
             )}
@@ -1099,7 +1099,7 @@ export function TradesmenClientList({
             {workers.length > 0 && (
               <div className="pt-4 border-t border-slate-200">
                 <p className="text-sm text-slate-600">
-                  <span className="font-bold text-slate-900">{workers.length}</span> meseriași găsiți
+                  <span className="font-bold text-slate-900">{workers.length}</span> tradesmen found
                 </p>
               </div>
             )}
@@ -1127,26 +1127,19 @@ export function TradesmenClientList({
             </div>
           )}
 
-          {/* Loading Skeleton */}
-          {isLoading && workers.length === 0 && (
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 lg:gap-6 animate-fade-in">
-              {Array.from({ length: 6 }).map((_, index) => (
-                <TradesmanCardSkeleton key={index} />
-              ))}
-            </div>
-          )}
-
-          {/* Results */}
-          {!error && workers.length > 0 ? (
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 lg:gap-6 animate-fade-in">
-              {workers.map((worker: Worker) => (
-                <TradesmanCard
-                  key={`${worker.id}-${worker.name}`}
-                  worker={worker}
+          {/* Tradesmen Grid */}
+          {workers.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6">
+              {workers.map((worker) => (
+                <TradesmanCard 
+                  key={worker.id} 
+                  worker={worker} 
                 />
               ))}
             </div>
-          ) : !error && !isLoading && (
+          )}
+          
+          {!error && !isLoading && workers.length === 0 && (
             <div className="text-center py-16">
               <div className="bg-white border border-slate-200 rounded-2xl p-8 sm:p-12 max-w-lg mx-auto shadow-sm">
                 <Search className="w-12 h-12 sm:w-16 sm:h-16 text-slate-400 mx-auto mb-4" />
@@ -1184,17 +1177,17 @@ export function TradesmenClientList({
 
           {/* CTA Banner - shown when list ends */}
           {!hasMore && workers.length > 0 && !isLoading && (
-            <div className="mt-8 bg-gradient-to-r from-amber-500 to-orange-500 rounded-2xl p-8 text-center shadow-lg">
-              <h3 className="text-xl font-bold text-white mb-2">Nu ai găsit meșeriașul potrivit?</h3>
-              <p className="text-white/90 mb-6 max-w-lg mx-auto">
-                Postează gratuit ce ai nevoie și primește oferte de la meseriași verificați din zona ta.
+            <div className="mt-6 lg:mt-8 bg-gradient-to-r from-amber-500 to-orange-500 rounded-xl lg:rounded-2xl p-6 lg:p-8 text-center shadow-lg">
+              <h3 className="text-lg lg:text-xl font-bold text-white mb-2">Couldn't find the right tradesman?</h3>
+              <p className="text-white/90 mb-4 lg:mb-6 max-w-lg mx-auto text-sm lg:text-base">
+                Post your job for free and receive quotes from verified tradesmen in your area.
               </p>
               <a 
                 href={`${import.meta.env.PUBLIC_APP_URL || 'https://app.findtrades.app'}/request-quote`}
-                className="inline-flex items-center px-6 py-3 bg-white text-orange-600 font-bold rounded-xl hover:bg-slate-100 transition-colors shadow-md"
+                className="inline-flex items-center px-5 lg:px-6 py-2.5 lg:py-3 bg-white text-orange-600 font-bold rounded-xl hover:bg-slate-100 transition-colors shadow-md text-sm lg:text-base"
               >
-                Postează o solicitare gratuită
-                <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                Post a Free Job Request
+                <svg className="w-4 h-4 lg:w-5 lg:h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
               </a>

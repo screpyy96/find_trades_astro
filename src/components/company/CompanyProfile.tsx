@@ -4,7 +4,7 @@ import { format } from 'date-fns';
 import { ro } from 'date-fns/locale/ro';
 import { createClient } from '@supabase/supabase-js';
 
-interface CompanyProfile {
+interface CompanyProfilee {
   id: string;
   name: string;
   email?: string;
@@ -24,8 +24,8 @@ interface CompanyProfile {
   [key: string]: any;
 }
 
-interface CompanyProfileProps {
-  company: CompanyProfile;
+interface CompanyProfileeProps {
+  company: CompanyProfilee;
   supabaseUrl?: string;
   supabaseAnonKey?: string;
 }
@@ -38,14 +38,14 @@ const getSupabaseBrowserClient = (config?: { url?: string; anonKey?: string }) =
 };
 
 // Report Modal Component
-function ReportModal({ company, onClose }: { company: CompanyProfile; onClose: () => void }) {
+function ReportModal({ company, onClose }: { company: CompanyProfilee; onClose: () => void }) {
   const [complaintType, setComplaintType] = useState('');
   const [details, setDetails] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const complaintTypes = [
-    { value: 'fake_profile', label: 'Profil fals sau înșelător' },
+    { value: 'fake_profile', label: 'Profile fals sau înșelător' },
     { value: 'inappropriate_content', label: 'Conținut nepotrivit' },
     { value: 'spam', label: 'Spam sau publicitate' },
     { value: 'fraud', label: 'Fraudă sau înșelăciune' },
@@ -159,7 +159,7 @@ function PortfolioModal({ item, onClose }: { item: any; onClose: () => void }) {
   );
 }
 
-export function CompanyProfile({ company, supabaseUrl, supabaseAnonKey }: CompanyProfileProps) {
+export function CompanyProfilee({ company, supabaseUrl, supabaseAnonKey }: CompanyProfileeProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'portfolio' | 'reviews'>('overview');
   const [isContactRevealed, setIsContactRevealed] = useState(false);
   const [selectedPortfolioItem, setSelectedPortfolioItem] = useState<any | null>(null);
@@ -223,7 +223,7 @@ export function CompanyProfile({ company, supabaseUrl, supabaseAnonKey }: Compan
 
   const capitalizedName = company.name?.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ') || 'Companie';
   const tradeNames = trades.map((t: any) => t.name).join(', ');
-  const primaryTrade = trades[0]?.name || 'Servicii Profesionale';
+  const primaryTrade = trades[0]?.name || 'Services Profesionale';
   const location = company.address?.split(',').pop()?.trim() || 'România';
 
   return (
@@ -305,7 +305,7 @@ export function CompanyProfile({ company, supabaseUrl, supabaseAnonKey }: Compan
                 <div className="flex flex-col gap-3 w-full lg:w-auto">
                   <button onClick={handlePhoneCall} className="flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all">
                     <Phone className="w-6 h-6" />
-                    <span>{isContactRevealed && company.phone ? company.phone : 'Contactează'}</span>
+                    <span>{isContactRevealed && company.phone ? company.phone : 'Contact'}</span>
                   </button>
                   <div className="flex gap-2">
                     <button onClick={handleShare} className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-colors">
@@ -339,14 +339,14 @@ export function CompanyProfile({ company, supabaseUrl, supabaseAnonKey }: Compan
               <div className="bg-white rounded-2xl p-6 shadow-lg border border-slate-200">
                 <div className="flex items-center gap-3 mb-2">
                   <div className="p-2 rounded-xl bg-emerald-100"><CheckCircle className="w-5 h-5 text-emerald-600" /></div>
-                  <span className="text-slate-600 font-medium">Recenzii</span>
+                  <span className="text-slate-600 font-medium">Reviews</span>
                 </div>
                 <p className="text-2xl font-bold text-slate-900">{stats.reviewCount}</p>
               </div>
               <div className="bg-white rounded-2xl p-6 shadow-lg border border-slate-200">
                 <div className="flex items-center gap-3 mb-2">
                   <div className="p-2 rounded-xl bg-purple-100"><Camera className="w-5 h-5 text-purple-600" /></div>
-                  <span className="text-slate-600 font-medium">Proiecte</span>
+                  <span className="text-slate-600 font-medium">Projects</span>
                 </div>
                 <p className="text-2xl font-bold text-slate-900">{stats.totalProjects}</p>
               </div>
@@ -357,7 +357,7 @@ export function CompanyProfile({ company, supabaseUrl, supabaseAnonKey }: Compan
               <div className="flex border-b border-slate-200">
                 {(['overview', 'portfolio', 'reviews'] as const).map(tab => (
                   <button key={tab} onClick={() => setActiveTab(tab)} className={`flex-1 px-6 py-4 font-bold transition-colors ${activeTab === tab ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'}`}>
-                    {tab === 'overview' ? 'Prezentare' : tab === 'portfolio' ? `Portofoliu (${portfolioItems.length})` : `Recenzii (${reviews.length})`}
+                    {tab === 'overview' ? 'Prezentare' : tab === 'portfolio' ? `Portofoliu (${portfolioItems.length})` : `Reviews (${reviews.length})`}
                   </button>
                 ))}
               </div>
@@ -368,13 +368,13 @@ export function CompanyProfile({ company, supabaseUrl, supabaseAnonKey }: Compan
                   <div className="space-y-6">
                     {company.bio && (
                       <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200">
-                        <h3 className="text-lg font-bold text-slate-900 mb-3">Despre Companie</h3>
+                        <h3 className="text-lg font-bold text-slate-900 mb-3">About Companie</h3>
                         <p className="text-slate-700 leading-relaxed">{company.bio}</p>
                       </div>
                     )}
                     {trades.length > 0 && (
                       <div>
-                        <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2"><Briefcase className="w-5 h-5 text-blue-600" />Servicii Oferite</h3>
+                        <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2"><Briefcase className="w-5 h-5 text-blue-600" />Services Oferite</h3>
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                           {trades.map((trade: any, idx: number) => (
                             <div key={trade.id || idx} className="flex items-center gap-3 p-4 bg-slate-50 rounded-xl border border-slate-200">

@@ -1,8 +1,8 @@
 import { MapPin, Star, Phone, Building2, ArrowRight } from 'lucide-react';
 import { useState, useEffect, useMemo, useCallback, memo } from 'react';
-import { getWorkerProfileUrl } from '../../utils/seo-urls';
+import { getWorkerProfileeUrl } from '../../utils/seo-urls';
 
-interface CompanyProfile {
+interface CompanyProfilee {
   id: string;
   name: string;
   avatar_url?: string | null;
@@ -16,12 +16,12 @@ interface CompanyProfile {
   subscription_plan?: string;
 }
 
-export const CompanyCard = memo(({ company }: { company: CompanyProfile }) => {
+export const CompanyCard = memo(({ company }: { company: CompanyProfilee }) => {
   const trades = useMemo(() => company.trades || [], [company.trades]);
   const [isPhoneRevealed, setIsPhoneRevealed] = useState(false);
   
   const profileUrl = useMemo(() => {
-    const baseUrl = getWorkerProfileUrl(company, trades);
+    const baseUrl = getWorkerProfileeUrl(company, trades);
     return baseUrl.replace('/tradesmen/', '/companii/');
   }, [company, trades]);
   
@@ -142,7 +142,7 @@ export const CompanyCard = memo(({ company }: { company: CompanyProfile }) => {
           className="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-200"
         >
           <Building2 className="w-4 h-4" />
-          <span>Vezi Profil</span>
+          <span>Vezi Profile</span>
           <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
         </a>
         
@@ -152,7 +152,7 @@ export const CompanyCard = memo(({ company }: { company: CompanyProfile }) => {
             className="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-sm font-semibold rounded-xl border border-emerald-200 hover:border-emerald-300 transition-all duration-200"
           >
             <Phone className="w-4 h-4" />
-            <span>{isPhoneRevealed ? company.phone : 'Contactează'}</span>
+            <span>{isPhoneRevealed ? company.phone : 'Contact'}</span>
           </button>
         )}
       </div>

@@ -1,6 +1,6 @@
 export type Json = string | number | boolean | null | { [key: string]: Json } | Json[];
 
-export interface Profile {
+export interface Profilee {
   id: string;
   name: string | null;
   email: string | null;
@@ -30,13 +30,13 @@ export interface Database {
   public: {
     Tables: {
       profiles: {
-        Row: Profile;
-        Insert: Omit<Profile, 'id' | 'created_at' | 'updated_at'> & {
+        Row: Profilee;
+        Insert: Omit<Profilee, 'id' | 'created_at' | 'updated_at'> & {
           id?: string;
           created_at?: string;
           updated_at?: string;
         };
-        Update: Partial<Omit<Profile, 'id' | 'created_at'>> & {
+        Update: Partial<Omit<Profilee, 'id' | 'created_at'>> & {
           updated_at?: string;
         };
       };
@@ -116,7 +116,7 @@ export interface Database {
 }
 
 // Tipuri pentru crearea profilului
-export interface CreateProfileData {
+export interface CreateProfileeData {
   name?: string;
   email?: string;
   role?: string;
@@ -140,7 +140,7 @@ export interface CreateProfileData {
 }
 
 // Tipuri pentru actualizarea profilului
-export interface UpdateProfileData {
+export interface UpdateProfileeData {
   name?: string;
   email?: string;
   role?: string;
@@ -188,7 +188,7 @@ export type ServiceContent = {
   updated_at: string;
 };
 
-export type WorkerProfile = {
+export type WorkerProfilee = {
   id: string;
   name: string;
   email: string;

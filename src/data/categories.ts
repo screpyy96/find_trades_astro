@@ -194,13 +194,13 @@ export const categories: CategoryData[] = [
     slug: "curatenie-igienizare",
     name: "Curățenie & Igienizare",
     h1: "Curățenie Profesională România – DDD, După Constructor, Tapițerii",
-    description: "Servicii de curățenie profesională, dezinsecție deratizare dezinfecție (DDD), curățenie după constructor, curățare tapițerii. Echipe verificate, oferte gratuite.",
+    description: "Services de curățenie profesională, dezinsecție deratizare dezinfecție (DDD), curățenie după constructor, curățare tapițerii. Echipe verificate, oferte gratuite.",
     keywords: ["curățenie profesională", "DDD dezinsecție", "curățenie după renovare", "curățare canapele", "igienizare", "deratizare"],
     stats: { cereriLuna: 890, meseriasi: 145 },
     topServices: [
       { slug: "curatenie-generala", name: "Curățenie Generală", pret: "12-22 RON/mp" },
       { slug: "curatenie-dupa-constructor", name: "După Constructor", pret: "18-35 RON/mp" },
-      { slug: "servicii-ddd", name: "Servicii DDD", pret: "120-280 RON/cameră" },
+      { slug: "servicii-ddd", name: "Services DDD", pret: "120-280 RON/cameră" },
       { slug: "curatare-tapiterii", name: "Curățare Tapițerii", pret: "80-180 RON/canapea" },
       { slug: "spalare-fatade", name: "Spălare Fațade", pret: "8-18 RON/mp" },
       { slug: "igienizare-climatizare", name: "Igienizare AC", pret: "100-200 RON/unitate" }
@@ -208,7 +208,7 @@ export const categories: CategoryData[] = [
     trends: [
       "Curățenie eco-friendly cu produse biodegradabile",
       "Dezinfecție cu ozon și UV-C",
-      "Servicii recurente cu abonament lunar",
+      "Services recurente cu abonament lunar",
       "Curățenie industrială cu echipamente profesionale",
       "Steam cleaning pentru tapițerii și covoare"
     ],
@@ -262,7 +262,7 @@ export const categories: CategoryData[] = [
     slug: "reparatii-diverse",
     name: "Reparații Diverse",
     h1: "Reparații România – Electrocasnice, Centrale Termice, Acoperișuri",
-    description: "Servicii de reparații: electrocasnice mari, centrale termice, acoperișuri, ferestre termopan, jaluzele. Meseriași cu experiență, intervenție rapidă.",
+    description: "Services de reparații: electrocasnice mari, centrale termice, acoperișuri, ferestre termopan, jaluzele. Meseriași cu experiență, intervenție rapidă.",
     keywords: ["reparații electrocasnice", "service centrală termică", "reparații acoperiș", "reparații termopan", "reparații jaluzele"],
     stats: { cereriLuna: 580, meseriasi: 95 },
     topServices: [
@@ -294,9 +294,9 @@ export const categories: CategoryData[] = [
   // ============================================
   {
     slug: "servicii-de-urgenta",
-    name: "Servicii de Urgență",
+    name: "Services de Urgență",
     h1: "Urgențe România – Instalator Non-Stop, Electrician 24/7, Lăcătuș",
-    description: "Servicii de urgență disponibile 24/7: instalator pentru inundații, electrician pentru pană curent, lăcătuș deblocări uși. Intervenție rapidă în 1-2 ore.",
+    description: "Services de urgență disponibile 24/7: instalator pentru inundații, electrician pentru pană curent, lăcătuș deblocări uși. Intervenție rapidă în 1-2 ore.",
     keywords: ["instalator urgență", "electrician non-stop", "lăcătuș deblocări", "urgențe 24/7", "intervenție rapidă"],
     stats: { cereriLuna: 480, meseriasi: 85 },
     topServices: [
@@ -306,7 +306,7 @@ export const categories: CategoryData[] = [
       { slug: "reparatii-urgente-acoperis", name: "Urgențe Acoperiș", pret: "250-600 RON" }
     ],
     trends: [
-      "Servicii garantate 24/7/365",
+      "Services garantate 24/7/365",
       "Intervenție sub 2 ore în orașe mari",
       "Plată doar după rezolvare",
       "Echipamente profesionale mobile",
@@ -326,9 +326,9 @@ export const categories: CategoryData[] = [
   // ============================================
   {
     slug: "servicii-specializate-consultanta",
-    name: "Servicii Specializate & Consultanță",
+    name: "Services Specializate & Consultanță",
     h1: "Consultanță Construcții România – Arhitectură, Design Interior, Topografie",
-    description: "Servicii profesionale de proiectare, arhitectură, design interior, consultanță construcții și dirigentie de șantier. Experți autorizați pentru proiecte rezidențiale și comerciale.",
+    description: "Services profesionale de proiectare, arhitectură, design interior, consultanță construcții și dirigentie de șantier. Experți autorizați pentru proiecte rezidențiale și comerciale.",
     keywords: ["arhitect", "design interior", "proiectare casă", "diriginte șantier", "topografie cadastru", "audit energetic"],
     stats: { cereriLuna: 320, meseriasi: 65 },
     topServices: [
@@ -361,8 +361,8 @@ export const categories: CategoryData[] = [
   {
     slug: "auto-utilaje",
     name: "Auto & Utilaje",
-    h1: "Servicii Auto România – Mecanică, Detailing, Vulcanizare, Tractări",
-    description: "Servicii auto profesionale: reparații mecanice, detailing și cosmetică auto, vulcanizare și tractări. Mecanici cu experiență, prețuri corecte.",
+    h1: "Services Auto România – Mecanică, Detailing, Vulcanizare, Tractări",
+    description: "Services auto profesionale: reparații mecanice, detailing și cosmetică auto, vulcanizare și tractări. Mecanici cu experiență, prețuri corecte.",
     keywords: ["mecanic auto", "detailing auto", "vulcanizare", "tractări auto", "service auto", "spălătorie auto"],
     stats: { cereriLuna: 280, meseriasi: 55 },
     topServices: [
@@ -391,22 +391,22 @@ export const categories: CategoryData[] = [
   // ============================================
   {
     slug: "alte-servicii",
-    name: "Alte Servicii",
-    h1: "Servicii Diverse România – Mutări, Transport, Sudură, Evacuare Moloz",
-    description: "Servicii diverse pentru casă și construcții: mutări și transport mobilă, evacuare moloz și deșeuri, servicii de sudură. Echipe profesioniste, prețuri corecte.",
+    name: "Alte Services",
+    h1: "Services Diverse România – Mutări, Transport, Sudură, Evacuare Moloz",
+    description: "Services diverse pentru casă și construcții: mutări și transport mobilă, evacuare moloz și deșeuri, servicii de sudură. Echipe profesioniste, prețuri corecte.",
     keywords: ["mutări mobilă", "transport marfă", "evacuare moloz", "sudură", "deșeuri construcții", "relocare"],
     stats: { cereriLuna: 350, meseriasi: 70 },
     topServices: [
       { slug: "mutari-transport", name: "Mutări și Transport", pret: "200-800 RON" },
       { slug: "evacuare-moloz", name: "Evacuare Moloz", pret: "150-400 RON/cursă" },
-      { slug: "servicii-sudura", name: "Servicii Sudură", pret: "80-200 RON/oră" }
+      { slug: "servicii-sudura", name: "Services Sudură", pret: "80-200 RON/oră" }
     ],
     trends: [
       "Mutări cu ambalare profesională inclusă",
       "Evacuare selectivă pentru reciclare",
       "Sudură TIG/MIG pentru inox și aluminiu",
       "Transport cu lift hidraulic pentru obiecte grele",
-      "Servicii de depozitare temporară"
+      "Services de depozitare temporară"
     ],
     faq: [
       { q: "Cât costă mutare apartament 2 camere?", a: "300-600 RON în același oraș. Include: 2-3 muncitori, dubă/camion, 2-4 ore. Ambalare: +150-300 RON. Etaj fără lift: +50 RON/etaj. Între orașe: 0.8-1.5 RON/km + încărcare." },
@@ -424,7 +424,7 @@ export const categories: CategoryData[] = [
     slug: "instalatii-amenajari",
     name: "Instalații & Amenajări",
     h1: "Recondiționare Căzi și Amenajări Băi România",
-    description: "Servicii specializate de recondiționare căzi de baie prin emailare sau acrilare. Alternativă economică la înlocuirea căzii, rezultat ca nou.",
+    description: "Services specializate de recondiționare căzi de baie prin emailare sau acrilare. Alternativă economică la înlocuirea căzii, rezultat ca nou.",
     keywords: ["recondiționare cadă", "emailare cadă", "acrilare cadă", "renovare baie", "reparații cadă"],
     stats: { cereriLuna: 120, meseriasi: 25 },
     topServices: [

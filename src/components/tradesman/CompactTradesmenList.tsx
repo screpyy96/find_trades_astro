@@ -216,7 +216,7 @@ export function CompactTradesmenList({
             Meseriași din categoria {categoryName}
           </h2>
           <p className="text-slate-600 max-w-2xl mx-auto">
-            Profesioniști verificați gata să lucreze la proiectul tău
+            Professionals verificați gata să lucreze la proiectul tău
           </p>
         </div>
 

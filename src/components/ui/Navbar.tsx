@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, memo, useCallback, useMemo } from 'react';
 
-type NavbarProfile = {
+type NavbarProfilee = {
   name: string | null;
   avatar_url: string | null;
   role: string | null;
@@ -9,7 +9,7 @@ type NavbarProfile = {
 interface NavbarProps {
   isLoggedIn: boolean;
   userType?: 'client' | 'tradesman';
-  profile?: NavbarProfile | null;
+  profile?: NavbarProfilee | null;
   currentPath: string;
   onLogout?: () => void;
   // URL configuration for cross-app navigation
@@ -220,7 +220,7 @@ export function Navbar({
                         isTransparent 
                           ? 'text-white group-hover:text-white/90' 
                           : 'text-slate-700 group-hover:text-slate-900'
-                      }`}>Profile</span>
+                      }`}>Profilee</span>
                       <span className={`text-xs block transition-colors duration-300 ${
                         isTransparent 
                           ? 'text-white/70 group-hover:text-white/80' 
@@ -265,7 +265,7 @@ export function Navbar({
                             </svg>
                           </div>
                           <div className="flex-1">
-                            <span className="font-semibold text-slate-900 text-base block">Public Profile</span>
+                            <span className="font-semibold text-slate-900 text-base block">Public Profilee</span>
                             <p className="text-xs text-slate-500 mt-0.5">Info and portfolio</p>
                           </div>
                         </a>
@@ -428,7 +428,7 @@ export function Navbar({
                             </svg>
                           </div>
                           <div className="flex-1">
-                            <span className="font-semibold text-slate-900 text-base block">Profile</span>
+                            <span className="font-semibold text-slate-900 text-base block">Profilee</span>
                             <p className="text-xs text-slate-500 mt-0.5">Account Settings</p>
                           </div>
                         </a>

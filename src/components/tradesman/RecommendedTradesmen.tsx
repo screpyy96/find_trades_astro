@@ -466,7 +466,7 @@ export function RecommendedTradesmen({
                 {compact ? 'Meseriași Premium' : `Meseriași Premium${cityName !== 'România' ? ` în ${cityName}` : ''}`}
               </h2>
               <p className="text-slate-500 text-sm">
-                Profesioniști verificați cu abonament activ
+                Professionals verificați cu abonament activ
               </p>
             </div>
           </div>

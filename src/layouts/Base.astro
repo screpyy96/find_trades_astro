@@ -27,7 +27,7 @@ const GTM_ID = import.meta.env.PUBLIC_GTM_ID;
 ---
 
 <!DOCTYPE html>
-<html lang="ro">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -56,7 +56,7 @@ const GTM_ID = import.meta.env.PUBLIC_GTM_ID;
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={ogImageURL} />
-    <meta property="og:locale" content="ro_RO" />
+    <meta property="og:locale" content="en_GB" />
     
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
@@ -71,11 +71,11 @@ const GTM_ID = import.meta.env.PUBLIC_GTM_ID;
     <!-- Additional SEO Meta Tags -->
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <meta name="googlebot" content="index, follow" />
-    <meta name="author" content="Meserias Local" />
-    <meta name="geo.region" content="RO" />
-    <meta name="geo.placename" content="Romania" />
-    <meta name="language" content="Romanian" />
-    <link rel="alternate" hreflang="ro" href={canonicalURL} />
+    <meta name="author" content="FindTrades" />
+    <meta name="geo.region" content="GB" />
+    <meta name="geo.placename" content="United Kingdom" />
+    <meta name="language" content="English" />
+    <link rel="alternate" hreflang="en" href={canonicalURL} />
     <link rel="alternate" hreflang="x-default" href={canonicalURL} />
     
     {!disableDefaultBreadcrumb && (
@@ -86,7 +86,7 @@ const GTM_ID = import.meta.env.PUBLIC_GTM_ID;
           {
             "@type": "ListItem",
             "position": 1,
-            "name": "Acasă",
+            "name": "Home",
             "item": Astro.site
           },
           {

@@ -8,7 +8,7 @@ export const POST: APIRoute = async ({ request }) => {
     const { profileId } = await request.json();
 
     if (!profileId) {
-      return new Response(JSON.stringify({ error: 'Profile ID is required' }), {
+      return new Response(JSON.stringify({ error: 'Profilee ID is required' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' }
       });

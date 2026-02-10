@@ -86,7 +86,7 @@ const canonicalUrl = `https://www.findtrades.app/tradesmen/${slug}`;
 </script>
 
 <script>
-  import { TradesmanProfile } from '../../components/tradesman/TradesmanProfile.tsx';
+  import { TradesmanProfilee } from '../../components/tradesman/TradesmanProfilee.tsx';
   import { createRoot } from 'react-dom/client';
   import React from 'react';
 
@@ -96,7 +96,7 @@ const canonicalUrl = `https://www.findtrades.app/tradesmen/${slug}`;
     
     if (container && worker) {
       const root = createRoot(container);
-      root.render(React.createElement(TradesmanProfile, { worker }));
+      root.render(React.createElement(TradesmanProfilee, { worker }));
     }
   });
 </script>

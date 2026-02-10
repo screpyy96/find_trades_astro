@@ -1,6 +1,6 @@
 import { MapPin, Star, CheckCircle, Phone, Crown } from 'lucide-react';
 import { useState, useEffect, useMemo, useCallback, memo } from 'react';
-import { getWorkerProfileUrl } from '../../utils/seo-urls';
+import { getWorkerProfileeUrl } from '../../utils/seo-urls';
 
 interface TradeObject {
   id: number;
@@ -9,7 +9,7 @@ interface TradeObject {
   slug?: string;
 }
 
-interface WorkerProfile {
+interface WorkerProfilee {
   id: string;
   name: string;
   avatar_url?: string | null;
@@ -23,7 +23,7 @@ interface WorkerProfile {
   subscription_plan?: string;
 }
 
-export const TradesmanCard = memo(({ worker }: { worker: WorkerProfile }) => {
+export const TradesmanCard = memo(({ worker }: { worker: WorkerProfilee }) => {
   const trades = useMemo(() => worker.trades || [], [worker.trades]);
   const [isPhoneRevealed, setIsPhoneRevealed] = useState(false);
 
@@ -32,7 +32,7 @@ export const TradesmanCard = memo(({ worker }: { worker: WorkerProfile }) => {
     worker.subscription_plan.toLowerCase().includes('enterprise')
   );
 
-  const profileUrl = useMemo(() => getWorkerProfileUrl(worker, trades), [worker, trades]);
+  const profileUrl = useMemo(() => getWorkerProfileeUrl(worker, trades), [worker, trades]);
 
   const avatarFallbackUrl = useMemo(() => {
     const name = worker.name || 'U';
@@ -138,7 +138,7 @@ export const TradesmanCard = memo(({ worker }: { worker: WorkerProfile }) => {
           href={profileUrl}
           className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-slate-900 rounded-lg hover:bg-slate-800 transition-colors"
         >
-          View Profile
+          View Profilee
         </a>
         {worker.phone && (
           <button

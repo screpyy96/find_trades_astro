@@ -8,7 +8,7 @@ export const POST: APIRoute = async ({ request }) => {
     const { profileId } = await request.json();
 
     if (!profileId) {
-      return new Response(JSON.stringify({ error: 'Profile ID is required' }), {
+      return new Response(JSON.stringify({ error: 'Profilee ID is required' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' }
       });
@@ -34,7 +34,7 @@ export const POST: APIRoute = async ({ request }) => {
 
     if (error) {
       // Log error but don't fail the request - table might not exist yet
-      console.log('Profile view tracking failed (table might not exist):', error);
+      console.log('Profilee view tracking failed (table might not exist):', error);
       // Return success anyway so the UI doesn't break
       return new Response(JSON.stringify({ success: true, tracked: false }), {
         status: 200,

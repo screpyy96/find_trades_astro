@@ -66,7 +66,7 @@ const GONE_410_HTML = `<!DOCTYPE html>
     <p>Pagina pe care o căutai a fost ștearsă permanent. Te invităm să explorezi serviciile noastre.</p>
     <a href="/" class="btn">Mergi la pagina principală</a>
     <div class="links">
-      <a href="/servicii/">Servicii</a>
+      <a href="/servicii/">Services</a>
       <a href="/tradesmen/">Tradesmen</a>
       <a href="/blog/">Blog</a>
     </div>
@@ -149,8 +149,8 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
   if (pathname.startsWith('/servicii/')) {
     try {
       const decoded = decodeURIComponent(pathname);
-      const pathAfterServicii = decoded.replace(/^\/servicii\//, '');
-      if (/[A-Z]/.test(pathAfterServicii) || /\s/.test(pathAfterServicii)) {
+      const pathAfterServices = decoded.replace(/^\/servicii\//, '');
+      if (/[A-Z]/.test(pathAfterServices) || /\s/.test(pathAfterServices)) {
         return return410();
       }
     } catch {

@@ -1,20 +1,10 @@
 import { trades } from '../data/trades.js';
 import { cities } from '../data/cities.js';
+import { categories } from '../data/categories.js';
 import { getCollection } from 'astro:content';
 
 // Prerender this page at build time instead of on every request
 export const prerender = true;
-
-function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '');
-}
 
 function xmlEscape(input: string): string {
   return input
@@ -76,6 +66,54 @@ const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
     <priority>0.5</priority>
   </url>
 
+  <!-- Tradesmen Directory -->
+  <url>
+    <loc>${ensureTrailingSlash(baseUrl)}tradesmen/</loc>
+    <lastmod>${new Date().toISOString()}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Companies Directory -->
+  <url>
+    <loc>${ensureTrailingSlash(baseUrl)}companies/</loc>
+    <lastmod>${new Date().toISOString()}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Legal & Info Pages -->
+  <url>
+    <loc>${ensureTrailingSlash(baseUrl)}faq/</loc>
+    <lastmod>${new Date().toISOString()}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>${ensureTrailingSlash(baseUrl)}privacy/</loc>
+    <lastmod>${new Date().toISOString()}</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>${ensureTrailingSlash(baseUrl)}terms/</loc>
+    <lastmod>${new Date().toISOString()}</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>${ensureTrailingSlash(baseUrl)}gdpr/</loc>
+    <lastmod>${new Date().toISOString()}</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>${ensureTrailingSlash(baseUrl)}support/</loc>
+    <lastmod>${new Date().toISOString()}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+
   <!-- Blog Posts -->
   ${blogPosts.map(post => `
   <url>
@@ -88,17 +126,35 @@ const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
   <!-- Service Pages -->
   ${trades.map(trade => `
   <url>
-    <loc>${ensureTrailingSlash(baseUrl)}services/${slugify(trade.name)}/</loc>
+    <loc>${ensureTrailingSlash(baseUrl)}services/${xmlEscape(trade.slug)}/</loc>
     <lastmod>${new Date().toISOString()}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>`).join('')}
 
-  <!-- Service City Pages -->
-  ${trades.flatMap(trade => 
-    cities.slice(0, 10).map(city => `
+  <!-- Service Category Pages -->
+  ${categories.map(cat => `
   <url>
-    <loc>${ensureTrailingSlash(baseUrl)}services/${slugify(trade.name)}/${slugify(city.name)}/</loc>
+    <loc>${ensureTrailingSlash(baseUrl)}services/${xmlEscape(cat.slug)}/</loc>
+    <lastmod>${new Date().toISOString()}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>`).join('')}
+
+  <!-- Service City Pages — London first (highest search volume) -->
+  ${trades.map(trade => `
+  <url>
+    <loc>${ensureTrailingSlash(baseUrl)}services/${xmlEscape(trade.slug)}/london/</loc>
+    <lastmod>${new Date().toISOString()}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>`).join('')}
+
+  <!-- Service City Pages — Other top cities -->
+  ${trades.flatMap(trade => 
+    cities.slice(1, 10).filter(city => city.slug !== 'london').map(city => `
+  <url>
+    <loc>${ensureTrailingSlash(baseUrl)}services/${xmlEscape(trade.slug)}/${xmlEscape(city.slug)}/</loc>
     <lastmod>${new Date().toISOString()}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>

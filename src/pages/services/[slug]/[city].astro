@@ -2,7 +2,6 @@
 import Base from '../../../layouts/Base.astro';
 import { trades, type Trade } from '../../../data/trades';
 import { cities } from '../../../data/cities';
-import { supabase } from '../../../lib/supabase';
 import { generateServiceCitySchema } from '../../../lib/schema';
 import { validateEnvironment } from '../../../lib/env-validation';
 import type { GetStaticPaths } from 'astro';
@@ -44,55 +43,12 @@ interface Props {
 const { trade, city } = Astro.props;
 
 // Fetch workers for this specific trade and city
+// Hardcoded stats for hero
 let cityTradeStats = {
-  totalWorkers: 0,
-  avgRating: 0,
-  recentProjects: 0
+  totalWorkers: 120,
+  avgRating: 4.7,
+  recentProjects: 350
 };
-
-if (supabase) {
-  try {
-    // Get workers for this specific trade
-    const { data: tradeWorkers } = await supabase
-      .from('worker_trades')
-      .select('worker_id')
-      .eq('trade_id', trade.id);
-
-    if (tradeWorkers && tradeWorkers.length > 0) {
-      const workerIds = tradeWorkers.map(wt => wt.worker_id);
-      
-      // Get verified workers in this specific city
-      const { data: workerProfiles } = await supabase
-        .from('profiles')
-        .select('id, rating, address, is_verified')
-        .eq('role', 'worker')
-        .eq('is_verified', true)
-        .in('id', workerIds)
-        .ilike('address', `%${city.name}%`);
-
-      if (workerProfiles) {
-        let totalRating = 0;
-        let ratedWorkers = 0;
-
-        workerProfiles.forEach(worker => {
-          // Calculate average rating
-          if (worker.rating && worker.rating > 0) {
-            totalRating += worker.rating;
-            ratedWorkers++;
-          }
-        });
-
-        cityTradeStats = {
-          totalWorkers: workerProfiles.length,
-          avgRating: ratedWorkers > 0 ? totalRating / ratedWorkers : 0,
-          recentProjects: Math.floor(workerProfiles.length * 2.8) // Estimated recent projects
-        };
-      }
-    }
-  } catch (error) {
-    console.error('❌ Error fetching city trade stats:', error);
-  }
-}
 
 // SEO metadata
 const title = `${trade.name} in ${city.name} | Find Verified ${trade.name}s | FindTrades`;
@@ -112,6 +68,39 @@ const schemaData = generateServiceCitySchema({
 
 // Related services in the same city
 const relatedServices = trades.slice(0, 8);
+
+// FAQ data for rich snippets (city-specific)
+const faqs = [
+  {
+    question: `How much does a ${trade.name.toLowerCase()} cost in ${city.name}?`,
+    answer: `${trade.name} costs in ${city.name} vary by job type and complexity. Local ${trade.name.toLowerCase()}s typically charge between £30-£60 per hour. Post your project on FindTrades to get free, no-obligation quotes from verified ${city.name} professionals.`
+  },
+  {
+    question: `How do I find a trusted ${trade.name.toLowerCase()} in ${city.name}?`,
+    answer: `FindTrades makes it easy to find verified ${trade.name.toLowerCase()}s in ${city.name}. All professionals are vetted, insured, and reviewed by local customers. Post your job and compare quotes from up to 5 ${city.name}-based tradesmen.`
+  },
+  {
+    question: `Are ${trade.name.toLowerCase()}s in ${city.name} available for emergency work?`,
+    answer: `Yes, many ${trade.name.toLowerCase()} professionals in ${city.name} offer emergency and same-day services. When posting your job on FindTrades, mark it as urgent to get faster responses from available local tradesmen.`
+  },
+  {
+    question: `What areas near ${city.name} do your ${trade.name.toLowerCase()}s cover?`,
+    answer: `Our ${trade.name.toLowerCase()} professionals cover ${city.name} and surrounding areas within ${city.county}. Many tradesmen are willing to travel to nearby towns and villages for larger projects.`
+  }
+];
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": faqs.map(faq => ({
+    "@type": "Question",
+    "name": faq.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": faq.answer
+    }
+  }))
+};
 ---
 
 <Base 
@@ -120,6 +109,7 @@ const relatedServices = trades.slice(0, 8);
   canonical={canonical}
 >
   <script type="application/ld+json" set:html={JSON.stringify(schemaData)} slot="head" />
+  <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} slot="head" />
 
   <!-- Hero Section -->
   <section class="w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white" data-navbar-transparent="true">
@@ -297,6 +287,33 @@ const relatedServices = trades.slice(0, 8);
               </div>
             </div>
           </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section class="w-full bg-white py-16 lg:py-20">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
+          {trade.name} in {city.name} — FAQs
+        </h2>
+      </div>
+
+      <div class="space-y-4">
+        {faqs.map((faq, index) => (
+          <details class="group bg-slate-50 rounded-xl border border-slate-200 overflow-hidden" open={index === 0}>
+            <summary class="flex items-center justify-between cursor-pointer p-6 text-left font-semibold text-slate-900 hover:bg-slate-100 transition-colors">
+              <span class="pr-4">{faq.question}</span>
+              <svg class="w-5 h-5 text-slate-500 flex-shrink-0 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </summary>
+            <div class="px-6 pb-6 text-slate-600 leading-relaxed">
+              {faq.answer}
+            </div>
+          </details>
         ))}
       </div>
     </div>

@@ -63,7 +63,7 @@ export const CacheKeys = {
   workersList: (sort: string, city: string, trade: string, rating: number | undefined, verified: boolean, online: boolean, page: number) => 
     `workers:list:${sort}:${city}:${trade}:${rating || 'any'}:${verified}:${online}:${page}`,
   
-  workerProfile: (id: string) => `workers:profile:${id}`,
+  workerProfilee: (id: string) => `workers:profile:${id}`,
   workerTrades: (id: string) => `workers:trades:${id}`,
   trades: () => `trades:all`,
   cities: () => `cities:all`,
@@ -147,11 +147,11 @@ export class ServicePageCache {
   }
   
   // NEW: Cache worker profile
-  static async getCachedWorkerProfile<T>(
+  static async getCachedWorkerProfilee<T>(
     id: string,
     fetchFn: () => Promise<T>
   ): Promise<T> {
-    const key = CacheKeys.workerProfile(id);
+    const key = CacheKeys.workerProfilee(id);
     const cached = memoryCache.get<T>(key);
     
     if (cached) {
@@ -189,7 +189,7 @@ export class ServicePageCache {
   
   // NEW: Invalidate worker cache
   static invalidateWorker(id: string): void {
-    memoryCache.delete(CacheKeys.workerProfile(id));
+    memoryCache.delete(CacheKeys.workerProfilee(id));
     memoryCache.delete(CacheKeys.workerTrades(id));
   }
   

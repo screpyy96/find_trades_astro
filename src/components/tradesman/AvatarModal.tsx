@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { X, CheckCircle } from 'lucide-react';
 
-interface WorkerProfile {
+interface WorkerProfilee {
   id: string;
   name: string;
   avatar_url?: string | null;
@@ -10,7 +10,7 @@ interface WorkerProfile {
 }
 
 interface AvatarModalProps {
-  worker: WorkerProfile;
+  worker: WorkerProfilee;
   onClose: () => void;
 }
 
@@ -48,7 +48,7 @@ export function AvatarModal({ worker, onClose }: AvatarModalProps) {
         {worker.avatar_url ? (
           <img 
             src={worker.avatar_url} 
-            alt={`${worker.name} - Profil`}
+            alt={`${worker.name} - Profile`}
             className="max-w-full max-h-[80vh] object-contain rounded-3xl shadow-2xl"
             loading="eager"
             decoding="async"
